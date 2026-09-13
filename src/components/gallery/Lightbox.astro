@@ -1,0 +1,275 @@
+---
+/**
+ * Accessible photo viewer on <dialog>: focus is contained while open, Esc closes,
+ * arrow keys and swipes move between photos, and focus returns to the opened thumbnail.
+ */
+import Icon from '../ui/Icon.astro';
+---
+
+<dialog class="lightbox" data-lightbox aria-label="Photo viewer">
+  <div class="lightbox__top">
+    <p class="lightbox__count" aria-live="polite" data-lb-count></p>
+    <button class="lightbox__btn" type="button" data-lb-close>
+      <span class="visually-hidden">Close photo viewer</span>
+      <Icon name="x" size="1.3rem" />
+    </button>
+  </div>
+  <figure class="lightbox__stage" data-lb-stage>
+    <img class="lightbox__img" alt="" data-lb-img decoding="async" />
+    <figcaption class="lightbox__caption" data-lb-caption></figcaption>
+  </figure>
+  <button class="lightbox__btn lightbox__nav lightbox__nav--prev" type="button" data-lb-prev>
+    <span class="visually-hidden">Previous photo</span>
+    <Icon name="arrow-left" size="1.3rem" />
+  </button>
+  <button class="lightbox__btn lightbox__nav lightbox__nav--next" type="button" data-lb-next>
+    <span class="visually-hidden">Next photo</span>
+    <Icon name="arrow-right" size="1.3rem" />
+  </button>
+</dialog>
+
+<style>
+  :global(html:has(.lightbox[open])) {
+    overflow: hidden;
+  }
+
+  .lightbox {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: rgb(6 5 4 / 0.97);
+    color: var(--chalk);
+    opacity: 0;
+    transition:
+      opacity var(--dur-base) var(--ease-out),
+      overlay var(--dur-base) allow-discrete,
+      display var(--dur-base) allow-discrete;
+  }
+
+  .lightbox[open] {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    opacity: 1;
+  }
+
+  @starting-style {
+    .lightbox[open] {
+      opacity: 0;
+    }
+  }
+
+  .lightbox::backdrop {
+    background: transparent;
+  }
+
+  .lightbox__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem var(--gutter);
+  }
+
+  .lightbox__count {
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    letter-spacing: 0.16em;
+    color: var(--sodium);
+  }
+
+  .lightbox__stage {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    justify-items: center;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 0;
+    margin: 0;
+    padding: 0 var(--gutter) 1.25rem;
+    touch-action: pan-y pinch-zoom;
+  }
+
+  .lightbox__img {
+    max-width: 100%;
+    max-height: 100%;
+    min-height: 0;
+    object-fit: contain;
+    box-shadow: 0 30px 80px rgb(0 0 0 / 0.6);
+    outline: clamp(4px, 0.6vw, 10px) solid #eef0f4;
+    transition: opacity var(--dur-fast) linear, transform var(--dur-base) var(--ease-out);
+  }
+
+  .lightbox__img.is-switching {
+    opacity: 0;
+    transform: translateX(var(--dir, 0));
+  }
+
+  .lightbox__caption {
+    max-width: 60ch;
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: var(--step-1);
+    text-align: center;
+    color: var(--peri);
+  }
+
+  .lightbox__btn {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border: 1px solid rgb(238 241 250 / 0.3);
+    border-radius: 50%;
+    background: rgb(7 11 31 / 0.6);
+    color: var(--chalk);
+    transition: background-color var(--dur-fast), color var(--dur-fast);
+  }
+
+  .lightbox__btn:hover {
+    background: var(--chalk);
+    color: var(--ink);
+  }
+
+  .lightbox__nav {
+    position: fixed;
+    top: 50%;
+    translate: 0 -50%;
+  }
+
+  .lightbox__nav--prev {
+    left: max(0.75rem, env(safe-area-inset-left));
+  }
+
+  .lightbox__nav--next {
+    right: max(0.75rem, env(safe-area-inset-right));
+  }
+
+  @media (max-width: 700px) {
+    .lightbox__nav {
+      top: auto;
+      bottom: max(1rem, env(safe-area-inset-bottom));
+      translate: none;
+    }
+
+    .lightbox__stage {
+      padding-bottom: 5rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lightbox,
+    .lightbox__img {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  interface Slide {
+    src: string;
+    srcset: string;
+    alt: string;
+    caption: string;
+    trigger: HTMLElement;
+  }
+
+  const dialog = document.querySelector<HTMLDialogElement>('[data-lightbox]');
+  const triggers = [...document.querySelectorAll<HTMLElement>('[data-lightbox-src]')];
+
+  if (dialog && triggers.length) {
+    const img = dialog.querySelector<HTMLImageElement>('[data-lb-img]')!;
+    const caption = dialog.querySelector<HTMLElement>('[data-lb-caption]')!;
+    const count = dialog.querySelector<HTMLElement>('[data-lb-count]')!;
+    const slides: Slide[] = triggers.map((t) => ({
+      src: t.dataset.lightboxSrc ?? '',
+      srcset: t.dataset.lightboxSrcset ?? '',
+      alt: t.dataset.lightboxAlt ?? '',
+      caption: t.dataset.lightboxCaption ?? '',
+      trigger: t,
+    }));
+    let index = 0;
+
+    const preload = (i: number) => {
+      const s = slides[(i + slides.length) % slides.length];
+      const pre = new Image();
+      pre.sizes = '100vw';
+      pre.srcset = s.srcset;
+      pre.src = s.src;
+    };
+
+    const show = (i: number, direction = 0) => {
+      index = (i + slides.length) % slides.length;
+      const s = slides[index];
+      const apply = () => {
+        img.sizes = '100vw';
+        img.srcset = s.srcset;
+        img.src = s.src;
+        img.alt = s.alt;
+        caption.textContent = s.caption;
+        caption.hidden = !s.caption;
+        count.textContent = `${String(index + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`;
+        img.classList.remove('is-switching');
+        history.replaceState(null, '', `#photo-${index + 1}`);
+      };
+      if (direction && dialog.open) {
+        img.style.setProperty('--dir', `${direction * 24}px`);
+        img.classList.add('is-switching');
+        setTimeout(apply, 120);
+      } else {
+        apply();
+      }
+      preload(index + 1);
+      preload(index - 1);
+    };
+
+    triggers.forEach((trigger, i) =>
+      trigger.addEventListener('click', (event) => {
+        event.preventDefault();
+        show(i);
+        dialog.showModal();
+      }),
+    );
+
+    dialog.querySelector('[data-lb-close]')?.addEventListener('click', () => dialog.close());
+    dialog.querySelector('[data-lb-prev]')?.addEventListener('click', () => show(index - 1, 1));
+    dialog.querySelector('[data-lb-next]')?.addEventListener('click', () => show(index + 1, -1));
+    dialog.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowRight') show(index + 1, -1);
+      if (event.key === 'ArrowLeft') show(index - 1, 1);
+    });
+    dialog.addEventListener('close', () => {
+      history.replaceState(null, '', location.pathname + location.search);
+      slides[index].trigger.focus({ preventScroll: true });
+    });
+    // Clicking the dark area around the photo closes the viewer.
+    dialog.addEventListener('click', (event) => {
+      if (event.target === dialog || event.target === dialog.querySelector('[data-lb-stage]')) dialog.close();
+    });
+
+    // Swipe between photos on touch screens.
+    let startX = 0;
+    let startY = 0;
+    dialog.addEventListener('touchstart', (e) => {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    }, { passive: true });
+    dialog.addEventListener('touchend', (e) => {
+      const dx = e.changedTouches[0].clientX - startX;
+      const dy = e.changedTouches[0].clientY - startY;
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) show(index + (dx < 0 ? 1 : -1), dx < 0 ? -1 : 1);
+    });
+
+    // Deep links like /gallery/album#photo-3 open straight to that photo.
+    const match = location.hash.match(/^#photo-(\d+)$/);
+    if (match) {
+      const i = Number(match[1]) - 1;
+      if (slides[i]) {
+        show(i);
+        dialog.showModal();
+      }
+    }
+  }
+</script>

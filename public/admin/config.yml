@@ -1,0 +1,536 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# UMI content manager (Decap CMS)
+# Editors: open https://www.ubcmusicinitiative.com/admin/ and log in with GitHub.
+# Developers: fields here mirror src/content.config.ts. Change both together.
+# Docs: https://decapcms.org/docs/configuration-options/
+# ─────────────────────────────────────────────────────────────────────────────
+
+backend:
+  name: github
+  # TODO before launch: replace with the real GitHub repository (owner/name).
+  repo: YOUR-GITHUB-ACCOUNT/umi-site
+  branch: main
+  # GitHub login is handled by Netlify: Site configuration → Access & security → OAuth → Install provider → GitHub.
+  base_url: https://api.netlify.com
+  squash_merges: true
+  commit_messages:
+    create: 'CMS: add {{collection}} “{{slug}}”'
+    update: 'CMS: update {{collection}} “{{slug}}”'
+    delete: 'CMS: delete {{collection}} “{{slug}}”'
+    uploadMedia: 'CMS: upload “{{path}}”'
+    deleteMedia: 'CMS: delete “{{path}}”'
+
+# Edit on your own computer without GitHub: run `npm run cms` and `npm run dev`, then open http://localhost:4321/admin/index.html
+local_backend: true
+
+site_url: https://www.ubcmusicinitiative.com
+display_url: https://www.ubcmusicinitiative.com
+logo_url: /icon-512.png
+
+# Uploaded images live in src/ so the site can resize them into fast AVIF/WebP versions.
+# Content files sit two folders below src/, which is why the public path starts with ../../
+media_folder: src/assets/uploads
+public_folder: ../../assets/uploads
+
+slug:
+  encoding: ascii
+  clean_accents: true
+  sanitize_replacement: '-'
+
+collections:
+  # ─── Events ────────────────────────────────────────────────────────────────
+  - name: events
+    label: Events
+    label_singular: Event
+    description: Shows, open mics, workshops and socials. Every event is on the calendar; the “Upcoming events” lists on the home page and Events page show only the next three weeks. Once an event ends it moves to “Past shows” automatically.
+    folder: src/content/events
+    editor: { preview: false }
+    create: true
+    slug: '{{year}}-{{month}}-{{slug}}'
+    summary: "{{start | date('YYYY-MM-DD')}} · {{title}}"
+    sortable_fields: [start, title]
+    view_filters:
+      - { label: Sample entries to replace, field: sample, pattern: true }
+      - { label: Hidden drafts, field: draft, pattern: true }
+    fields:
+      - { label: Event name, name: title, widget: string }
+      - label: Type
+        name: type
+        widget: select
+        default: show
+        options:
+          - { label: Showcase, value: show }
+          - { label: Open mic, value: open-mic }
+          - { label: Workshop, value: workshop }
+          - { label: Social, value: social }
+          - { label: Members only, value: members-only }
+          - { label: Community, value: community }
+      - label: Starts
+        name: start
+        widget: datetime
+        format: 'YYYY-MM-DDTHH:mm:ssZ'
+        date_format: 'MMM D, YYYY'
+        time_format: 'h:mm A'
+        picker_utc: false
+        hint: Times use your device's time zone, so enter them in Vancouver time.
+      - label: Ends
+        name: end
+        widget: datetime
+        required: false
+        format: 'YYYY-MM-DDTHH:mm:ssZ'
+        date_format: 'MMM D, YYYY'
+        time_format: 'h:mm A'
+        picker_utc: false
+        hint: Optional. Without an end time the event is assumed to run 3 hours.
+      - { label: Hide the time, name: hideTime, widget: boolean, required: false, default: false, hint: For past events where the exact time isn't known. }
+      - { label: Venue, name: venue, widget: string, hint: 'e.g. Lev Bukman Theatre, AMS Student Nest' }
+      - { label: Street address, name: address, widget: string, required: false }
+      - label: Short summary
+        name: summary
+        widget: text
+        hint: One or two sentences, under 240 characters. Shown on tickets, cards and in Google results.
+        pattern: ['^[\s\S]{1,240}$', Keep the summary under 240 characters.]
+      - { label: Poster or cover photo, name: cover, widget: image, required: false, hint: At least 1600px wide. JPG or PNG under 3 MB. }
+      - { label: Photo description, name: coverAlt, widget: string, required: false, hint: Describe the photo for people using screen readers. }
+      - { label: Member price, name: priceMember, widget: string, required: false, hint: 'e.g. Free or $2' }
+      - { label: General price, name: priceGeneral, widget: string, required: false, hint: 'e.g. $5' }
+      - { label: Ticket link, name: ticketUrl, widget: string, required: false, hint: 'Full link starting with https://' }
+      - { label: Performer sign-up link, name: performerUrl, widget: string, required: false, hint: 'Full link starting with https://' }
+      - { label: Sample entry, name: sample, widget: boolean, required: false, default: false, hint: Sample entries show a “Sample” stamp. Switch off once the details are real. }
+      - { label: Hide from the site (draft), name: draft, widget: boolean, required: false, default: false }
+      - { label: Full description, name: body, widget: markdown, required: false }
+
+  # ─── Gallery ───────────────────────────────────────────────────────────────
+  - name: gallery
+    label: Gallery albums
+    label_singular: Album
+    description: One album per night. The newest albums appear in the film strip on the home page.
+    folder: src/content/gallery
+    editor: { preview: false }
+    create: true
+    slug: '{{slug}}-{{year}}'
+    summary: "{{date | date('YYYY-MM-DD')}} · {{title}}"
+    sortable_fields: [date, title]
+    fields:
+      - { label: Album title, name: title, widget: string }
+      - { label: Date, name: date, widget: datetime, format: 'YYYY-MM-DD', date_format: 'MMM D, YYYY', time_format: false }
+      - label: Event
+        name: event
+        widget: relation
+        collection: events
+        value_field: '{{slug}}'
+        search_fields: [title]
+        display_fields: [title]
+        required: false
+        hint: Links the album and the event page to each other.
+      - { label: Cover photo, name: cover, widget: image }
+      - { label: Cover photo description, name: coverAlt, widget: string }
+      - { label: Photographer, name: photographer, widget: string, required: false }
+      - { label: Show in the home page film strip, name: showOnHome, widget: boolean, required: false, default: true }
+      - label: Photos
+        name: photos
+        widget: list
+        min: 1
+        summary: '{{fields.alt}}'
+        fields:
+          - { label: Photo, name: src, widget: image, hint: Export at about 2400px on the long edge, under 3 MB. }
+          - { label: Description, name: alt, widget: string, required: false, hint: 'What is happening in the photo? e.g. “Two guitarists harmonising under red lights”.' }
+          - { label: Caption, name: caption, widget: string, required: false }
+      - { label: Sample entry, name: sample, widget: boolean, required: false, default: false }
+
+  # ─── ProduceUMI songs ──────────────────────────────────────────────────────
+  - name: songs
+    label: ProduceUMI songs
+    label_singular: Song
+    description: Songs made in the ProduceUMI workshop. The ProduceUMI page groups them by school year, newest first. Add a Spotify link for a Spotify button, and a short audio snippet that plays when someone clicks the record.
+    folder: src/content/songs
+    editor: { preview: false }
+    create: true
+    identifier_field: title
+    slug: '{{slug}}'
+    summary: '{{schoolYear}} · {{title}} — {{artist}}'
+    sortable_fields: [schoolYear, title, order]
+    view_groups:
+      - { label: School year, field: schoolYear }
+    view_filters:
+      - { label: Sample entries to replace, field: sample, pattern: true }
+    fields:
+      - { label: Song title, name: title, widget: string }
+      - { label: Artist, name: artist, widget: string, hint: The student, band or group who made the song. }
+      - { label: School year (starting year), name: schoolYear, widget: number, value_type: int, hint: 'The year the school year began. Enter 2025 for 2025/26.' }
+      - { label: Genre, name: genre, widget: string, required: false }
+      - { label: Cover art, name: cover, widget: image, required: false, hint: Square works best, at least 1200 × 1200. Without cover art the ProduceUMI logo is shown. }
+      - { label: Cover art description, name: coverAlt, widget: string, required: false }
+      - { label: One-line summary, name: summary, widget: string, required: false, hint: Under 200 characters. }
+      - { label: Credits, name: producers, widget: string, required: false, hint: 'e.g. Produced with Alex Kim and Sam Lee' }
+      - label: Spotify link
+        name: spotifyUrl
+        widget: string
+        required: false
+        hint: The song on Spotify (in the app, Share → Copy song link). Adds a Spotify button to the song everywhere it's listed.
+        pattern: ['^$|^https://(open\.spotify\.com|spotify\.link)/', 'Paste a link that starts with https://open.spotify.com/']
+      - label: Song snippet (audio)
+        name: snippet
+        widget: file
+        required: false
+        choose_url: false
+        media_folder: /public/audio/snippets
+        public_folder: /audio/snippets
+        hint: A short clip (15–30 seconds, MP3, under 1 MB) that plays when someone clicks the record. Without one, the record just links to the song's page.
+      - { label: Listen link (plays on the page), name: listenUrl, widget: string, required: false, hint: 'Optional: a SoundCloud or YouTube link for the full player on the song page. Leave blank to use the Spotify link.' }
+      - { label: Order within the year, name: order, widget: number, value_type: int, default: 100, hint: Lower numbers are listed first. }
+      - { label: Sample entry, name: sample, widget: boolean, required: false, default: false }
+      - { label: Hide from the site (draft), name: draft, widget: boolean, required: false, default: false }
+      - { label: The story behind the song, name: body, widget: markdown, required: false }
+
+  # ─── Exec team ─────────────────────────────────────────────────────────────
+  - name: team
+    label: Exec team
+    label_singular: Exec
+    description: The About page shows presidents and VPs as cards, and everyone in a dropdown for their department. Switch off “Current exec” instead of deleting past execs.
+    folder: src/content/team
+    editor: { preview: false }
+    create: true
+    identifier_field: name
+    slug: '{{role}}-{{name}}'
+    summary: '{{role}} · {{name}}'
+    sortable_fields: [order, name, department]
+    view_groups:
+      - { label: Department, field: department }
+    fields:
+      - { label: Name, name: name, widget: string }
+      - { label: Role, name: role, widget: string, hint: 'e.g. VP Events' }
+      - label: Department
+        name: department
+        widget: select
+        options: [Presidential, Internal, External, Events, Sound, Performance, Marketing, Finance, Education]
+        hint: Presidential is the President and VP Administration.
+      - { label: President or VP (show as a card), name: lead, widget: boolean, required: false, default: false, hint: Leads get a full card under “Meet the execs”. Everyone is listed in their department's dropdown. }
+      - { label: Order, name: order, widget: number, value_type: int, default: 100, hint: Lower numbers are listed first. }
+      - { label: Portrait, name: photo, widget: image, required: false, hint: Portrait orientation (4:5) works best. }
+      - { label: Pronouns, name: pronouns, widget: string, required: false }
+      - { label: Program & year, name: program, widget: string, required: false, hint: 'e.g. 3rd year, Computer Science' }
+      - { label: Plays, name: plays, widget: string, required: false }
+      - { label: On repeat, name: onRepeat, widget: string, required: false, hint: 'Song — Artist' }
+      - { label: Email, name: email, widget: string, required: false }
+      - { label: Short bio, name: bio, widget: text, required: false }
+      - { label: Current exec (show on site), name: active, widget: boolean, required: false, default: true }
+      - { label: Sample entry, name: sample, widget: boolean, required: false, default: false }
+
+  # ─── Sponsors ──────────────────────────────────────────────────────────────
+  - name: sponsors
+    label: Sponsors & partners
+    label_singular: Sponsor
+    folder: src/content/sponsors
+    editor: { preview: false }
+    create: true
+    identifier_field: name
+    slug: '{{slug}}'
+    summary: '{{name}} · {{tier}}'
+    fields:
+      - { label: Name, name: name, widget: string }
+      - label: Tier
+        name: tier
+        widget: select
+        options:
+          - { label: Headliner, value: headliner }
+          - { label: Support, value: support }
+          - { label: Opener, value: opener }
+          - { label: Member perk, value: member-perk }
+      - { label: Logo, name: logo, widget: image, required: false, hint: SVG or transparent PNG. Without a logo the name is shown. }
+      - { label: Website, name: url, widget: string, required: false }
+      - { label: Perk or description, name: perk, widget: string, required: false }
+      - { label: Order, name: order, widget: number, value_type: int, default: 100 }
+      - { label: Active, name: active, widget: boolean, required: false, default: true }
+      - { label: Sample entry, name: sample, widget: boolean, required: false, default: false }
+
+  # ─── Pages ─────────────────────────────────────────────────────────────────
+  - name: pages
+    label: Pages
+    description: Words and photos on each page.
+    editor: { preview: false }
+    files:
+      - name: home
+        label: Home page
+        file: src/content/pages/home.md
+        fields:
+          - { label: Browser tab title (optional), name: seoTitle, widget: string, required: false }
+          - label: Hero
+            name: hero
+            widget: object
+            fields:
+              - { label: Camcorder line, name: timecode, widget: string, hint: 'Small text next to REC, e.g. AMS Student Nest — Rm 3308' }
+              - { label: Subtitle, name: subtitle, widget: string, hint: 'The italic line under the UMI wordmark.' }
+              - label: Photos (up to 3)
+                name: photos
+                widget: list
+                min: 1
+                max: 3
+                summary: '{{fields.alt}}'
+                fields:
+                  - { label: Photo, name: src, widget: image }
+                  - { label: Description, name: alt, widget: string }
+                  - { label: Date stamp, name: date, widget: datetime, format: 'YYYY-MM-DD', time_format: false, required: false }
+          - label: About section
+            name: manifesto
+            widget: object
+            fields:
+              - { label: Eyebrow, name: eyebrow, widget: string }
+              - { label: Big statement, name: statement, widget: text, hint: 'Wrap one word in *asterisks* to set it in bold capitals circled in marker.' }
+              - { label: Paragraph, name: body, widget: text }
+              - label: Stats
+                name: stats
+                widget: list
+                max: 4
+                fields:
+                  - { label: Value, name: value, widget: string }
+                  - { label: Label, name: label, widget: string }
+              - label: Photo
+                name: photo
+                widget: object
+                fields:
+                  - { label: Photo, name: src, widget: image }
+                  - { label: Description, name: alt, widget: string }
+                  - { label: Date stamp, name: date, widget: datetime, format: 'YYYY-MM-DD', time_format: false, required: false }
+          - label: Upcoming events section
+            name: shows
+            widget: object
+            hint: Lists up to five events starting in the next three weeks. Later events are on the Events page calendar.
+            fields:
+              - { label: Title, name: title, widget: string }
+              - { label: Intro, name: intro, widget: string, required: false }
+          - label: ProduceUMI section
+            name: produce
+            widget: object
+            fields:
+              - { label: Title, name: title, widget: string }
+              - { label: Text, name: text, widget: text, hint: The three newest songs are listed underneath automatically. }
+          - label: Gallery section
+            name: gallery
+            widget: object
+            fields:
+              - { label: Title, name: title, widget: string }
+              - { label: Intro, name: intro, widget: string, required: false }
+          - label: Get involved section
+            name: sideB
+            widget: object
+            fields:
+              - { label: Title, name: title, widget: string }
+              - { label: Intro, name: intro, widget: string, required: false }
+          - label: Membership section
+            name: join
+            widget: object
+            fields:
+              - { label: Title, name: title, widget: string }
+              - { label: Text, name: text, widget: text, hint: Prices and perks come from the Join page. }
+
+      - name: produce
+        label: ProduceUMI page
+        file: src/content/pages/produce.md
+        fields:
+          - { label: Title, name: title, widget: string }
+          - { label: Intro, name: intro, widget: text }
+          - label: Sign-up status
+            name: status
+            widget: select
+            options:
+              - { label: Sign-ups open, value: open }
+              - { label: Waitlist, value: waitlist }
+              - { label: Closed, value: closed }
+          - { label: Status note, name: statusNote, widget: string, required: false }
+          - { label: Sign-up link, name: signupUrl, widget: string, required: false, hint: Leave empty to use the contact form. }
+          - { label: How it works, name: steps, widget: list, fields: [{ label: Title, name: title, widget: string }, { label: Text, name: text, widget: text }] }
+          - { label: FAQ, name: faq, widget: list, summary: '{{fields.question}}', fields: [{ label: Question, name: question, widget: string }, { label: Answer, name: answer, widget: text }] }
+          - { label: Sample content, name: sample, widget: boolean, required: false, default: false }
+          - { label: About the workshop, name: body, widget: markdown, required: false }
+
+      - name: about
+        label: About page
+        file: src/content/pages/about.md
+        fields:
+          - { label: Title, name: title, widget: string }
+          - { label: Intro, name: intro, widget: text }
+          - { label: Hero photo, name: heroPhoto, widget: object, fields: [{ label: Photo, name: src, widget: image }, { label: Description, name: alt, widget: string }, { label: Date stamp, name: date, widget: datetime, format: 'YYYY-MM-DD', time_format: false, required: false }] }
+          - { label: Mission statement, name: mission, widget: text }
+          - label: Pillars
+            name: pillars
+            widget: list
+            fields:
+              - { label: Title, name: title, widget: string }
+              - { label: Text, name: text, widget: text }
+          - { label: Exec section intro, name: execsIntro, widget: text }
+          - { label: Story heading, name: storyTitle, widget: string }
+          - label: Timeline
+            name: timeline
+            widget: list
+            summary: '{{fields.when}} · {{fields.title}}'
+            fields:
+              - { label: When, name: when, widget: string, hint: 'e.g. Fall 2020' }
+              - { label: Title, name: title, widget: string }
+              - { label: Text, name: text, widget: text }
+              - { label: Sample entry, name: sample, widget: boolean, required: false, default: false }
+          - label: Story photos
+            name: storyPhotos
+            widget: list
+            max: 3
+            fields:
+              - { label: Photo, name: src, widget: image }
+              - { label: Description, name: alt, widget: string }
+              - { label: Date stamp, name: date, widget: datetime, format: 'YYYY-MM-DD', time_format: false, required: false }
+          - { label: Our story, name: body, widget: markdown }
+
+      - name: join
+        label: Join page
+        file: src/content/pages/join.md
+        fields:
+          - { label: Title, name: title, widget: string }
+          - { label: Intro, name: intro, widget: text }
+          - { label: Hero photo, name: heroPhoto, widget: object, fields: [{ label: Photo, name: src, widget: image }, { label: Description, name: alt, widget: string }, { label: Date stamp, name: date, widget: datetime, format: 'YYYY-MM-DD', time_format: false, required: false }] }
+          - { label: Membership term note, name: term, widget: string }
+          - label: Prices
+            name: prices
+            widget: list
+            fields:
+              - { label: Who, name: audience, widget: string }
+              - { label: New member price, name: newPrice, widget: string }
+              - { label: Returning member price, name: returningPrice, widget: string }
+          - label: Benefits
+            name: benefits
+            widget: list
+            fields:
+              - { label: Title, name: title, widget: string }
+              - { label: Text, name: text, widget: text }
+          - { label: How to join steps, name: steps, widget: list, fields: [{ label: Title, name: title, widget: string }, { label: Text, name: text, widget: text }] }
+          - { label: FAQ, name: faq, widget: list, summary: '{{fields.question}}', fields: [{ label: Question, name: question, widget: string }, { label: Answer, name: answer, widget: text }] }
+
+      - name: booking
+        label: Booking & rentals page
+        file: src/content/pages/booking.md
+        fields:
+          - { label: Title, name: title, widget: string }
+          - { label: Intro, name: intro, widget: text }
+          - { label: Hero photo, name: heroPhoto, widget: object, fields: [{ label: Photo, name: src, widget: image }, { label: Description, name: alt, widget: string }, { label: Date stamp, name: date, widget: datetime, format: 'YYYY-MM-DD', time_format: false, required: false }] }
+          - label: Performers
+            name: performers
+            widget: object
+            fields:
+              - { label: Title, name: title, widget: string }
+              - { label: Text, name: text, widget: text }
+              - { label: Free events note, name: freeNote, widget: text }
+              - { label: Rates, name: rates, widget: list, fields: [{ label: Set length, name: length, widget: string }, { label: Price, name: price, widget: string }] }
+              - { label: Request link, name: requestUrl, widget: string, required: false, hint: Leave empty to use the contact form. }
+          - label: Rentals
+            name: rentals
+            widget: object
+            fields:
+              - { label: Title, name: title, widget: string }
+              - { label: Text, name: text, widget: text }
+              - { label: Gear highlights, name: gear, widget: list, field: { label: Item, name: item, widget: string } }
+              - { label: Rate sheet link, name: ratesUrl, widget: string, required: false }
+              - { label: Rental agreement link, name: agreementUrl, widget: string, required: false }
+              - { label: Request form link, name: requestUrl, widget: string, required: false }
+          - { label: Rental steps, name: steps, widget: list, fields: [{ label: Title, name: title, widget: string }, { label: Text, name: text, widget: text }] }
+          - { label: Extra details, name: body, widget: markdown, required: false }
+
+      - name: lessons
+        label: Lessons page
+        file: src/content/pages/lessons.md
+        fields:
+          - { label: Title, name: title, widget: string }
+          - { label: Intro, name: intro, widget: text }
+          - { label: Hero photo, name: heroPhoto, widget: object, fields: [{ label: Photo, name: src, widget: image }, { label: Description, name: alt, widget: string }, { label: Date stamp, name: date, widget: datetime, format: 'YYYY-MM-DD', time_format: false, required: false }] }
+          - label: Sign-up status
+            name: status
+            widget: select
+            options:
+              - { label: Sign-ups open, value: open }
+              - { label: Waitlist, value: waitlist }
+              - { label: Closed, value: closed }
+          - { label: Status note, name: statusNote, widget: string, required: false }
+          - { label: Instruments, name: instruments, widget: list, field: { label: Instrument, name: instrument, widget: string } }
+          - { label: How it works, name: steps, widget: list, fields: [{ label: Title, name: title, widget: string }, { label: Text, name: text, widget: text }] }
+          - { label: For learners, name: learners, widget: object, fields: [{ label: Title, name: title, widget: string }, { label: Text, name: text, widget: text }, { label: Sign-up link, name: signupUrl, widget: string, required: false }] }
+          - { label: For instructors, name: instructors, widget: object, fields: [{ label: Title, name: title, widget: string }, { label: Text, name: text, widget: text }, { label: Sign-up link, name: signupUrl, widget: string, required: false }] }
+          - { label: FAQ, name: faq, widget: list, summary: '{{fields.question}}', fields: [{ label: Question, name: question, widget: string }, { label: Answer, name: answer, widget: text }] }
+          - { label: Sample content, name: sample, widget: boolean, required: false, default: false }
+          - { label: Extra details, name: body, widget: markdown, required: false }
+
+      - name: sponsors
+        label: Sponsors page
+        file: src/content/pages/sponsors.md
+        fields:
+          - { label: Title, name: title, widget: string }
+          - { label: Intro, name: intro, widget: text }
+          - { label: Hero photo, name: heroPhoto, widget: object, fields: [{ label: Photo, name: src, widget: image }, { label: Description, name: alt, widget: string }, { label: Date stamp, name: date, widget: datetime, format: 'YYYY-MM-DD', time_format: false, required: false }] }
+          - { label: Stats, name: stats, widget: list, max: 4, fields: [{ label: Value, name: value, widget: string }, { label: Label, name: label, widget: string }] }
+          - { label: Reasons to partner, name: reasons, widget: list, fields: [{ label: Title, name: title, widget: string }, { label: Text, name: text, widget: text }] }
+          - label: Sponsorship tiers
+            name: tiers
+            widget: list
+            fields:
+              - { label: Name, name: name, widget: string }
+              - { label: Price, name: price, widget: string }
+              - { label: Perks, name: perks, widget: list, field: { label: Perk, name: perk, widget: string } }
+          - { label: Contact text, name: contactText, widget: text }
+          - { label: Sample content, name: sample, widget: boolean, required: false, default: false }
+
+      - name: contact
+        label: Contact page
+        file: src/content/pages/contact.md
+        fields:
+          - { label: Title, name: title, widget: string }
+          - { label: Intro, name: intro, widget: text }
+          - { label: Message topics, name: topics, widget: list, field: { label: Topic, name: topic, widget: string } }
+          - { label: Response time note, name: responseNote, widget: string, required: false }
+
+  # ─── Site settings ─────────────────────────────────────────────────────────
+  - name: settings
+    label: Site settings
+    editor: { preview: false }
+    files:
+      - name: site
+        label: Contact, socials, links & announcement bar
+        file: src/content/settings/site.yml
+        fields:
+          - { label: Club name, name: siteName, widget: string }
+          - { label: Short name, name: shortName, widget: string }
+          - { label: Tagline, name: tagline, widget: string }
+          - { label: Search engine description, name: description, widget: text, hint: About 155 characters. }
+          - { label: Header logo (optional), name: logo, widget: image, required: false, hint: Leave empty to use the UMI logo. To swap it, upload a light-coloured SVG or PNG on a transparent background. }
+          - { label: Logo description, name: logoAlt, widget: string, required: false }
+          - { label: Email, name: email, widget: string }
+          - label: Office
+            name: office
+            widget: object
+            fields:
+              - { label: Room, name: room, widget: string }
+              - { label: Building, name: building, widget: string }
+              - { label: Address, name: address, widget: string }
+              - { label: Map link, name: mapUrl, widget: string, required: false }
+              - { label: Office hours, name: hours, widget: string, required: false }
+          - label: Social media
+            name: socials
+            widget: object
+            fields:
+              - { label: Instagram, name: instagram, widget: string, required: false }
+              - { label: Facebook, name: facebook, widget: string, required: false }
+              - { label: TikTok, name: tiktok, widget: string, required: false }
+              - { label: YouTube, name: youtube, widget: string, required: false }
+              - { label: Spotify, name: spotify, widget: string, required: false }
+          - label: Links
+            name: links
+            widget: object
+            fields:
+              - { label: Membership sign-up (CampusBase), name: membership, widget: string, required: false }
+              - { label: Newsletter sign-up, name: newsletter, widget: string, required: false }
+              - { label: CampusBase page, name: campusbase, widget: string, required: false }
+              - { label: Constitution, name: constitution, widget: string, required: false }
+          - label: Announcement bar
+            name: announcement
+            widget: object
+            fields:
+              - { label: Show the bar, name: enabled, widget: boolean, required: false, default: false }
+              - { label: Message, name: text, widget: string, required: false }
+              - { label: Link label, name: linkLabel, widget: string, required: false }
+              - { label: Link, name: url, widget: string, required: false, hint: 'A page like /join or a full https:// link' }
+          - { label: Land acknowledgement, name: landAcknowledgement, widget: text }

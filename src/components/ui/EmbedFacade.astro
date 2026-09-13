@@ -1,0 +1,140 @@
+---
+/**
+ * Click-to-load player. Nothing from Spotify, YouTube or SoundCloud loads (no
+ * scripts, cookies or trackers) until the visitor chooses to listen.
+ */
+import { toEmbed } from '../../lib/embeds';
+import Icon from './Icon.astro';
+
+interface Props {
+  url?: string;
+  title: string;
+  class?: string;
+}
+
+const { url, title, class: className } = Astro.props;
+const embed = toEmbed(url);
+const icon = embed?.provider === 'youtube' ? 'youtube' : embed?.provider === 'soundcloud' ? 'soundcloud' : 'spotify';
+---
+
+{
+  embed && (
+    <div
+      class:list={['embed', `embed--${embed.provider}`, className]}
+      data-embed
+      data-src={embed.src}
+      data-title={`${title} on ${embed.label}`}
+      data-height={embed.height ?? ''}
+      style={embed.height ? `--embed-h:${embed.height}px` : undefined}
+    >
+      <button class="embed__button" type="button">
+        <span class="embed__play" aria-hidden="true">
+          <Icon name="play" size="1.2rem" />
+        </span>
+        <span class="embed__text">
+          <span class="embed__label">Listen on {embed.label}</span>
+          <span class="embed__note">Loads the {embed.label} player</span>
+        </span>
+        <Icon name={icon} size="1.6rem" class="embed__brand" />
+      </button>
+    </div>
+  )
+}
+
+<style>
+  .embed {
+    position: relative;
+    width: 100%;
+  }
+
+  .embed--youtube {
+    aspect-ratio: 16 / 9;
+  }
+
+  .embed__button {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    width: 100%;
+    height: 100%;
+    min-height: 64px;
+    padding: 0.7rem 1rem 0.7rem 0.7rem;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-m);
+    background: color-mix(in srgb, var(--fg) 5%, transparent);
+    text-align: left;
+    transition: background-color var(--dur-fast), border-color var(--dur-fast);
+  }
+
+  .embed--youtube .embed__button {
+    justify-content: center;
+  }
+
+  .embed__button:hover {
+    background: color-mix(in srgb, var(--fg) 10%, transparent);
+    border-color: var(--fg);
+  }
+
+  .embed__play {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--accent-fg);
+    transition: transform var(--dur-base) var(--ease-spring);
+  }
+
+  .embed__button:hover .embed__play {
+    transform: scale(1.08);
+  }
+
+  .embed__text {
+    display: grid;
+    gap: 0.1rem;
+  }
+
+  .embed__label {
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .embed__note {
+    font-size: var(--step--2);
+    color: var(--fg-muted);
+  }
+
+  .embed :global(.embed__brand) {
+    margin-left: auto;
+    opacity: 0.7;
+  }
+
+  .embed :global(iframe) {
+    display: block;
+    width: 100%;
+    height: var(--embed-h, 100%);
+    border: 0;
+    border-radius: var(--radius-m);
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-embed]').forEach((root) => {
+    const button = root.querySelector('button');
+    button?.addEventListener('click', () => {
+      const iframe = document.createElement('iframe');
+      iframe.src = root.dataset.src ?? '';
+      iframe.title = root.dataset.title ?? 'Music player';
+      iframe.allow = 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture';
+      iframe.loading = 'lazy';
+      iframe.setAttribute('allowfullscreen', '');
+      root.replaceChildren(iframe);
+      iframe.focus();
+    });
+  });
+</script>

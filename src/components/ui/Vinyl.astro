@@ -1,0 +1,214 @@
+---
+/**
+ * An album sleeve with the record sliding out. Pure CSS. Without a snippet the record spins while in view;
+ * with one, the record is a play button and spins only while the snippet plays.
+ */
+import type { ImageMetadata } from 'astro';
+import { Picture } from 'astro:assets';
+import SnippetButton from '../produce/SnippetButton.astro';
+
+interface Props {
+  src: ImageMetadata;
+  alt: string;
+  label: string;
+  sizes: string;
+  /** Round sticker on the sleeve. */
+  sticker?: string;
+  /** Audio snippet played by clicking the record, with the song and artist for its label. */
+  snippet?: { src: string; title: string; artist: string };
+  class?: string;
+}
+
+const { src, alt, label, sizes, sticker = 'ProduceUMI', snippet, class: className } = Astro.props;
+---
+
+<div class:list={['vinyl', snippet && 'vinyl--playable', className]} data-vinyl data-snippet-root={snippet ? '' : undefined}>
+  <div class="vinyl__record" aria-hidden="true">
+    <div class="vinyl__disc">
+      <span class="vinyl__label">
+        <span class="vinyl__label-text">{label}</span>
+      </span>
+    </div>
+  </div>
+  <div class="vinyl__sleeve">
+    <Picture src={src} alt={alt} widths={[360, 540, 720, 960]} sizes={sizes} formats={['avif', 'webp']} class="vinyl__img" />
+    <span class="vinyl__wear" aria-hidden="true"></span>
+    {sticker && <span class="vinyl__sticker" aria-hidden="true">{sticker}</span>}
+  </div>
+  {snippet && <SnippetButton variant="cover" src={snippet.src} title={snippet.title} artist={snippet.artist} text="Snippet" class="vinyl__play" />}
+</div>
+
+<style>
+  .vinyl {
+    --snippet-reach: -36%; /* the record's resting overhang, so clicking the disc plays too */
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    container-type: inline-size;
+  }
+
+  .vinyl__sleeve {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    box-shadow: var(--shadow-lift), inset 0 0 0 1px rgb(255 255 255 / 0.06);
+  }
+
+  .vinyl__sleeve :global(picture),
+  .vinyl__sleeve :global(.vinyl__img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .vinyl__wear {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(circle at 50% 50%, transparent 45%, rgb(255 255 255 / 0.06) 46%, transparent 47%),
+      linear-gradient(135deg, rgb(255 255 255 / 0.12), transparent 30%, transparent 70%, rgb(0 0 0 / 0.25));
+    mix-blend-mode: screen;
+  }
+
+  .vinyl__sticker {
+    position: absolute;
+    top: 6%;
+    right: 6%;
+    display: grid;
+    place-items: center;
+    width: 26%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--peri);
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: clamp(0.45rem, 0.3rem + 0.45vw, 0.66rem);
+    font-weight: 500;
+    line-height: 1.15;
+    letter-spacing: 0.04em;
+    text-align: center;
+    text-transform: uppercase;
+    transform: rotate(12deg);
+    box-shadow: 0 2px 6px rgb(0 0 0 / 0.35);
+  }
+
+  .vinyl__record {
+    position: absolute;
+    top: 3%;
+    left: 3%;
+    z-index: 1;
+    width: 94%;
+    height: 94%;
+    transform: translateX(40%);
+    transition: transform var(--dur-cinematic) var(--ease-out);
+  }
+
+  .vinyl__disc {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle, transparent 0 17%, rgb(255 255 255 / 0.12) 17.5%, transparent 18.5%),
+      radial-gradient(circle, transparent 0 95%, rgb(255 255 255 / 0.22) 97%, transparent 99%),
+      repeating-radial-gradient(circle, #161b33 0 2px, #2b3150 2.5px 3px),
+      #161b33;
+    box-shadow:
+      0 0 0 1px rgb(238 241 250 / 0.22),
+      0 12px 40px rgb(0 0 0 / 0.6);
+    animation: vinyl-spin 2.2s linear infinite paused;
+  }
+
+  .vinyl__disc::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: conic-gradient(from 20deg, transparent 0 7%, rgb(255 255 255 / 0.34) 13%, transparent 21% 57%, rgb(255 255 255 / 0.24) 63%, transparent 71%);
+  }
+
+  .vinyl__label {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 34%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(circle, #070a1a 0 5%, var(--orange) 5.5%);
+    color: var(--ink);
+  }
+
+  .vinyl__label-text {
+    max-width: 70%;
+    font-family: var(--font-display);
+    font-size: clamp(0.38rem, 0.28rem + 0.4vw, 0.62rem);
+    font-weight: 900;
+    line-height: 0.95;
+    text-align: center;
+    text-transform: uppercase;
+    transform: translateY(-58%);
+  }
+
+  .vinyl.is-spinning .vinyl__disc,
+  .vinyl.is-playing .vinyl__disc {
+    animation-play-state: running;
+  }
+
+  /* Playing: the record slides further out, but not so far it covers the text beside it. */
+  .vinyl.is-playing .vinyl__record,
+  .vinyl.is-paused .vinyl__record {
+    transform: translateX(48%);
+  }
+
+  .vinyl :global(.vinyl__play) {
+    --snippet-size: clamp(2.75rem, 13cqi, 3.5rem);
+    --snippet-inset: clamp(0.6rem, 3.5cqi, 1rem);
+  }
+
+  /* On a small record the "Snippet" word would cover the art: keep just the round button. */
+  @container (max-width: 17.5rem) {
+    .vinyl :global(.vinyl__play .snippet__text) {
+      display: none;
+    }
+  }
+
+  @media (hover: hover) {
+    .vinyl:hover .vinyl__record {
+      transform: translateX(54%) rotate(20deg);
+    }
+
+    .vinyl.is-playing:hover .vinyl__record,
+    .vinyl.is-paused:hover .vinyl__record {
+      transform: translateX(48%);
+    }
+  }
+
+  @keyframes vinyl-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .vinyl__disc {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  // Records with a snippet spin only while it plays (see scripts/snippets.ts).
+  const records = document.querySelectorAll<HTMLElement>('[data-vinyl]:not(.vinyl--playable)');
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      for (const entry of entries) entry.target.classList.toggle('is-spinning', entry.isIntersecting);
+    });
+    records.forEach((r) => io.observe(r));
+  }
+</script>

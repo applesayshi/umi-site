@@ -1,0 +1,121 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import type { ImageMetadata } from 'astro';
+import Hero from '../components/home/Hero.astro';
+import PhotoRibbon from '../components/home/PhotoRibbon.astro';
+import Manifesto from '../components/home/Manifesto.astro';
+import UpcomingEvents from '../components/home/UpcomingEvents.astro';
+import ProduceUMI from '../components/home/ProduceUMI.astro';
+import ContactSheet from '../components/home/ContactSheet.astro';
+import SideB from '../components/home/SideB.astro';
+import Membership from '../components/home/Membership.astro';
+import { getAlbums, getPage, getSettings, getSongs, getUpcomingEvents } from '../lib/content';
+
+const [home, join, produce, lessons, booking, sponsors, about, settings, upcoming, songs, albums] = await Promise.all([
+  getPage('home', 'home'),
+  getPage('join', 'join'),
+  getPage('produce', 'produce'),
+  getPage('lessons', 'lessons'),
+  getPage('booking', 'booking'),
+  getPage('sponsorsPage', 'sponsors'),
+  getPage('about', 'about'),
+  getSettings(),
+  getUpcomingEvents(),
+  getSongs(),
+  getAlbums(),
+]);
+
+const h = home.data;
+const produceSignup = produce.data.signupUrl ?? `/contact?topic=${encodeURIComponent('ProduceUMI')}`;
+
+// Interleave album photos so the strip mixes nights rather than showing one album in a row.
+const homeAlbums = albums.filter((a) => a.data.showOnHome);
+const frames = [];
+for (let i = 0; i < 4 && frames.length < 10; i++) {
+  for (const album of homeAlbums) {
+    const photo = album.data.photos[i];
+    if (photo && frames.length < 10) {
+      frames.push({ src: photo.src, alt: photo.alt, href: `/gallery/${album.id}`, album: album.data.title, date: album.data.date });
+    }
+  }
+}
+
+// The photo ribbon under the hero: gallery photos (taking turns between albums) with a song or
+// event cover after every second photo. Duplicates are dropped.
+const photos: ImageMetadata[] = [];
+const longestAlbum = Math.max(0, ...albums.map((album) => album.data.photos.length));
+for (let i = 0; i < longestAlbum; i++) {
+  for (const album of albums) {
+    const photo = album.data.photos[i];
+    if (photo) photos.push(photo.src);
+  }
+}
+const art = [...songs.map((song) => song.data.cover), ...upcoming.map((event) => event.data.cover)].filter((src): src is ImageMetadata => Boolean(src));
+const pool: ImageMetadata[] = [];
+let artIndex = 0;
+photos.forEach((src, i) => {
+  pool.push(src);
+  if (i % 2 === 1 && artIndex < art.length) pool.push(art[artIndex++]);
+});
+pool.push(...art.slice(artIndex));
+const ribbon = [...new Map(pool.map((src) => [src.src, src])).values()].slice(0, 16);
+
+const tracks = [
+  {
+    title: 'Lessons',
+    text: 'Learn an instrument from fellow students, one-on-one with volunteer instructors.',
+    href: '/lessons',
+    label: 'Learn',
+    icon: 'graduation-cap' as const,
+    image: lessons.data.heroPhoto.src,
+  },
+  {
+    title: 'Booking & rentals',
+    text: 'Hire UMI performers for your event, or borrow speakers, mics and instruments.',
+    href: '/booking',
+    label: 'Hire & borrow',
+    icon: 'speaker' as const,
+    image: booking.data.heroPhoto.src,
+  },
+  {
+    title: 'Sponsors & partners',
+    text: 'Back student musicians and put your brand in front of UBC’s music scene.',
+    href: '/sponsors',
+    label: 'Partner',
+    icon: 'handshake' as const,
+    image: sponsors.data.heroPhoto.src,
+  },
+  {
+    title: 'Workshops',
+    text: 'Production, songwriting and alumni nights for leveling up between shows.',
+    href: '/events?type=workshop',
+    label: 'Create',
+    icon: 'music-notes' as const,
+    image: about.data.heroPhoto.src,
+  },
+];
+---
+
+<BaseLayout title={h.seoTitle}>
+  <Hero timecode={h.hero.timecode} subtitle={h.hero.subtitle} photos={h.hero.photos} upcoming={upcoming} />
+  {ribbon.length > 0 && <PhotoRibbon images={ribbon} />}
+  <Manifesto
+    eyebrow={h.manifesto.eyebrow}
+    statement={h.manifesto.statement}
+    body={h.manifesto.body}
+    stats={h.manifesto.stats}
+    photo={h.manifesto.photo}
+  />
+  <UpcomingEvents title={h.shows.title} intro={h.shows.intro} events={upcoming} instagram={settings.socials.instagram} />
+  <ProduceUMI title={h.produce.title} text={h.produce.text} songs={songs.slice(0, 3)} signupHref={produceSignup} />
+  {frames.length > 0 && <ContactSheet title={h.gallery.title} intro={h.gallery.intro} frames={frames} />}
+  <SideB title={h.sideB.title} intro={h.sideB.intro} tracks={tracks} />
+  <Membership
+    title={h.join.title}
+    text={h.join.text}
+    term={join.data.term}
+    prices={join.data.prices}
+    benefits={join.data.benefits}
+    membershipUrl={settings.links.membership}
+  />
+</BaseLayout>

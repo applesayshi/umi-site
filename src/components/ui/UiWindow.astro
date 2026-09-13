@@ -1,0 +1,99 @@
+---
+/** A small, flat "program window" frame (title bar + body) for collage UI moments. */
+interface Props {
+  title: string;
+  class?: string;
+  tone?: 'night' | 'paper' | 'cobalt';
+  /** Element to render. (A prop named `as` stops astro check from reading this interface.) */
+  tag?: 'div' | 'aside' | 'section';
+  label?: string;
+}
+
+const { title, class: className, tone = 'night', tag: Tag = 'div', label } = Astro.props;
+---
+
+<Tag class:list={['ui-window', `ui-window--${tone}`, className]} aria-label={label}>
+  <div class="ui-window__bar" aria-hidden="true">
+    <span class="ui-window__dots"><i></i><i></i><i></i></span>
+    <span class="ui-window__title">{title}</span>
+    <span class="ui-window__grip"></span>
+  </div>
+  <div class="ui-window__body">
+    <slot />
+  </div>
+</Tag>
+
+<style>
+  .ui-window {
+    --win-bg: rgb(11 17 43 / 0.88);
+    --win-fg: var(--chalk);
+    --win-line: rgb(147 163 230 / 0.45);
+    position: relative;
+    border: 1px solid var(--win-line);
+    background: var(--win-bg);
+    color: var(--win-fg);
+    box-shadow: 6px 6px 0 rgb(3 5 18 / 0.45);
+    backdrop-filter: blur(6px);
+  }
+
+  .ui-window--paper {
+    --win-bg: #eef0f4;
+    --win-fg: var(--ink);
+    --win-line: rgb(10 15 38 / 0.5);
+  }
+
+  .ui-window--cobalt {
+    --win-bg: var(--cobalt-deep);
+    --win-fg: #ffffff;
+    --win-line: rgb(255 255 255 / 0.55);
+  }
+
+  .ui-window__bar {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    height: 1.6rem;
+    padding-inline: 0.5rem;
+    border-bottom: 1px solid var(--win-line);
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    text-transform: lowercase;
+  }
+
+  .ui-window__dots {
+    display: flex;
+    gap: 3px;
+  }
+
+  .ui-window__dots i {
+    display: block;
+    width: 7px;
+    height: 7px;
+    border: 1px solid currentColor;
+  }
+
+  .ui-window__dots i:first-child {
+    background: var(--orange);
+    border-color: var(--orange);
+  }
+
+  .ui-window__title {
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    opacity: 0.85;
+  }
+
+  .ui-window__grip {
+    width: 18px;
+    height: 7px;
+    background: repeating-linear-gradient(90deg, currentColor 0 1px, transparent 1px 3px);
+    opacity: 0.5;
+  }
+
+  .ui-window__body {
+    padding: 0.8rem;
+  }
+</style>

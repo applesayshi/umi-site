@@ -1,0 +1,341 @@
+---
+import Icon from '../ui/Icon.astro';
+import { renderMonth, vancouverToday, type CalendarEvent } from '../../lib/calendar';
+
+interface Props {
+  events: CalendarEvent[];
+}
+
+const { events } = Astro.props;
+const today = vancouverToday();
+const initial = renderMonth(today.year, today.month, events, today.key);
+---
+
+<div class="cal" data-calendar data-year={today.year} data-month={today.month}>
+  <script is:inline type="application/json" data-calendar-events set:html={JSON.stringify(events)} />
+  <div class="cal__bar">
+    <div class="cal__nav">
+      <button class="cal__btn" type="button" data-cal-prev>
+        <span class="visually-hidden">Previous month</span>
+        <Icon name="caret-left" />
+      </button>
+      <h3 class="cal__label display" aria-live="polite" data-cal-label>{initial.label}</h3>
+      <button class="cal__btn" type="button" data-cal-next>
+        <span class="visually-hidden">Next month</span>
+        <Icon name="caret-right" />
+      </button>
+    </div>
+    <button class="btn btn--ghost btn--small" type="button" data-cal-today>
+      <span class="btn__label">This month</span>
+    </button>
+  </div>
+  <div class="cal__body" data-cal-grid set:html={initial.grid} />
+  <div class="cal__month-agenda" data-cal-agenda set:html={initial.agenda} />
+</div>
+
+<style>
+  .cal {
+    border: 1px solid var(--line-strong);
+    background: color-mix(in srgb, var(--night-900) 80%, transparent);
+  }
+
+  .cal__bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid var(--line-strong);
+  }
+
+  .cal__nav {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .cal__label {
+    min-width: 13ch;
+    font-size: clamp(1.05rem, 0.9rem + 0.7vw, 1.55rem);
+    font-weight: 900;
+    line-height: 1;
+    text-align: center;
+  }
+
+  .cal__btn {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--line-strong);
+    border-radius: 50%;
+    transition: background-color var(--dur-fast), color var(--dur-fast);
+  }
+
+  .cal__btn:hover {
+    background: var(--chalk);
+    color: var(--ink);
+  }
+
+  .cal__body :global(.cal__grid) {
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  .cal__body :global(th) {
+    padding: 0.55rem 0.4rem;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    font-weight: 400;
+    letter-spacing: 0.14em;
+    text-align: left;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+
+  .cal__body :global(abbr) {
+    text-decoration: none;
+  }
+
+  .cal__body :global(td) {
+    height: clamp(3.2rem, 1rem + 7vw, 7.5rem);
+    padding: 0.4rem;
+    vertical-align: top;
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .cal__body :global(td:last-child) {
+    border-right: 0;
+  }
+
+  .cal__body :global(tr:last-child td) {
+    border-bottom: 0;
+  }
+
+  .cal__body :global(.cal__num) {
+    display: inline-grid;
+    place-items: center;
+    min-width: 1.9rem;
+    height: 1.9rem;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-stretch: 125%;
+    font-size: 0.95rem;
+    line-height: 1;
+  }
+
+  .cal__body :global(td.is-out) {
+    background: repeating-linear-gradient(-45deg, transparent 0 6px, rgb(238 241 250 / 0.035) 6px 7px);
+  }
+
+  .cal__body :global(.is-past .cal__num) {
+    color: var(--fg-muted);
+  }
+
+  .cal__body :global(.is-today .cal__num) {
+    border-radius: 50%;
+    background: var(--peri);
+    color: var(--ink);
+  }
+
+  .cal__body :global(.cal__events) {
+    display: grid;
+    gap: 0.25rem;
+    margin-top: 0.25rem;
+  }
+
+  .cal__body :global(.cal__event a) {
+    display: grid;
+    padding: 0.25rem 0.4rem;
+    border-left: 3px solid var(--dot, var(--peri));
+    background: color-mix(in srgb, var(--dot, var(--peri)) 14%, transparent);
+    color: var(--fg);
+    text-decoration: none;
+    transition: background-color var(--dur-fast);
+  }
+
+  .cal__body :global(.cal__event a:hover) {
+    background: color-mix(in srgb, var(--dot, var(--peri)) 30%, transparent);
+  }
+
+  .cal__body :global(.cal__event-time) {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.06em;
+    color: var(--fg-muted);
+  }
+
+  .cal__body :global(.cal__event-title) {
+    overflow: hidden;
+    font-size: 0.78rem;
+    font-weight: 600;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .cal__month-agenda {
+    border-top: 1px solid var(--line-strong);
+  }
+
+  .cal__month-agenda :global(.cal__agenda) {
+    display: grid;
+  }
+
+  .cal__month-agenda :global(.cal__agenda-item) {
+    display: grid;
+    grid-template-columns: 2.6rem 1fr;
+    align-items: center;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .cal__month-agenda :global(.cal__agenda-item:last-child) {
+    border-bottom: 0;
+  }
+
+  .cal__month-agenda :global(.cal__agenda-day) {
+    align-self: stretch;
+    display: grid;
+    place-items: center;
+    border-right: 3px solid var(--dot, var(--peri));
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-stretch: 125%;
+    font-size: 1.05rem;
+  }
+
+  .cal__month-agenda :global(.cal__agenda-item a) {
+    display: grid;
+    gap: 0.1rem;
+    min-height: 56px;
+    padding: 0.55rem 1rem;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .cal__month-agenda :global(.cal__agenda-item a:hover .cal__agenda-title) {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  .cal__month-agenda :global(.cal__agenda-title) {
+    font-weight: 600;
+  }
+
+  .cal__month-agenda :global(.cal__agenda-meta) {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+
+  .cal__month-agenda :global(.cal__empty) {
+    padding: 1rem;
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: var(--step-1);
+    color: var(--fg-muted);
+  }
+
+  .cal :global(.type-show) { --dot: var(--peri); }
+  .cal :global(.type-open-mic) { --dot: var(--orange); }
+  .cal :global(.type-workshop) { --dot: var(--mint); }
+  .cal :global(.type-social) { --dot: #ff7cc2; }
+  .cal :global(.type-members-only) { --dot: var(--sodium); }
+  .cal :global(.type-community) { --dot: var(--chalk); }
+
+  /*
+   * Small screens: the grid is too narrow for titles, so its event links are removed
+   * (display:none also removes them from the accessibility tree) and a dot marks busy days.
+   * The agenda under the grid carries the same links, so nothing is announced twice.
+   */
+  @media (max-width: 719px) {
+    .cal__body :global(.cal__events) {
+      display: none;
+    }
+
+    .cal__body :global(td) {
+      height: 3.4rem;
+      padding: 0.2rem;
+      text-align: center;
+    }
+
+    .cal__body :global(th) {
+      text-align: center;
+    }
+
+    .cal__body :global(.cal__num) {
+      position: relative;
+      min-width: 1.7rem;
+      height: 1.7rem;
+      font-size: 1.1rem;
+    }
+
+    .cal__body :global(.has-events .cal__num::after) {
+      content: '';
+      position: absolute;
+      left: 50%;
+      bottom: -0.45rem;
+      width: 0.4rem;
+      height: 0.4rem;
+      border-radius: 50%;
+      background: var(--peri);
+      translate: -50% 0;
+    }
+  }
+
+  @media (min-width: 720px) {
+    .cal__month-agenda {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  import { renderMonth, vancouverToday, type CalendarEvent } from '../../lib/calendar';
+
+  document.querySelectorAll<HTMLElement>('[data-calendar]').forEach((root) => {
+    const events: CalendarEvent[] = JSON.parse(root.querySelector('[data-calendar-events]')?.textContent ?? '[]');
+    const grid = root.querySelector<HTMLElement>('[data-cal-grid]')!;
+    const agenda = root.querySelector<HTMLElement>('[data-cal-agenda]')!;
+    const label = root.querySelector<HTMLElement>('[data-cal-label]')!;
+    const today = vancouverToday();
+    let year = today.year;
+    let month = today.month;
+
+    const draw = () => {
+      const out = renderMonth(year, month, events, today.key);
+      grid.innerHTML = out.grid;
+      agenda.innerHTML = out.agenda;
+      label.textContent = out.label;
+      root.dispatchEvent(new CustomEvent('calendar:render', { bubbles: true }));
+    };
+
+    const shift = (delta: number) => {
+      month += delta;
+      if (month < 1) {
+        month = 12;
+        year--;
+      } else if (month > 12) {
+        month = 1;
+        year++;
+      }
+      draw();
+    };
+
+    root.querySelector('[data-cal-prev]')?.addEventListener('click', () => shift(-1));
+    root.querySelector('[data-cal-next]')?.addEventListener('click', () => shift(1));
+    root.querySelector('[data-cal-today]')?.addEventListener('click', () => {
+      year = today.year;
+      month = today.month;
+      draw();
+    });
+
+    // The build may be from an earlier month; always open on the visitor's current month.
+    if (Number(root.dataset.year) !== year || Number(root.dataset.month) !== month) draw();
+  });
+</script>

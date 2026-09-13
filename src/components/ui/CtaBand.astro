@@ -1,0 +1,81 @@
+---
+import Icon from './Icon.astro';
+import Sticker from './Sticker.astro';
+import { fitStyle } from '../../lib/fit';
+
+interface Props {
+  title: string;
+  text?: string;
+  href: string;
+  label: string;
+  external?: boolean;
+  sticker?: string;
+  secondaryHref?: string;
+  secondaryLabel?: string;
+}
+
+const { title, text, href, label, external = false, sticker, secondaryHref, secondaryLabel } = Astro.props;
+---
+
+<section class="cta-band theme-cobalt" aria-labelledby="cta-title">
+  <div class="container cta-band__inner">
+    <div class="cta-band__copy">
+      <h2 class="cta-band__title display" id="cta-title" data-reveal="stutter" style={fitStyle(title)}>{title}</h2>
+      {text && <p class="cta-band__text" data-reveal style="--i:1">{text}</p>}
+      <div class="btn-row" data-reveal style="--i:2">
+        <a class="btn" href={href} target={external ? '_blank' : undefined} rel={external ? 'noopener noreferrer' : undefined}>
+          <span class="btn__label">{label}</span>
+          <Icon name={external ? 'arrow-up-right' : 'arrow-right'} />
+        </a>
+        {
+          secondaryHref && secondaryLabel && (
+            <a class="btn btn--ghost" href={secondaryHref}>
+              <span class="btn__label">{secondaryLabel}</span>
+            </a>
+          )
+        }
+      </div>
+    </div>
+    {sticker && <Sticker text={sticker} class="cta-band__sticker" />}
+  </div>
+</section>
+
+<style>
+  .cta-band {
+    position: relative;
+    overflow: hidden;
+    padding-block: var(--space-3xl);
+  }
+
+  .cta-band__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-xl);
+  }
+
+  .cta-band__copy {
+    flex: 1 1 30rem;
+    display: grid;
+    gap: var(--space-m);
+    justify-items: start;
+    max-width: 52rem;
+    container-type: inline-size;
+  }
+
+  .cta-band__title {
+    font-size: min(var(--display-xl), 100cqi / var(--fit, 0.01));
+    font-weight: 900;
+    line-height: 0.84;
+  }
+
+  .cta-band__text {
+    max-width: 46ch;
+    font-size: var(--step-1);
+  }
+
+  .cta-band :global(.cta-band__sticker) {
+    width: clamp(8rem, 6rem + 8vw, 13rem);
+  }
+</style>

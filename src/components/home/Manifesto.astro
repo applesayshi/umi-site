@@ -1,0 +1,250 @@
+---
+import type { ImageMetadata } from 'astro';
+import Photo from '../ui/Photo.astro';
+import Icon from '../ui/Icon.astro';
+import TornEdge from '../ui/TornEdge.astro';
+import Scribble from '../ui/Scribble.astro';
+import { fitStyle } from '../../lib/fit';
+
+interface Props {
+  eyebrow: string;
+  statement: string;
+  body: string;
+  stats: { value: string; label: string }[];
+  photo: { src: ImageMetadata; alt: string; date?: Date };
+}
+
+const { eyebrow, statement, body, stats, photo } = Astro.props;
+
+/* Split the statement into words for the scroll-linked reveal. *word* = circled in marker. */
+const words = statement.split(/\s+/).map((raw) => {
+  const shout = /^\*.+\*[.,!?]?$/.test(raw);
+  const text = raw.replace(/\*/g, '');
+  return { text, shout };
+});
+const plain = statement.replace(/\*/g, '');
+---
+
+<section class="manifesto theme-paper texture-paper" id="about-umi" aria-labelledby="manifesto-title">
+  <TornEdge position="top" seed="manifesto-top" />
+  <Scribble variant="vine" class="manifesto__vine" color="var(--ink)" width={2.2} />
+  <div class="manifesto__inner container">
+    <p class="eyebrow manifesto__eyebrow"><span class="eyebrow__index">A1</span><span>{eyebrow}</span></p>
+
+    <h2 class="manifesto__statement serif" id="manifesto-title">
+      <span class="visually-hidden">{plain}</span>
+      <span aria-hidden="true">
+        {
+          words.map((w) =>
+            w.shout ? (
+              <>
+                <span class="manifesto__word manifesto__shout">
+                  <span class="manifesto__shout-text display">{w.text}</span>
+                  <Scribble variant="circle" class="manifesto__circle" color="var(--orange-ink)" width={3} />
+                </span>{' '}
+              </>
+            ) : (
+              <span class="manifesto__word">{w.text} </span>
+            ),
+          )
+        }
+      </span>
+    </h2>
+
+    <div class="manifesto__grid">
+      <div class="manifesto__copy">
+        <p class="manifesto__body" data-reveal>{body}</p>
+        <dl class="manifesto__stats" style={fitStyle(stats.map((s) => s.value).join(' '))}>
+          {
+            stats.map((s, i) => (
+              <div class="manifesto__stat" data-reveal style={`--i:${i + 1}`}>
+                <dt>{s.label}</dt>
+                <dd class="display">{s.value}</dd>
+              </div>
+            ))
+          }
+        </dl>
+        <a class="link-arrow" href="/about" data-reveal style="--i:4">
+          <span>Our story & the exec team</span>
+          <Icon name="arrow-up-right" />
+        </a>
+      </div>
+
+      <div class="manifesto__photo" data-reveal>
+        <Photo
+          src={photo.src}
+          alt={photo.alt}
+          date={photo.date}
+          sizes="(min-width: 900px) 34vw, 86vw"
+          widths={[400, 640, 900, 1200]}
+          aspect="4 / 5"
+          frame="print"
+          tape="top"
+          tilt={-2.5}
+          duo="mint"
+          flash
+        />
+        <p class="manifesto__caption" aria-hidden="true">fig. 01 — the nest, after dark</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .manifesto {
+    position: relative;
+    padding-block: var(--section);
+  }
+
+  .manifesto :global(.manifesto__vine) {
+    position: absolute;
+    top: 8%;
+    left: 0.5%;
+    width: clamp(2.5rem, 5vw, 5rem);
+    height: auto;
+    opacity: 0.8;
+  }
+
+  .manifesto__inner {
+    display: grid;
+    gap: var(--space-xl);
+  }
+
+  .manifesto__statement {
+    max-width: 19ch;
+    font-size: clamp(2.6rem, 1.4rem + 5.2vw, 7rem);
+    line-height: 1;
+    letter-spacing: -0.012em;
+  }
+
+  .manifesto__word {
+    display: inline;
+  }
+
+  .manifesto__shout {
+    position: relative;
+    display: inline-block;
+    padding-inline: 0.12em;
+  }
+
+  .manifesto__shout-text {
+    font-size: 0.72em;
+    font-weight: 900;
+    letter-spacing: -0.01em;
+    color: var(--cobalt-deep);
+  }
+
+  .manifesto__shout :global(.manifesto__circle) {
+    position: absolute;
+    inset: -28% -12% -22% -14%;
+    width: 126%;
+    height: 150%;
+  }
+
+  /* Scroll-linked reveal: each word inks in as its line crosses the viewport. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .manifesto__word {
+        animation: ink-in linear both;
+        animation-timeline: view();
+        animation-range: entry 10% cover 38%;
+      }
+    }
+  }
+
+  @keyframes ink-in {
+    from {
+      opacity: 0.14;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .manifesto__grid {
+    display: grid;
+    gap: var(--space-2xl);
+    align-items: start;
+  }
+
+  .manifesto__copy {
+    display: grid;
+    gap: var(--space-l);
+    align-content: start;
+  }
+
+  .manifesto__body {
+    max-width: 52ch;
+    font-size: var(--step-1);
+    line-height: 1.55;
+  }
+
+  /* Flex rather than grid: a short last row stretches instead of leaving an empty grey cell.
+     One --fit for the whole strip keeps every value the same size. */
+  .manifesto__stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1px;
+    margin: 0;
+    background: var(--line-strong);
+    border: 1px solid var(--line-strong);
+  }
+
+  .manifesto__stat {
+    flex: 1 1 10rem;
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+    gap: 0.4rem;
+    padding: 1.1rem 1.1rem 1.2rem;
+    background: var(--paper-50);
+    container-type: inline-size;
+  }
+
+  .manifesto__stat dt {
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  .manifesto__stat dd {
+    margin: 0;
+    font-size: min(clamp(1.05rem, 0.8rem + 0.9vw, 1.6rem), 100cqi / var(--fit, 0.01));
+    font-weight: 900;
+    line-height: 1;
+    color: var(--ink);
+  }
+
+  .manifesto__stat:first-child dd {
+    color: var(--cobalt-deep);
+  }
+
+  .manifesto__photo {
+    max-width: 30rem;
+    justify-self: center;
+    width: 88%;
+  }
+
+  .manifesto__caption {
+    margin-top: 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.24em;
+    text-transform: lowercase;
+    color: var(--ink-soft);
+    text-align: right;
+  }
+
+  @media (min-width: 900px) {
+    .manifesto__grid {
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    }
+
+    .manifesto__photo {
+      margin-top: calc(var(--space-3xl) * -1.6);
+      justify-self: end;
+    }
+  }
+</style>

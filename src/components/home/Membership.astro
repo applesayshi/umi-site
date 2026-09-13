@@ -1,0 +1,238 @@
+---
+/** Membership on the home page: what it costs, what you get, and how to join. */
+import Icon from '../ui/Icon.astro';
+import { fitStyle } from '../../lib/fit';
+
+interface Props {
+  title: string;
+  text: string;
+  term: string;
+  prices: { audience: string; newPrice: string; returningPrice: string }[];
+  benefits: { title: string; text: string }[];
+  membershipUrl?: string;
+}
+
+const { title, text, term, prices, benefits, membershipUrl } = Astro.props;
+---
+
+<section class="member theme-cobalt" aria-labelledby="member-title">
+  <div class="member__screen" aria-hidden="true"></div>
+  <div class="container member__inner">
+    <div class="member__copy">
+      <p class="eyebrow" data-reveal="fade"><span class="eyebrow__index">B2</span><span>Membership</span></p>
+      <h2 class="member__title display" id="member-title" data-reveal="stutter" style={fitStyle(title)}>{title}</h2>
+      <p class="member__text" data-reveal style="--i:1">{text}</p>
+      <ul class="member__perks" role="list" data-reveal style="--i:2">
+        {
+          benefits.map((benefit) => (
+            <li>
+              <span class="member__check" aria-hidden="true">
+                <Icon name="check" size="0.95rem" />
+              </span>
+              <span>{benefit.title}</span>
+            </li>
+          ))
+        }
+      </ul>
+      <div class="btn-row" data-reveal style="--i:3">
+        {
+          membershipUrl ? (
+            <a class="btn member__btn" href={membershipUrl} target="_blank" rel="noopener noreferrer">
+              <span class="btn__label">Become a member</span>
+              <Icon name="arrow-up-right" />
+            </a>
+          ) : (
+            <a class="btn member__btn" href="/join">
+              <span class="btn__label">Become a member</span>
+              <Icon name="arrow-right" />
+            </a>
+          )
+        }
+        <a class="btn btn--ghost" href="/join">
+          <span class="btn__label">Membership details</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="member__prices" data-reveal>
+      <h3 class="member__prices-title">Prices</h3>
+      <ul class="member__cards" role="list">
+        {
+          prices.map((price) => (
+            <li class="price">
+              <p class="price__who">{price.audience}</p>
+              <p class="price__new">
+                <span class="price__amount display">{price.newPrice}</span>
+                <span class="price__label">new member</span>
+              </p>
+              <p class="price__returning">
+                <span class="price__returning-amount">{price.returningPrice}</span> if you're returning
+              </p>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="member__term">{term}</p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .member {
+    position: relative;
+    overflow: hidden;
+    padding-block: var(--section);
+  }
+
+  /* Riso halftone screen across the cobalt ink. */
+  .member__screen {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle, rgb(255 255 255 / 0.1) 1px, transparent 1.5px);
+    background-size: 7px 7px;
+    mask-image: linear-gradient(115deg, #000 10%, transparent 55%);
+  }
+
+  .member__inner {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-2xl);
+    align-items: center;
+  }
+
+  .member__copy {
+    display: grid;
+    gap: var(--space-m);
+    justify-items: start;
+    container-type: inline-size;
+  }
+
+  .member__title {
+    font-size: min(var(--display-xl), 100cqi / var(--fit, 0.01));
+    font-weight: 900;
+    line-height: 0.9;
+  }
+
+  .member__text {
+    max-width: 40ch;
+    font-size: var(--step-1);
+    line-height: 1.5;
+  }
+
+  .member__perks {
+    display: grid;
+    gap: 0.6rem;
+    margin-block: var(--space-2xs);
+  }
+
+  .member__perks li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: var(--step-0);
+    font-weight: 600;
+  }
+
+  .member__check {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 50%;
+    background: var(--night-950);
+    color: var(--mint);
+  }
+
+  .member__btn {
+    --btn-bg: var(--orange);
+    --btn-fg: var(--night-950);
+  }
+
+  .member__prices {
+    display: grid;
+    gap: var(--space-s);
+    width: min(100%, 32rem);
+    justify-self: center;
+  }
+
+  .member__prices-title {
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+
+  .member__cards {
+    display: grid;
+    gap: var(--space-m);
+  }
+
+  .price {
+    display: grid;
+    gap: 0.35rem;
+    padding: 1.25rem 1.4rem 1.3rem;
+    background: var(--paper-50);
+    color: var(--ink);
+    box-shadow: 8px 8px 0 var(--night-950);
+  }
+
+  .price__who {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  .price__new {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 0.75rem;
+  }
+
+  .price__amount {
+    font-size: clamp(2.4rem, 1.9rem + 1.8vw, 3.4rem);
+    font-weight: 900;
+    line-height: 1;
+    color: var(--cobalt-deep);
+  }
+
+  .price__label {
+    font-size: var(--step--1);
+    font-weight: 600;
+  }
+
+  .price__returning {
+    padding-top: 0.5rem;
+    border-top: 1px dashed rgb(10 15 38 / 0.3);
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+
+  .price__returning-amount {
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .member__term {
+    font-size: var(--step--1);
+    color: var(--fg-muted);
+  }
+
+  @media (min-width: 900px) {
+    .member__inner {
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    }
+
+    .member__prices {
+      justify-self: end;
+    }
+  }
+</style>

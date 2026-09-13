@@ -1,0 +1,320 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/layout/PageHero.astro';
+import ArtBackdrop from '../components/ui/ArtBackdrop.astro';
+import Steps from '../components/ui/Steps.astro';
+import Icon from '../components/ui/Icon.astro';
+import TornEdge from '../components/ui/TornEdge.astro';
+import Scribble from '../components/ui/Scribble.astro';
+import { getPage, getSettings } from '../lib/content';
+import { fitStyle } from '../lib/fit';
+
+const [page, settings] = await Promise.all([getPage('booking', 'booking'), getSettings()]);
+const { data } = page;
+const { Content } = await render(page);
+const { performers, rentals } = data;
+
+const rentalSteps = data.steps.map((step, i) => {
+  const links = [
+    { href: rentals.ratesUrl, label: 'View rate sheet' },
+    { href: rentals.agreementUrl, label: 'Read agreement' },
+    { href: rentals.requestUrl, label: 'Request gear' },
+  ];
+  return links[i]?.href ? { ...step, href: links[i].href, linkLabel: links[i].label } : step;
+});
+const performerHref = performers.requestUrl ?? `/contact?topic=${encodeURIComponent('Booking a performer')}`;
+---
+
+<BaseLayout title="Booking & rentals" description={data.intro} image={data.heroPhoto.src} imageAlt={data.heroPhoto.alt}>
+  <PageHero eyebrow="Hire & borrow" index="B2" title={data.title} intro={data.intro} photo={data.heroPhoto} duo="sun">
+    <div class="btn-row booking-hero__actions">
+      <a class="btn" href="#performers">
+        <Icon name="microphone" />
+        <span class="btn__label">Book a performer</span>
+      </a>
+      <a class="btn btn--ghost" href="#rentals">
+        <Icon name="speaker" />
+        <span class="btn__label">Rent gear</span>
+      </a>
+    </div>
+  </PageHero>
+
+  <section class="performers theme-night section" id="performers" aria-labelledby="performers-title">
+    <div class="container performers__grid">
+      <div class="performers__copy">
+        <p class="eyebrow"><span class="eyebrow__index">01</span><span>Live music for your event</span></p>
+        <h2 class="booking__title display" id="performers-title" data-reveal="stutter" style={fitStyle(performers.title)}>{performers.title}</h2>
+        <p class="lede">{performers.text}</p>
+        <p class="performers__free">
+          <Icon name="sparkle" />
+          <span>{performers.freeNote}</span>
+        </p>
+        <a class="btn" href={performerHref}>
+          <span class="btn__label">Request a performer</span>
+          <Icon name="arrow-right" />
+        </a>
+      </div>
+
+      <!-- A riso-printed rate sheet, taped to the wall. -->
+      <div class="sheet" data-reveal>
+        <span class="tape sheet__tape" aria-hidden="true"></span>
+        <p class="sheet__head">
+          <span class="sheet__title display">Set prices</span>
+          <span class="sheet__sub">Paid events & venues · minimums</span>
+        </p>
+        <table class="sheet__table">
+          <caption class="visually-hidden">Minimum performance fees by set length</caption>
+          <thead>
+            <tr>
+              <th scope="col">Set length</th>
+              <th scope="col">From</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              performers.rates.map((rate) => (
+                <tr>
+                  <th scope="row">{rate.length}</th>
+                  <td class="display">{rate.price}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+        <p class="sheet__foot">Custom quotes for longer sets and multi-act nights</p>
+        <Scribble variant="circle" class="sheet__circle" color="var(--sun)" width={2.5} />
+      </div>
+    </div>
+  </section>
+
+  <section class="rentals theme-paper texture-paper" id="rentals" aria-labelledby="rentals-title">
+    <ArtBackdrop pieces={['desk']} placement="section" ink="var(--cobalt-deep)" strength={0.2} />
+    <TornEdge position="top" seed="rentals-top" />
+    <div class="container rentals__inner">
+      <div class="rentals__head">
+        <p class="eyebrow"><span class="eyebrow__index">02</span><span>Gear library</span></p>
+        <h2 class="booking__title display" id="rentals-title" data-reveal="stutter" style={fitStyle(rentals.title)}>{rentals.title}</h2>
+        <p class="lede">{rentals.text}</p>
+        <ul class="gear" role="list">
+          {
+            rentals.gear.map((item, i) => (
+              <li class="gear__item" data-reveal style={`--i:${i}`}>
+                <span class="gear__tag">Nº {String(i + 1).padStart(2, '0')}</span>
+                <span class="gear__name">{item}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      <Steps steps={rentalSteps} class="rentals__steps" />
+      <div class="prose rentals__prose">
+        <Content />
+      </div>
+      <p class="rentals__contact">
+        Questions about a rental? Email <a class="link" href={`mailto:${settings.email}?subject=${encodeURIComponent('Equipment rental')}`}>{settings.email}</a>.
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .booking-hero__actions {
+    margin-top: var(--space-s);
+  }
+
+  .booking__title {
+    font-size: min(var(--display-xl), 100cqi / var(--fit, 0.01));
+    font-weight: 900;
+    line-height: 0.9;
+  }
+
+  .performers__copy .booking__title {
+    font-size: min(var(--display-l), 100cqi / var(--fit, 0.01));
+  }
+
+  .performers__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-2xl);
+    align-items: center;
+  }
+
+  .performers__copy {
+    display: grid;
+    gap: var(--space-m);
+    justify-items: start;
+    container-type: inline-size;
+  }
+
+  .performers__free {
+    display: flex;
+    gap: 0.7rem;
+    max-width: 48ch;
+    padding: 1rem 1.1rem;
+    border-left: 3px solid var(--peri);
+    background: color-mix(in srgb, var(--peri) 10%, transparent);
+    font-size: var(--step--1);
+    line-height: 1.6;
+  }
+
+  .performers__free :global(svg) {
+    flex: none;
+    margin-top: 0.2rem;
+    color: var(--peri);
+  }
+
+  /* Cobalt riso rate sheet with halftone texture. */
+  .sheet {
+    position: relative;
+    padding: 1.6rem 1.7rem 1.5rem;
+    background: var(--cobalt-deep);
+    color: #ffffff;
+    box-shadow: 10px 10px 0 var(--orange);
+    transform: rotate(-1.2deg);
+  }
+
+  .sheet::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle, rgb(255 255 255 / 0.12) 0.9px, transparent 1.3px);
+    background-size: 5px 5px;
+  }
+
+  .sheet__tape {
+    top: -0.8rem;
+    left: 40%;
+    rotate: -4deg;
+  }
+
+  .sheet__head {
+    display: grid;
+    gap: 0.3rem;
+    padding-bottom: 0.9rem;
+    border-bottom: 2px solid #ffffff;
+  }
+
+  .sheet__title {
+    font-size: clamp(1.8rem, 1.3rem + 2vw, 2.9rem);
+    font-weight: 900;
+    line-height: 0.95;
+  }
+
+  .sheet__sub,
+  .sheet__foot {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #dde3ff;
+  }
+
+  .sheet__table {
+    width: 100%;
+    margin-block: 0.6rem;
+  }
+
+  .sheet__table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  .sheet__table tr {
+    border-bottom: 1px dashed rgb(255 255 255 / 0.4);
+  }
+
+  .sheet__table th {
+    padding-block: 0.75rem;
+    font-weight: 600;
+    text-align: left;
+  }
+
+  .sheet__table td {
+    font-size: clamp(1.4rem, 1.1rem + 1.2vw, 2.1rem);
+    font-weight: 900;
+    line-height: 1;
+    text-align: right;
+  }
+
+  .sheet :global(.sheet__circle) {
+    position: absolute;
+    right: -1.4rem;
+    top: 5.2rem;
+    width: 9.5rem;
+    height: auto;
+  }
+
+  .rentals {
+    position: relative;
+    padding-block: var(--section);
+  }
+
+  /* Sits above the mixing-desk print in the section background. */
+  .rentals__inner {
+    position: relative;
+  }
+
+  .rentals__head {
+    display: grid;
+    gap: var(--space-m);
+    margin-bottom: var(--space-2xl);
+    container-type: inline-size;
+  }
+
+  .gear {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: var(--space-s);
+  }
+
+  .gear__item {
+    display: grid;
+    gap: 0.15rem;
+    padding: 0.7rem 1.1rem 0.65rem;
+    background: var(--ink);
+    color: var(--chalk);
+    box-shadow: 4px 4px 0 var(--cobalt-deep);
+    transform: rotate(var(--r, -1deg));
+  }
+
+  .gear__item:nth-child(even) {
+    --r: 1.2deg;
+  }
+
+  .gear__tag {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+    color: var(--peri);
+  }
+
+  .gear__name {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-stretch: 125%;
+    font-size: 1.05rem;
+    line-height: 1.1;
+    text-transform: uppercase;
+  }
+
+  .rentals__prose:empty {
+    display: none;
+  }
+
+  .rentals__contact {
+    margin-top: var(--space-xl);
+    color: var(--fg-muted);
+  }
+
+  @media (min-width: 960px) {
+    .performers__grid {
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    }
+  }
+</style>

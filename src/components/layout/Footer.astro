@@ -1,0 +1,261 @@
+---
+import { Image } from 'astro:assets';
+import Icon from '../ui/Icon.astro';
+import GlitchStrip from '../ui/GlitchStrip.astro';
+import umiLogo from '../../assets/brand/umi-logo.png';
+import { getSettings } from '../../lib/content';
+import { fullNav } from '../../lib/site';
+
+const settings = await getSettings();
+const year = new Date().getFullYear();
+const socials = [
+  { name: 'Instagram', href: settings.socials.instagram, icon: 'instagram' },
+  { name: 'Facebook', href: settings.socials.facebook, icon: 'facebook' },
+  { name: 'TikTok', href: settings.socials.tiktok, icon: 'tiktok' },
+  { name: 'YouTube', href: settings.socials.youtube, icon: 'youtube' },
+  { name: 'Spotify', href: settings.socials.spotify, icon: 'spotify' },
+] as const;
+---
+
+<footer class="site-footer theme-night">
+  <div class="container">
+    <div class="site-footer__cta">
+      <div>
+        <p class="eyebrow"><span class="eyebrow__index">Liner notes</span><span>Stay in the loop</span></p>
+        <p class="site-footer__headline serif">Shows, sign-ups and <em><span class="nowrap">last-minute</span> open mics</em>, straight to your inbox.</p>
+      </div>
+      <div class="btn-row">
+        {
+          settings.links.newsletter && (
+            <a class="btn" href={settings.links.newsletter} target="_blank" rel="noopener noreferrer">
+              <span class="btn__label">Get the newsletter</span>
+              <Icon name="arrow-up-right" />
+            </a>
+          )
+        }
+        {
+          settings.socials.instagram && (
+            <a class="btn btn--ghost" href={settings.socials.instagram} target="_blank" rel="noopener noreferrer">
+              <Icon name="instagram" />
+              <span class="btn__label">@ubcmusicinitiative</span>
+            </a>
+          )
+        }
+      </div>
+    </div>
+
+    <div class="site-footer__grid">
+      <div class="site-footer__col">
+        <h2 class="site-footer__label">Recorded live at</h2>
+        <address>
+          {settings.office.room}<br />
+          {settings.office.building}<br />
+          {settings.office.address}
+        </address>
+        {
+          settings.office.mapUrl && (
+            <a class="link-arrow" href={settings.office.mapUrl} target="_blank" rel="noopener noreferrer">
+              <span>Open in Maps</span>
+              <Icon name="arrow-up-right" />
+            </a>
+          )
+        }
+      </div>
+
+      <nav class="site-footer__col" aria-label="Footer">
+        <h2 class="site-footer__label">Tracklist</h2>
+        <ul class="site-footer__links" role="list">
+          {
+            fullNav.slice(1).map((item) => (
+              <li>
+                <a class="link" href={item.href}>
+                  {item.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <div class="site-footer__col">
+        <h2 class="site-footer__label">Contact</h2>
+        <a class="link site-footer__email" href={`mailto:${settings.email}`}>{settings.email}</a>
+        <ul class="site-footer__socials" role="list">
+          {
+            socials
+              .filter((s) => s.href)
+              .map((s) => (
+                <li>
+                  <a href={s.href} target="_blank" rel="noopener noreferrer">
+                    <Icon name={s.icon} label={`${s.name} (opens in a new tab)`} size="1.3rem" />
+                  </a>
+                </li>
+              ))
+          }
+        </ul>
+        <a class="link-arrow" href="/calendar.ics">
+          <span>Subscribe to our calendar</span>
+          <Icon name="calendar-plus" />
+        </a>
+      </div>
+
+      <div class="site-footer__col site-footer__land">
+        <h2 class="site-footer__label">Land acknowledgement</h2>
+        <p>{settings.landAcknowledgement}</p>
+      </div>
+    </div>
+
+    <div class="site-footer__wordmark">
+      <GlitchStrip seed="footer-strip" height={16} class="site-footer__strip" />
+      <a class="site-footer__logo" href="/">
+        <Image src={umiLogo} alt="UBC Music Initiative home" widths={[240, 360, 480, 720]} sizes="(min-width: 640px) 360px, 60vw" />
+      </a>
+    </div>
+
+    <div class="site-footer__base">
+      <p>© {year} {settings.siteName}. A student-run AMS club.</p>
+      <a class="link-arrow" href="#main">
+        <span>Back to the top</span>
+        <Icon name="arrow-up-right" />
+      </a>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    position: relative;
+    overflow: hidden;
+    padding-top: var(--section);
+    border-top: 1px solid var(--line);
+  }
+
+  .site-footer__cta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-l);
+    padding-bottom: var(--space-2xl);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .site-footer__headline {
+    max-width: 22ch;
+    margin-top: var(--space-s);
+    font-size: var(--step-4);
+    line-height: 1.02;
+  }
+
+  .site-footer__headline em {
+    color: var(--peri);
+  }
+
+  .site-footer__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+    gap: var(--space-xl) var(--space-l);
+    padding-block: var(--space-2xl);
+    font-size: var(--step--1);
+    line-height: 1.7;
+  }
+
+  .site-footer__col {
+    display: grid;
+    align-content: start;
+    gap: var(--space-s);
+  }
+
+  .site-footer__label {
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+
+  address {
+    font-style: normal;
+  }
+
+  .site-footer__links {
+    columns: 2;
+    column-gap: var(--space-m);
+  }
+
+  .site-footer__links li {
+    padding-block: 0.3rem;
+    break-inside: avoid;
+  }
+
+  .site-footer__links a {
+    display: inline-block;
+    padding-block: 0.2rem;
+  }
+
+  .site-footer__socials {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-left: -0.6rem;
+  }
+
+  .site-footer__socials a {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    transition: background-color var(--dur-fast), color var(--dur-fast);
+  }
+
+  .site-footer__socials a:hover {
+    background: var(--peri);
+    color: var(--ink);
+  }
+
+  .site-footer__land p {
+    font-family: var(--font-serif);
+    font-size: var(--step-1);
+    line-height: 1.35;
+  }
+
+  .site-footer__wordmark {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-xl);
+    margin-inline: calc(var(--gutter) * -0.2);
+    padding-block: var(--space-l) var(--space-xl);
+    border-top: 1px solid var(--line);
+    overflow: hidden;
+  }
+
+  .site-footer__wordmark :global(.site-footer__strip) {
+    justify-self: stretch;
+  }
+
+  .site-footer__logo {
+    display: block;
+    width: min(60vw, 22.5rem);
+    border-radius: var(--radius-m);
+  }
+
+  .site-footer__logo :global(img) {
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(0 0 30px rgb(147 163 230 / 0.28));
+  }
+
+  .site-footer__base {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-s);
+    padding-block: var(--space-l) calc(var(--space-l) + env(safe-area-inset-bottom));
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    letter-spacing: 0.08em;
+    color: var(--fg-muted);
+  }
+</style>

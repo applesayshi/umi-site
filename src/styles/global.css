@@ -1,0 +1,7 @@
+/* Layer order: component-scoped Astro styles are unlayered and always win. */
+@layer reset, tokens, base, components;
+
+@import './tokens.css';
+@import './base.css';
+@import './components.css';
+@import './motion.css';

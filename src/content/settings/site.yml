@@ -1,0 +1,30 @@
+siteName: UBC Music Initiative
+shortName: UMI
+tagline: Connecting music & community
+description: UBC Music Initiative (UMI) is a student-run AMS club giving musicians of every genre and skill level a stage. Monthly themed shows, open mics, workshops, lessons and affordable gear rentals at the AMS Student Nest.
+logo: ''
+logoAlt: ''
+email: ubcmusicinitiative@gmail.com
+office:
+  room: Room 3308
+  building: AMS Student Nest
+  address: 6133 University Boulevard, Vancouver, BC V6T 1Z1
+  mapUrl: https://www.google.com/maps/search/?api=1&query=AMS+Student+Nest+6133+University+Blvd+Vancouver+BC
+  hours: ''
+socials:
+  instagram: https://www.instagram.com/ubcmusicinitiative/
+  facebook: https://www.facebook.com/ubcmusicinitiative
+  tiktok: https://www.tiktok.com/@ubcmusicinitiative
+  youtube: ''
+  spotify: ''
+links:
+  membership: http://cglink.me/s33387
+  newsletter: http://eepurl.com/bxOYyf
+  campusbase: https://amscampusbase.ubc.ca/umi/home
+  constitution: ''
+announcement:
+  enabled: true
+  text: Memberships are open. $10 for UBC students, and members get into UMI events free.
+  linkLabel: Join UMI
+  url: /join
+landAcknowledgement: UMI gathers, rehearses and performs on the traditional, ancestral, and unceded territory of the xʷməθkʷəy̓əm (Musqueam) people.

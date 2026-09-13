@@ -1,0 +1,138 @@
+/* ==========================================================================
+   Motion system
+   - Content is always visible without JS: reveal states only apply under
+     html.js, which an inline head script sets.
+   - prefers-reduced-motion renders every element in its final state.
+   ========================================================================== */
+
+@layer components {
+  /* ---- Scroll reveals ---------------------------------------------------- */
+  html.js [data-reveal] {
+    opacity: 0;
+    transform: translate3d(0, 28px, 0);
+    transition:
+      opacity var(--dur-slow) var(--ease-out),
+      transform var(--dur-slower) var(--ease-out);
+    transition-delay: calc(var(--i, 0) * 70ms);
+  }
+
+  html.js [data-reveal='fade'] {
+    transform: none;
+  }
+
+  html.js [data-reveal='left'] {
+    transform: translate3d(-32px, 0, 0);
+  }
+
+  /* Headline wipe: the heading glides in from the left as it's uncovered. */
+  html.js [data-reveal='stutter'] {
+    opacity: 1;
+    transform: translate3d(-2.5%, 0, 0);
+    clip-path: inset(0 100% 0 0);
+    transition:
+      transform var(--dur-slower) var(--ease-out),
+      clip-path var(--dur-slower) var(--ease-out);
+    transition-delay: calc(var(--i, 0) * 90ms);
+  }
+
+  html.js [data-reveal].is-in {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Only the stutter wipe clips. Its end state reaches past the box, so glows, accents,
+     shadows and anything positioned outside the element aren't cut off after the reveal. */
+  html.js [data-reveal='stutter'].is-in {
+    clip-path: inset(-0.6em);
+  }
+
+  /* ---- Photo "flash" develop -------------------------------------------- */
+  html.js [data-flash] {
+    position: relative;
+  }
+
+  html.js [data-flash]::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    background: radial-gradient(120% 90% at 50% 40%, rgb(240 246 255 / 0.9), rgb(225 235 255 / 0.35) 60%, transparent);
+    opacity: 0;
+  }
+
+  html.js [data-flash].is-flashed::after {
+    animation: flash-develop 900ms var(--ease-out) both;
+  }
+
+  @keyframes flash-develop {
+    0% { opacity: 0.42; }
+    100% { opacity: 0; }
+  }
+
+  /* ---- Entrances on page load -------------------------------------------- */
+  /* Fade and rise using only opacity and transform, which the browser can animate
+     off the main thread, so they stay smooth while the rest of the page loads. */
+  @keyframes rise-in {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 22px, 0);
+    }
+  }
+
+  /* ---- Cross-document view transitions ----------------------------------- */
+  @media (prefers-reduced-motion: no-preference) {
+    @view-transition {
+      navigation: auto;
+    }
+
+    /* A quick crossfade between pages: no sliding or flashing, so it never looks like a stutter. */
+    ::view-transition-old(root) {
+      animation: vt-out 180ms var(--ease-in) both;
+    }
+
+    ::view-transition-new(root) {
+      animation: vt-in 320ms var(--ease-out) both;
+    }
+
+    ::view-transition-group(site-header) {
+      animation-duration: 0s;
+    }
+  }
+
+  @keyframes vt-out {
+    to {
+      opacity: 0;
+    }
+  }
+
+  @keyframes vt-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  /* ---- Reduced motion: final states, no loops ---------------------------- */
+  @media (prefers-reduced-motion: reduce) {
+    html.js [data-reveal],
+    html.js [data-reveal='stutter'] {
+      opacity: 1;
+      transform: none;
+      clip-path: none;
+      transition: none;
+    }
+
+    html.js [data-flash].is-flashed::after {
+      animation: none;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

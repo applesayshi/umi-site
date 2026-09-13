@@ -1,0 +1,269 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/layout/PageHero.astro';
+import ArtBackdrop from '../components/ui/ArtBackdrop.astro';
+import Steps from '../components/ui/Steps.astro';
+import Faq from '../components/ui/Faq.astro';
+import Icon from '../components/ui/Icon.astro';
+import TornEdge from '../components/ui/TornEdge.astro';
+import UiWindow from '../components/ui/UiWindow.astro';
+import Scribble from '../components/ui/Scribble.astro';
+import { getPage, getSettings } from '../lib/content';
+import { fitStyle } from '../lib/fit';
+import type { IconName } from '../lib/icons';
+
+const [page, settings] = await Promise.all([getPage('lessons', 'lessons'), getSettings()]);
+const { data } = page;
+const { Content } = await render(page);
+
+const statusCopy = {
+  open: { label: 'Sign-ups open', tone: 'go' },
+  waitlist: { label: 'Join the waitlist', tone: 'warn' },
+  closed: { label: 'Sign-ups closed', tone: 'stop' },
+} as const;
+const status = statusCopy[data.status];
+
+const iconFor = (instrument: string): IconName => {
+  const i = instrument.toLowerCase();
+  if (i.includes('guitar') || i.includes('bass') || i.includes('ukulele')) return 'guitar';
+  if (i.includes('piano') || i.includes('key')) return 'piano-keys';
+  if (i.includes('voice') || i.includes('vocal') || i.includes('sing')) return 'microphone';
+  if (i.includes('drum') || i.includes('percussion')) return 'metronome';
+  if (i.includes('produc') || i.includes('dj')) return 'headphones';
+  return 'music-notes';
+};
+
+const contactFallback = (topic: string) => `/contact?topic=${encodeURIComponent(topic)}`;
+---
+
+<BaseLayout title="Lessons" description={data.intro} image={data.heroPhoto.src} imageAlt={data.heroPhoto.alt}>
+  <PageHero eyebrow="Learn" index="B1" title={data.title} intro={data.intro} photo={data.heroPhoto} duo="orange">
+    <UiWindow title="lessons_status.txt" class="lessons__status">
+      <p class={`status status--${status.tone}`}>
+        <span class="status__light" aria-hidden="true"></span>
+        <span>{status.label}</span>
+        {data.sample && <span class="sample-tag">Sample</span>}
+      </p>
+      {data.statusNote && <p class="lessons__note">{data.statusNote}</p>}
+    </UiWindow>
+  </PageHero>
+
+  <section class="lessons theme-night section" aria-labelledby="instruments-title">
+    <ArtBackdrop pieces={['guitar']} placement="section" strength={0.26} />
+    <div class="container lessons__inner">
+      <div class="lessons__intro">
+        <h2 class="lessons__title display" id="instruments-title" data-reveal="stutter">What you can learn</h2>
+        <ul class="instruments" role="list">
+          {
+            data.instruments.map((instrument, i) => (
+              <li class="instrument" data-reveal style={`--i:${i % 4}`}>
+                <Icon name={iconFor(instrument)} size="1.4rem" />
+                <span>{instrument}</span>
+              </li>
+            ))
+          }
+        </ul>
+        <div class="prose lessons__prose">
+          <Content />
+        </div>
+      </div>
+
+      <div class="lessons__steps">
+        <h2 class="lessons__title display" data-reveal="stutter">How it works</h2>
+        <Steps steps={data.steps} />
+      </div>
+    </div>
+  </section>
+
+  <section class="paths theme-paper texture-paper" aria-label="Sign up">
+    <TornEdge position="top" seed="lessons-top" />
+    <div class="container paths__grid">
+      {
+        [
+          { ...data.learners, href: data.learners.signupUrl ?? contactFallback('Lessons'), cta: 'Sign up to learn', icon: 'graduation-cap' as const },
+          { ...data.instructors, href: data.instructors.signupUrl ?? contactFallback('Lessons'), cta: 'Volunteer to teach', icon: 'hand-heart' as const },
+        ].map((path, i) => (
+          <article class:list={['path', i === 0 && 'path--ink']} data-reveal style={`--i:${i}`}>
+            <Icon name={path.icon} size="2.2rem" class="path__icon" />
+            <h2 class="path__title display" style={fitStyle(path.title)}>{path.title}</h2>
+            <p class="path__text">{path.text}</p>
+            <a
+              class:list={['btn', i === 1 && 'btn--ghost']}
+              href={path.href}
+              target={path.href.startsWith('http') ? '_blank' : undefined}
+              rel={path.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+            >
+              <span class="btn__label">{path.cta}</span>
+              <Icon name={path.href.startsWith('http') ? 'arrow-up-right' : 'arrow-right'} />
+            </a>
+            {i === 0 && <Scribble variant="star" class="path__star" color="var(--sun)" width={2.5} />}
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="theme-night section" aria-label="Frequently asked questions">
+    <div class="container">
+      <Faq items={data.faq} title="Lesson FAQ" id="lessons-faq" />
+      <p class="lessons__contact muted">
+        Still wondering? Email <a class="link" href={`mailto:${settings.email}`}>{settings.email}</a>.
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  :global(.lessons__status) {
+    width: min(100%, 24rem);
+    margin-top: var(--space-s);
+  }
+
+  .status {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-stretch: 125%;
+    font-size: 1.05rem;
+    line-height: 1.1;
+    text-transform: uppercase;
+    color: var(--tone);
+  }
+
+  .status--go { --tone: var(--mint); }
+  .status--warn { --tone: var(--sun); }
+  .status--stop { --tone: var(--orange); }
+
+  .status__light {
+    width: 0.65rem;
+    height: 0.65rem;
+    border-radius: 50%;
+    background: var(--tone);
+    box-shadow: 0 0 10px var(--tone);
+  }
+
+  .lessons__note {
+    margin-top: 0.5rem;
+    font-size: var(--step--1);
+    color: var(--mist);
+  }
+
+  /* Sits above the guitar print in the section background. */
+  .lessons__inner {
+    position: relative;
+  }
+
+  .lessons__title {
+    font-size: var(--display-l);
+    font-weight: 900;
+    line-height: 0.92;
+  }
+
+  .lessons__intro {
+    display: grid;
+    gap: var(--space-xl);
+  }
+
+  .instruments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .instrument {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 48px;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--line-strong);
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-stretch: 125%;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+  }
+
+  .instrument :global(svg) {
+    color: var(--peri);
+  }
+
+  .lessons__prose:empty {
+    display: none;
+  }
+
+  .lessons__steps {
+    display: grid;
+    gap: var(--space-xl);
+    margin-top: var(--space-3xl);
+  }
+
+  .paths {
+    position: relative;
+    padding-block: var(--space-3xl);
+  }
+
+  .paths__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+    gap: var(--space-l);
+  }
+
+  .path {
+    position: relative;
+    display: grid;
+    align-content: start;
+    justify-items: start;
+    gap: var(--space-s);
+    padding: var(--space-xl);
+    border: 2px solid var(--ink);
+    background: var(--paper-50);
+    container-type: inline-size;
+  }
+
+  .path--ink {
+    background: var(--ink);
+    color: var(--chalk);
+    --fg: var(--chalk);
+    --fg-muted: var(--mist);
+    --line-strong: rgb(238 241 250 / 0.32);
+    --accent: var(--orange);
+    --accent-fg: var(--night-950);
+  }
+
+  .path :global(.path__icon) {
+    color: var(--cobalt-deep);
+  }
+
+  .path--ink :global(.path__icon) {
+    color: var(--peri);
+  }
+
+  .path :global(.path__star) {
+    position: absolute;
+    top: -1.2rem;
+    right: 1.2rem;
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .path__title {
+    font-size: min(var(--display-l), 100cqi / var(--fit, 0.01));
+    font-weight: 900;
+    line-height: 0.92;
+  }
+
+  .path__text {
+    max-width: 44ch;
+    font-size: var(--step-1);
+    line-height: 1.5;
+  }
+
+  .lessons__contact {
+    margin-top: var(--space-xl);
+  }
+</style>

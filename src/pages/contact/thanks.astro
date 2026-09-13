@@ -1,0 +1,48 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Icon from '../../components/ui/Icon.astro';
+---
+
+<BaseLayout title="Message sent" noindex>
+  <section class="thanks theme-night" aria-labelledby="thanks-title">
+    <div class="container thanks__inner">
+      <p class="eyebrow"><span class="eyebrow__index">Received</span><span>Contact form</span></p>
+      <h1 class="thanks__title display" id="thanks-title">Message sent</h1>
+      <p class="subtitle thanks__text">Thanks for reaching out. An exec will reply by email soon.</p>
+      <div class="btn-row">
+        <a class="btn" href="/events">
+          <span class="btn__label">See what's on</span>
+          <Icon name="arrow-right" />
+        </a>
+        <a class="btn btn--ghost" href="/">
+          <span class="btn__label">Back home</span>
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .thanks {
+    min-height: 80svh;
+    display: grid;
+    align-items: center;
+    padding-block: calc(var(--header-h) + var(--space-2xl)) var(--section);
+  }
+
+  .thanks__inner {
+    display: grid;
+    gap: var(--space-m);
+    justify-items: start;
+  }
+
+  .thanks__title {
+    font-size: var(--display-2xl);
+    font-weight: 900;
+    line-height: 0.8;
+  }
+
+  .thanks__text {
+    font-size: var(--step-3);
+  }
+</style>

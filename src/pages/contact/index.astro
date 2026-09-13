@@ -1,0 +1,369 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/layout/PageHero.astro';
+import Icon from '../../components/ui/Icon.astro';
+import { getPage, getSettings } from '../../lib/content';
+
+const [page, settings] = await Promise.all([getPage('contact', 'contact'), getSettings()]);
+const { data } = page;
+const socials = [
+  { name: 'Instagram', href: settings.socials.instagram, icon: 'instagram' },
+  { name: 'Facebook', href: settings.socials.facebook, icon: 'facebook' },
+  { name: 'TikTok', href: settings.socials.tiktok, icon: 'tiktok' },
+  { name: 'YouTube', href: settings.socials.youtube, icon: 'youtube' },
+] as const;
+---
+
+<BaseLayout title="Contact" description={data.intro}>
+  <PageHero eyebrow="Get in touch" index="B6" title={data.title} intro={data.intro} />
+
+  <section class="contact theme-night" aria-label="Contact UMI">
+    <div class="container contact__grid">
+      <form
+        class="contact-form"
+        name="contact"
+        method="POST"
+        action="/contact/thanks/"
+        data-netlify="true"
+        netlify-honeypot="company"
+        novalidate
+        data-contact-form
+        data-email={settings.email}
+      >
+        <input type="hidden" name="form-name" value="contact" />
+        <p class="contact-form__trap" aria-hidden="true">
+          <label>Company <input name="company" tabindex="-1" autocomplete="off" /></label>
+        </p>
+
+        <div class="contact-form__summary" role="alert" tabindex="-1" hidden data-error-summary>
+          <p class="contact-form__summary-title">Please fix the highlighted fields:</p>
+          <ul role="list" data-error-list></ul>
+        </div>
+
+        <div class="contact-form__row">
+          <div class="field">
+            <label for="cf-name">Name <span class="req" aria-hidden="true">*</span></label>
+            <input class="input" id="cf-name" name="name" type="text" autocomplete="name" required aria-describedby="cf-name-error" />
+            <p class="field__error" id="cf-name-error" hidden></p>
+          </div>
+          <div class="field">
+            <label for="cf-email">Email <span class="req" aria-hidden="true">*</span></label>
+            <input class="input" id="cf-email" name="email" type="email" autocomplete="email" inputmode="email" required aria-describedby="cf-email-hint cf-email-error" />
+            <p class="field__hint" id="cf-email-hint">We'll only use this to reply.</p>
+            <p class="field__error" id="cf-email-error" hidden></p>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="cf-topic">What's it about?</label>
+          <select class="select" id="cf-topic" name="topic" data-topic-select>
+            {data.topics.map((topic) => <option value={topic}>{topic}</option>)}
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="cf-message">Message <span class="req" aria-hidden="true">*</span></label>
+          <textarea class="textarea" id="cf-message" name="message" rows="7" required minlength="10" aria-describedby="cf-message-hint cf-message-error"></textarea>
+          <p class="field__hint" id="cf-message-hint">For bookings, include the date, venue and set length.</p>
+          <p class="field__error" id="cf-message-error" hidden></p>
+        </div>
+
+        <div class="contact-form__footer">
+          <p class="muted contact-form__required"><span class="req" aria-hidden="true">*</span> Required</p>
+          <button class="btn" type="submit" data-submit>
+            <span class="btn__label" data-submit-label>Send message</span>
+            <Icon name="arrow-right" />
+          </button>
+        </div>
+        <p class="contact-form__status" role="status" aria-live="polite" data-form-status></p>
+      </form>
+
+      <aside class="contact__aside">
+        <div class="contact__card">
+          <p class="contact__label">Email</p>
+          <a class="contact__big link" href={`mailto:${settings.email}`}>{settings.email}</a>
+        </div>
+        <div class="contact__card">
+          <p class="contact__label">Office</p>
+          <address class="contact__address">
+            {settings.office.room}<br />
+            {settings.office.building}<br />
+            {settings.office.address}
+          </address>
+          {settings.office.hours && <p class="muted">{settings.office.hours}</p>}
+          {
+            settings.office.mapUrl && (
+              <a class="link-arrow" href={settings.office.mapUrl} target="_blank" rel="noopener noreferrer">
+                <Icon name="map-pin" />
+                <span>Open in Maps</span>
+              </a>
+            )
+          }
+        </div>
+        <div class="contact__card">
+          <p class="contact__label">Follow</p>
+          <ul class="contact__socials" role="list">
+            {
+              socials
+                .filter((s) => s.href)
+                .map((s) => (
+                  <li>
+                    <a class="btn btn--ghost btn--small" href={s.href} target="_blank" rel="noopener noreferrer">
+                      <Icon name={s.icon} />
+                      <span class="btn__label">{s.name}</span>
+                    </a>
+                  </li>
+                ))
+            }
+          </ul>
+        </div>
+        {data.responseNote && <p class="contact__note serif">{data.responseNote}</p>}
+      </aside>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .contact {
+    padding-bottom: var(--section);
+  }
+
+  .contact__grid {
+    display: grid;
+    gap: var(--space-2xl);
+    align-items: start;
+  }
+
+  .contact-form {
+    display: grid;
+    gap: var(--space-m);
+    padding: clamp(1.25rem, 0.8rem + 2vw, 2.5rem);
+    border: 1px solid var(--line-strong);
+    background: var(--night-900);
+  }
+
+  .contact-form__trap {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .contact-form__row {
+    display: grid;
+    gap: var(--space-m);
+  }
+
+  .contact-form__summary {
+    padding: 1rem 1.1rem;
+    border: 2px solid var(--orange);
+    background: rgb(255 90 43 / 0.08);
+  }
+
+  .contact-form__summary:focus {
+    outline: none;
+  }
+
+  .contact-form__summary-title {
+    font-weight: 600;
+  }
+
+  .contact-form__summary ul {
+    margin-top: 0.4rem;
+  }
+
+  .contact-form__summary a {
+    color: var(--orange);
+  }
+
+  .contact-form__footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .contact-form__required {
+    font-size: var(--step--1);
+  }
+
+  .contact-form__status:empty {
+    display: none;
+  }
+
+  .contact-form__status {
+    padding: 0.9rem 1rem;
+    border-left: 3px solid var(--mint);
+    background: rgb(158 240 201 / 0.08);
+  }
+
+  .contact-form__status[data-tone='error'] {
+    border-color: var(--orange);
+    background: rgb(255 90 43 / 0.08);
+  }
+
+  .contact-form [data-submit][aria-busy='true'] {
+    opacity: 0.6;
+    cursor: progress;
+  }
+
+  .contact__aside {
+    display: grid;
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+
+  .contact__card {
+    display: grid;
+    gap: 0.5rem;
+    justify-items: start;
+    padding: 1.4rem 1.5rem;
+    background: var(--night-950);
+  }
+
+  .contact__label {
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+
+  .contact__big {
+    font-family: var(--font-serif);
+    font-size: clamp(1.3rem, 1rem + 1.2vw, 1.9rem);
+    overflow-wrap: anywhere;
+  }
+
+  .contact__address {
+    font-style: normal;
+    line-height: 1.6;
+  }
+
+  .contact__socials {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .contact__note {
+    padding: 1.4rem 1.5rem;
+    background: var(--night-950);
+    font-style: italic;
+    font-size: var(--step-1);
+    color: var(--peri);
+  }
+
+  @media (min-width: 700px) {
+    .contact-form__row {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .contact__grid {
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.9fr);
+    }
+
+    .contact__aside {
+      position: sticky;
+      top: calc(var(--header-h) + var(--space-l));
+    }
+  }
+</style>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-contact-form]');
+
+  if (form) {
+    // Pre-select the topic from links like /contact?topic=Sponsorship
+    const topic = new URLSearchParams(location.search).get('topic');
+    const select = form.querySelector<HTMLSelectElement>('[data-topic-select]');
+    if (topic && select && [...select.options].some((o) => o.value === topic)) select.value = topic;
+
+    const fields = [...form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input[required], textarea[required]')];
+    const summary = form.querySelector<HTMLElement>('[data-error-summary]')!;
+    const summaryList = form.querySelector<HTMLElement>('[data-error-list]')!;
+    const status = form.querySelector<HTMLElement>('[data-form-status]')!;
+    const submit = form.querySelector<HTMLButtonElement>('[data-submit]')!;
+    const submitLabel = form.querySelector<HTMLElement>('[data-submit-label]')!;
+
+    const messageFor = (field: HTMLInputElement | HTMLTextAreaElement) => {
+      const label = form.querySelector(`label[for="${field.id}"]`)?.childNodes[0]?.textContent?.trim() ?? 'This field';
+      if (field.validity.valueMissing) return `${label} is required.`;
+      if (field.validity.typeMismatch) return 'Enter an email address like name@example.com.';
+      if (field.validity.tooShort) return `${label} needs at least ${field.getAttribute('minlength')} characters.`;
+      return '';
+    };
+
+    const validate = (field: HTMLInputElement | HTMLTextAreaElement) => {
+      const error = document.getElementById(`${field.id}-error`);
+      const message = field.checkValidity() ? '' : messageFor(field);
+      field.setAttribute('aria-invalid', String(Boolean(message)));
+      if (error) {
+        error.textContent = message;
+        error.hidden = !message;
+      }
+      return message;
+    };
+
+    // Validate when a field is left, then live-correct once it has been flagged.
+    fields.forEach((field) => {
+      field.addEventListener('blur', () => field.value && validate(field));
+      field.addEventListener('input', () => field.getAttribute('aria-invalid') === 'true' && validate(field));
+    });
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const errors = fields.map((f) => ({ field: f, message: validate(f) })).filter((e) => e.message);
+      summaryList.replaceChildren();
+      if (errors.length) {
+        for (const { field, message } of errors) {
+          const li = document.createElement('li');
+          const a = document.createElement('a');
+          a.href = `#${field.id}`;
+          a.textContent = message;
+          a.addEventListener('click', (e) => {
+            e.preventDefault();
+            field.focus();
+          });
+          li.append(a);
+          summaryList.append(li);
+        }
+        summary.hidden = false;
+        summary.focus();
+        return;
+      }
+      summary.hidden = true;
+
+      submit.setAttribute('aria-busy', 'true');
+      submit.disabled = true;
+      submitLabel.textContent = 'Sending…';
+      status.textContent = '';
+      delete status.dataset.tone;
+
+      try {
+        const body = new URLSearchParams(new FormData(form) as unknown as Record<string, string>).toString();
+        const response = await fetch('/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body,
+        });
+        if (!response.ok) throw new Error(String(response.status));
+        form.reset();
+        fields.forEach((f) => f.removeAttribute('aria-invalid'));
+        status.textContent = "Thanks! Your message is on its way. We'll reply by email.";
+      } catch {
+        status.dataset.tone = 'error';
+        status.textContent = `Sorry, that didn’t send. Please try again, or email ${form.dataset.email ?? 'us'} directly.`;
+      } finally {
+        submit.removeAttribute('aria-busy');
+        submit.disabled = false;
+        submitLabel.textContent = 'Send message';
+      }
+    });
+  }
+</script>

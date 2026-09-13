@@ -1,0 +1,278 @@
+---
+import { EVENT_TYPE_LABELS, eventEnd, type EventEntry } from '../../lib/content';
+import { dateParts, dayKey, dayPadded, monthShort, timeRange, weekdayShort, mediumDate } from '../../lib/dates';
+import Icon from '../ui/Icon.astro';
+import { fitStyle } from '../../lib/fit';
+
+interface Props {
+  event: EventEntry;
+  variant?: 'upcoming' | 'past';
+  albumHref?: string;
+  index?: number;
+  /** Render the row hidden (a later event the page script may bring into the three-week list). */
+  hidden?: boolean;
+}
+
+const { event, variant = 'upcoming', albumHref, index = 0, hidden = false } = Astro.props;
+const { data } = event;
+const href = `/events/${event.id}`;
+---
+
+<li
+  class:list={['event-row', `event-row--${variant}`]}
+  data-event-type={data.type}
+  data-event-day={dayKey(data.start)}
+  data-event-end={eventEnd(event).toISOString()}
+  hidden={hidden}
+  data-reveal
+  style={`--i:${Math.min(index, 6)}`}
+>
+  <time class="event-row__date" datetime={data.start.toISOString()}>
+    <span class="event-row__weekday">{weekdayShort(data.start)}</span>
+    <span class="event-row__day display">{dayPadded(data.start)}</span>
+    <span class="event-row__month">{monthShort(data.start)}{variant === 'past' ? ` ’${String(dateParts(data.start).year).slice(-2)}` : ''}</span>
+  </time>
+
+  <div class="event-row__main">
+    <p class="event-row__type">
+      <span class={`event-row__dot type-${data.type}`} aria-hidden="true"></span>
+      {EVENT_TYPE_LABELS[data.type]}
+      {data.sample && <span class="sample-tag">Sample</span>}
+    </p>
+    <h3 class="event-row__title display" style={fitStyle(data.title)}>
+      <a class="event-row__link" href={href}>{data.title}</a>
+    </h3>
+    <p class="event-row__meta">
+      {!data.hideTime && variant === 'upcoming' && <span><Icon name="clock" size="1em" /> {timeRange(data.start, data.end)}</span>}
+      <span><Icon name="map-pin" size="1em" /> {data.venue}</span>
+      {variant === 'past' && <span class="visually-hidden">{mediumDate(data.start)}</span>}
+    </p>
+  </div>
+
+  <div class="event-row__aside">
+    {
+      variant === 'upcoming' && (data.priceMember || data.priceGeneral) && (
+        <p class="event-row__price">
+          {data.priceMember && (
+            <span>
+              <small>Members</small> {data.priceMember}
+            </span>
+          )}
+          {data.priceGeneral && (
+            <span>
+              <small>General</small> {data.priceGeneral}
+            </span>
+          )}
+        </p>
+      )
+    }
+    {
+      albumHref && (
+        <a class="chip event-row__album" href={albumHref}>
+          <Icon name="images" />
+          Photos
+        </a>
+      )
+    }
+    <span class="event-row__arrow" aria-hidden="true"><Icon name="arrow-up-right" size="1.2rem" /></span>
+  </div>
+</li>
+
+<style>
+  .event-row {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+    gap: 0.9rem 1.25rem;
+    padding-block: 1.35rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .event-row::before {
+    content: '';
+    position: absolute;
+    inset: 0 calc(var(--gutter) * -0.5);
+    z-index: -1;
+    background: color-mix(in srgb, var(--fg) 6%, transparent);
+    opacity: 0;
+    transition: opacity var(--dur-base) var(--ease-out);
+  }
+
+  .event-row__date {
+    display: grid;
+    justify-items: center;
+    align-content: start;
+    padding-top: 0.2rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+
+  .event-row__day {
+    font-size: 2.2rem;
+    font-weight: 900;
+    line-height: 0.9;
+    letter-spacing: 0;
+    color: var(--fg);
+  }
+
+  .event-row--upcoming .event-row__day {
+    color: var(--peri);
+  }
+
+  .event-row__main {
+    display: grid;
+    gap: 0.35rem;
+    align-content: start;
+    min-width: 0;
+    container-type: inline-size;
+  }
+
+  .event-row__type {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+
+  .event-row__dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: var(--dot, var(--peri));
+  }
+
+  .event-row__title {
+    font-size: min(clamp(1.2rem, 0.95rem + 1.1vw, 2rem), 100cqi / var(--fit, 0.01));
+    font-weight: 900;
+    line-height: 0.92;
+  }
+
+  .event-row--past .event-row__title {
+    font-size: min(clamp(1rem, 0.88rem + 0.6vw, 1.4rem), 100cqi / var(--fit, 0.01));
+  }
+
+  .event-row__link {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .event-row__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .event-row__link:focus-visible {
+    outline: none;
+  }
+
+  .event-row:has(.event-row__link:focus-visible) {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  .event-row__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem 1.2rem;
+    font-size: var(--step--1);
+    color: var(--fg-muted);
+  }
+
+  .event-row__meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .event-row__aside {
+    grid-column: 2;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.25rem;
+  }
+
+  .event-row__price {
+    display: flex;
+    gap: 1.1rem;
+    font-weight: 600;
+  }
+
+  .event-row__price small {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    font-weight: 400;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+
+  .event-row__album {
+    position: relative;
+    z-index: 1;
+    min-height: 40px;
+  }
+
+  .event-row__album:hover {
+    background: var(--fg);
+    color: var(--bg);
+  }
+
+  .event-row__arrow {
+    display: none;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    margin-left: auto;
+    border: 1px solid var(--line-strong);
+    border-radius: 50%;
+    transition: transform var(--dur-base) var(--ease-out), background-color var(--dur-fast), color var(--dur-fast);
+  }
+
+  @media (hover: hover) {
+    .event-row:hover::before {
+      opacity: 1;
+    }
+
+    .event-row:hover .event-row__arrow {
+      background: var(--peri);
+      border-color: var(--peri);
+      color: var(--ink);
+      transform: rotate(45deg);
+    }
+  }
+
+  @media (min-width: 820px) {
+    .event-row {
+      grid-template-columns: 5.5rem minmax(0, 1fr) auto;
+      align-items: center;
+    }
+
+    .event-row__aside {
+      grid-column: 3;
+      justify-content: flex-end;
+    }
+
+    .event-row__arrow {
+      display: grid;
+    }
+  }
+
+  .type-show { --dot: var(--peri); }
+  .type-open-mic { --dot: var(--orange); }
+  .type-workshop { --dot: var(--mint); }
+  .type-social { --dot: #ff7cc2; }
+  .type-members-only { --dot: var(--sodium); }
+  .type-community { --dot: var(--chalk); }
+</style>

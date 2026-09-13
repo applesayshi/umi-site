@@ -1,0 +1,233 @@
+/* ==========================================================================
+   UMI design tokens
+   "Blue Hour Riso": UMI's navy & periwinkle identity printed like a
+   risograph zine at night. Cobalt and fluorescent orange are the two riso
+   inks; pink, mint and sun yellow are spot colours used sparingly.
+   Contrast (WCAG): every text pairing noted below is >= 4.5:1 unless marked.
+   ========================================================================== */
+
+@layer tokens {
+  :root {
+    /* ---- Night (blue-black) surfaces ----------------------------------- */
+    --night-950: #070b1f;
+    --night-900: #0b112b;
+    --night-850: #0f1636;
+    --night-800: #141c42;
+    --night-700: #1d2753;
+    --night-600: #2a3566;
+
+    /* ---- Brand --------------------------------------------------------- */
+    --navy: #01114b;        /* the logo files' navy. chalk on navy 16.2:1, mist on navy 8.1:1 */
+    --peri: #93a3e6;        /* logo periwinkle. On night 8:1; night text on peri 8:1 */
+    --peri-deep: #6f82d6;
+
+    /* ---- Riso inks & spot colours -------------------------------------- */
+    --cobalt: #2c52e0;      /* white text on cobalt 5.5:1. Never night text on cobalt (3.2:1). */
+    --cobalt-deep: #2446c4; /* white on deep cobalt 6.8:1; cobalt-deep text on paper 6.3:1 */
+    --orange: #ff5a2b;      /* on night 6.3:1; night text on orange 6.3:1. Never white text (2.8:1). */
+    --orange-ink: #ad2d0b;  /* orange text on paper 5.5:1 */
+    --pink: #ff7cc2;        /* on night 8.3:1; ink on pink 8:1 */
+    --mint: #9ef0c9;        /* on night 14.6:1; ink on mint 14.2:1 */
+    --mint-ink: #0f6b4c;
+    --sun: #ffe45e;         /* on night 15.3:1; ink on sun 14.9:1 */
+    --sodium: #ff8a4c;      /* camera date-stamp LCD, decorative */
+    --shade: #0e2350;       /* duotone shadow, decorative */
+
+    /* ---- Paper & ink --------------------------------------------------- */
+    --paper-50: #ebe9e1;
+    --paper-100: #e1dfd5;
+    --paper-200: #d3d0c3;
+    --paper-300: #bdb9a9;
+    --chalk: #eef1fa;       /* text on night 17.3:1 */
+    --mist: #a9b1d6;        /* muted text on night 9.2:1 (8.5:1 on night-900) */
+    --ink: #0a0f26;         /* text on paper 15.6:1 */
+    --ink-soft: #454b66;    /* muted text on paper 7:1 (6:1 on paper-200) */
+
+    /* ---- Type ---------------------------------------------------------- */
+    --step--2: clamp(0.72rem, 0.7rem + 0.1vw, 0.78rem);
+    --step--1: clamp(0.84rem, 0.81rem + 0.15vw, 0.94rem);
+    --step-0: clamp(1rem, 0.96rem + 0.2vw, 1.125rem);
+    --step-1: clamp(1.18rem, 1.09rem + 0.42vw, 1.45rem);
+    --step-2: clamp(1.42rem, 1.24rem + 0.85vw, 1.95rem);
+    --step-3: clamp(1.8rem, 1.46rem + 1.6vw, 2.8rem);
+    --step-4: clamp(2.35rem, 1.7rem + 2.9vw, 4.25rem);
+    --step-5: clamp(3rem, 1.95rem + 5vw, 6.5rem);
+    --step-6: clamp(3.9rem, 2rem + 9vw, 10.5rem);
+    --step-7: clamp(4.8rem, 1.8rem + 15vw, 15rem);
+
+    /* Expanded display type runs about twice as wide as body type, so it gets its own scale. */
+    --display-s: clamp(1.25rem, 1.05rem + 0.9vw, 1.75rem);
+    --display-m: clamp(1.6rem, 1.2rem + 1.8vw, 2.7rem);
+    --display-l: clamp(2rem, 1.3rem + 3.2vw, 4.1rem);
+    --display-xl: clamp(2.15rem, 1rem + 5.3vw, 6.2rem);
+    --display-2xl: clamp(2.6rem, 0.8rem + 8.6vw, 9.5rem);
+
+    /* ---- Space --------------------------------------------------------- */
+    --space-3xs: 0.25rem;
+    --space-2xs: 0.5rem;
+    --space-xs: 0.75rem;
+    --space-s: 1rem;
+    --space-m: 1.5rem;
+    --space-l: 2rem;
+    --space-xl: 3rem;
+    --space-2xl: clamp(3rem, 2.4rem + 2.6vw, 4.5rem);
+    --space-3xl: clamp(4rem, 3rem + 4.5vw, 7rem);
+    --section: clamp(4.5rem, 3rem + 6.5vw, 9.5rem);
+
+    --gutter: clamp(1.25rem, 0.75rem + 2.2vw, 2.75rem);
+    --max: 1480px;
+    --max-text: 66ch;
+    --header-h: 4.25rem;
+
+    /* ---- Lines, radii, depth ------------------------------------------- */
+    --radius-s: 2px;
+    --radius-m: 4px;
+    --radius-pill: 999px;
+    --shadow-print: 0 1px 0 rgb(3 5 18 / 0.3), 0 12px 28px -12px rgb(3 5 18 / 0.6);
+    --shadow-lift: 0 2px 0 rgb(3 5 18 / 0.25), 0 28px 60px -24px rgb(3 5 18 / 0.75);
+
+    /* ---- Layers -------------------------------------------------------- */
+    --z-raised: 10;
+    --z-sticky: 40;
+    --z-header: 100;
+    --z-overlay: 900;
+    --z-modal: 1000;
+    --z-grain: 1100;
+
+    /* ---- Motion -------------------------------------------------------- */
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-in-out: cubic-bezier(0.76, 0, 0.24, 1);
+    --ease-in: cubic-bezier(0.64, 0, 0.78, 0);
+    --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+    --dur-instant: 100ms;
+    --dur-fast: 180ms;
+    --dur-base: 280ms;
+    --dur-slow: 560ms;
+    --dur-slower: 900ms;
+    --dur-cinematic: 1400ms;
+  }
+
+  /* ---- Surface themes: each section declares one ---------------------- */
+  .theme-night {
+    --bg: var(--night-950);
+    --surface: var(--night-900);
+    --surface-2: var(--night-800);
+    --fg: var(--chalk);
+    --fg-muted: var(--mist);
+    --line: rgb(238 241 250 / 0.13);
+    --line-strong: rgb(238 241 250 / 0.32);
+    --accent: var(--orange);
+    --accent-fg: var(--night-950);
+    --hot: var(--orange);
+    --go: var(--mint);
+    --focus: var(--peri);
+    --duo-dark: var(--night-950);
+    --duo-light: var(--peri);
+    color-scheme: dark;
+    color: var(--fg);
+    background-color: var(--bg);
+  }
+
+  .theme-navy {
+    --bg: var(--navy);
+    --surface: #07195c;
+    --surface-2: #0d236e;
+    --fg: var(--chalk);
+    --fg-muted: var(--mist);
+    --line: rgb(238 241 250 / 0.16);
+    --line-strong: rgb(238 241 250 / 0.36);
+    --accent: var(--orange);
+    --accent-fg: var(--night-950);
+    --hot: var(--orange);
+    --go: var(--mint);
+    --focus: var(--peri);
+    --duo-dark: var(--navy);
+    --duo-light: var(--peri);
+    color-scheme: dark;
+    color: var(--fg);
+    background-color: var(--bg);
+  }
+
+  .theme-paper {
+    --bg: var(--paper-50);
+    --surface: var(--paper-100);
+    --surface-2: var(--paper-200);
+    --fg: var(--ink);
+    --fg-muted: var(--ink-soft);
+    --line: rgb(10 15 38 / 0.15);
+    --line-strong: rgb(10 15 38 / 0.4);
+    --accent: var(--cobalt-deep);
+    --accent-fg: var(--chalk);
+    --hot: var(--orange-ink);
+    --go: var(--mint-ink);
+    --focus: var(--cobalt-deep);
+    --duo-dark: var(--ink);
+    --duo-light: var(--mint);
+    color-scheme: light;
+    color: var(--fg);
+    background-color: var(--bg);
+  }
+
+  /* Riso cobalt: white text only. */
+  .theme-cobalt {
+    --bg: var(--cobalt-deep);
+    --surface: #2a4fd4;
+    --surface-2: #1d3aa8;
+    --fg: #ffffff;
+    --fg-muted: #dde3ff; /* 5.6:1 on cobalt-deep */
+    --line: rgb(255 255 255 / 0.22);
+    --line-strong: rgb(255 255 255 / 0.5);
+    --accent: var(--night-950);
+    --accent-fg: #ffffff;
+    --hot: var(--sun);
+    --go: var(--mint);
+    --focus: #ffffff;
+    --duo-dark: var(--night-950);
+    --duo-light: var(--orange);
+    color-scheme: dark;
+    color: var(--fg);
+    background-color: var(--bg);
+  }
+
+  /* Logo periwinkle: night text only (8:1). */
+  .theme-peri {
+    --bg: var(--peri);
+    --surface: #a3b1ea;
+    --surface-2: #8394dc;
+    --fg: var(--night-950);
+    --fg-muted: #1d2753; /* 5.9:1 on peri */
+    --line: rgb(7 11 31 / 0.22);
+    --line-strong: rgb(7 11 31 / 0.5);
+    --accent: var(--night-950);
+    --accent-fg: var(--chalk);
+    --hot: var(--night-950);
+    --go: var(--night-950);
+    --focus: var(--night-950);
+    --duo-dark: var(--navy);
+    --duo-light: var(--chalk);
+    color-scheme: light;
+    color: var(--fg);
+    background-color: var(--bg);
+  }
+
+  /* Fluorescent orange: for thin bars and stickers, night text only. */
+  .theme-orange {
+    --bg: var(--orange);
+    --surface: #ff6d42;
+    --surface-2: #e94e22;
+    --fg: var(--night-950);
+    --fg-muted: #2a1208;
+    --line: rgb(7 11 31 / 0.22);
+    --line-strong: rgb(7 11 31 / 0.5);
+    --accent: var(--night-950);
+    --accent-fg: var(--chalk);
+    --hot: var(--night-950);
+    --go: var(--night-950);
+    --focus: var(--night-950);
+    --duo-dark: var(--night-950);
+    --duo-light: var(--sun);
+    color-scheme: light;
+    color: var(--fg);
+    background-color: var(--bg);
+  }
+}

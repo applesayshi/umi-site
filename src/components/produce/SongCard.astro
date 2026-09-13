@@ -1,0 +1,265 @@
+---
+/**
+ * A ProduceUMI song as a record sleeve with the disc peeking out. With a snippet, clicking the record plays it
+ * (the disc slides out and spins); the rest of the card links to the song's page. A Spotify link adds an icon.
+ */
+import { Picture } from 'astro:assets';
+import produceLogo from '../../assets/brand/produceumi-logo.png';
+import Icon from '../ui/Icon.astro';
+import SnippetButton from './SnippetButton.astro';
+import { schoolYearLabel, songSnippet, type SongEntry } from '../../lib/content';
+import { fitStyle } from '../../lib/fit';
+
+interface Props {
+  song: SongEntry;
+  index?: number;
+}
+
+const { song, index = 0 } = Astro.props;
+const { data } = song;
+const snippet = songSnippet(song);
+---
+
+<article class="song" data-snippet-root data-reveal style={`--i:${index % 4}`}>
+  <div class="song__art">
+    <span class="song__disc" aria-hidden="true"><span class="song__groove"></span></span>
+    <span class:list={['song__sleeve', !data.cover && 'song__sleeve--logo']}>
+      {
+        data.cover ? (
+          <Picture src={data.cover} alt={data.coverAlt ?? ''} widths={[320, 480, 640]} sizes="(min-width: 1100px) 22vw, (min-width: 640px) 40vw, 80vw" formats={['avif', 'webp']} />
+        ) : (
+          <Picture src={produceLogo} alt="" widths={[320, 480]} sizes="(min-width: 1100px) 16vw, 60vw" formats={['webp']} />
+        )
+      }
+    </span>
+    {snippet && <SnippetButton variant="cover" src={snippet} title={data.title} artist={data.artist} />}
+  </div>
+
+  <div class="song__text">
+    <div class="song__info">
+      <span class="song__meta">{schoolYearLabel(data.schoolYear)}{data.genre && ` · ${data.genre}`}</span>
+      <a class="song__link" href={`/produceumi/${song.id}`}>
+        <span class="song__title display" style={fitStyle(data.title)}>{data.title}</span>
+      </a>
+      <span class="song__artist">
+        {data.artist}
+        {data.sample && <span class="sample-tag">Sample</span>}
+      </span>
+    </div>
+    {
+      data.spotifyUrl && (
+        <a class="song__spotify" href={data.spotifyUrl} target="_blank" rel="noopener noreferrer" title="Listen on Spotify">
+          <Icon name="spotify" size="1.4rem" label={`${data.title} on Spotify (opens in a new tab)`} />
+        </a>
+      )
+    }
+  </div>
+</article>
+
+<style>
+  .song {
+    position: relative;
+    display: grid;
+    gap: 1rem;
+  }
+
+  .song__art {
+    --snippet-reach: -13.6%; /* the 12% margin the disc slides into, as a share of the art's own width */
+    position: relative;
+    display: block;
+    aspect-ratio: 1;
+    margin-right: 12%;
+  }
+
+  .song__sleeve {
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    box-shadow: var(--shadow-lift);
+  }
+
+  .song__sleeve--logo {
+    display: grid;
+    place-items: center;
+    padding: 12%;
+    background: var(--navy);
+  }
+
+  .song__sleeve :global(picture),
+  .song__sleeve :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .song__sleeve--logo :global(img) {
+    object-fit: contain;
+  }
+
+  .song__disc {
+    position: absolute;
+    top: 4%;
+    left: 4%;
+    width: 92%;
+    height: 92%;
+    transform: translateX(10%);
+    transition: transform var(--dur-slower) var(--ease-out);
+  }
+
+  /* The grooves carry a sheen and a label mark, so the record visibly turns while a snippet plays. */
+  .song__groove {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle, #070a1a 0 2.5%, var(--orange) 3% 15%, #161b33 15.5% 17%, transparent 17.5%),
+      conic-gradient(from 30deg, transparent 0 8%, rgb(255 255 255 / 0.2) 13%, transparent 19% 58%, rgb(255 255 255 / 0.14) 63%, transparent 69%),
+      repeating-radial-gradient(circle, #161b33 0 2px, #2b3150 2.5px 3px);
+    box-shadow: 0 0 0 1px rgb(238 241 250 / 0.2);
+    animation: song-spin 1.8s linear infinite paused;
+  }
+
+  .song__groove::after {
+    content: '';
+    position: absolute;
+    top: 38%;
+    left: 50%;
+    width: 4%;
+    height: 4%;
+    border-radius: 50%;
+    background: var(--night-950);
+    opacity: 0.55;
+  }
+
+  .song.is-playing .song__disc,
+  .song.is-paused .song__disc {
+    transform: translateX(34%);
+  }
+
+  .song.is-playing .song__groove {
+    animation-play-state: running;
+  }
+
+  .song__text {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 0.75rem;
+  }
+
+  .song__info {
+    display: grid;
+    gap: 0.3rem;
+    container-type: inline-size;
+  }
+
+  .song__meta {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--peri);
+  }
+
+  .song__link {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  /* The whole card opens the song; the play button and Spotify icon sit above this. */
+  .song__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+  }
+
+  .song__link:focus-visible {
+    outline: none;
+  }
+
+  .song:has(.song__link:focus-visible) {
+    outline: 2px solid var(--focus);
+    outline-offset: 6px;
+  }
+
+  .song__title {
+    display: block;
+    font-size: min(clamp(1.05rem, 0.9rem + 0.6vw, 1.4rem), 100cqi / var(--fit, 0.01));
+    font-weight: 900;
+    line-height: 0.95;
+    transition: color var(--dur-fast);
+  }
+
+  .song.is-playing .song__title,
+  .song.is-paused .song__title {
+    color: var(--peri);
+  }
+
+  .song__artist {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-serif);
+    font-size: var(--step-1);
+    font-style: italic;
+    line-height: 1.2;
+    color: var(--fg-muted);
+  }
+
+  .song__spotify {
+    position: relative;
+    z-index: 3;
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 50%;
+    color: var(--fg);
+    box-shadow: inset 0 0 0 1px var(--line-strong);
+    transition:
+      color var(--dur-fast),
+      box-shadow var(--dur-fast);
+  }
+
+  .song__spotify:hover {
+    color: #1ed760;
+    box-shadow: inset 0 0 0 1px #1ed760;
+  }
+
+  @media (hover: hover) {
+    .song:hover .song__disc {
+      transform: translateX(22%) rotate(40deg);
+    }
+
+    .song.is-playing:hover .song__disc,
+    .song.is-paused:hover .song__disc {
+      transform: translateX(34%);
+    }
+
+    .song:has(.song__link:hover) .song__title {
+      color: var(--peri);
+    }
+  }
+
+  @keyframes song-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .song__disc {
+      transition: none;
+    }
+
+    .song__groove {
+      animation: none;
+    }
+  }
+</style>

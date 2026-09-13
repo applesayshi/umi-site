@@ -1,0 +1,199 @@
+---
+import Photo from '../ui/Photo.astro';
+import Icon from '../ui/Icon.astro';
+import type { TeamEntry } from '../../lib/content';
+import { seeded, between } from '../../lib/random';
+import { fitStyle } from '../../lib/fit';
+
+interface Props {
+  member: TeamEntry;
+  index?: number;
+}
+
+const { member, index = 0 } = Astro.props;
+const { data } = member;
+const inks = ['peri', 'orange', 'mint', 'pink', 'teal'] as const;
+const rand = seeded(member.id);
+const tilt = Number(between(rand, -1.8, 1.8).toFixed(2));
+const initials = data.name
+  .split(/\s+/)
+  .map((part) => part[0])
+  .join('')
+  .slice(0, 2)
+  .toUpperCase();
+---
+
+<article class="exec" data-reveal style={`--i:${index % 4}`}>
+  <div class="exec__photo">
+    {
+      data.photo ? (
+        <Photo
+          src={data.photo}
+          alt={`Portrait of ${data.name}`}
+          sizes="(min-width: 1200px) 18vw, (min-width: 700px) 30vw, 88vw"
+          widths={[320, 480, 640, 800]}
+          aspect="4 / 5"
+          duo={inks[index % inks.length]}
+          tilt={tilt}
+          frame="print"
+        />
+      ) : (
+        <div class="exec__placeholder" style={`--tilt:${tilt}deg`} aria-hidden="true">
+          <span class="display">{initials}</span>
+        </div>
+      )
+    }
+  </div>
+  <div class="exec__body">
+    <p class="exec__dept">{data.department}</p>
+    <p class="exec__role display" style={fitStyle(data.role)}>{data.role}</p>
+    <h3 class="exec__name serif">
+      {data.name}
+      {data.pronouns && <span class="exec__pronouns">({data.pronouns})</span>}
+      {data.sample && <span class="sample-tag">Sample</span>}
+    </h3>
+    {data.program && <p class="exec__program">{data.program}</p>}
+    {data.bio && <p class="exec__bio">{data.bio}</p>}
+    {
+      (data.plays || data.onRepeat) && (
+        <dl class="exec__facts">
+          {data.plays && (
+            <div>
+              <dt>Plays</dt>
+              <dd>{data.plays}</dd>
+            </div>
+          )}
+          {data.onRepeat && (
+            <div>
+              <dt>On repeat</dt>
+              <dd>{data.onRepeat}</dd>
+            </div>
+          )}
+        </dl>
+      )
+    }
+    {
+      data.email && (
+        <a class="link-arrow exec__email" href={`mailto:${data.email}`}>
+          <Icon name="envelope" />
+          <span>{data.email}</span>
+        </a>
+      )
+    }
+  </div>
+</article>
+
+<style>
+  .exec {
+    display: grid;
+    gap: 1rem;
+    align-content: start;
+  }
+
+  .exec__photo {
+    padding: 0.4rem;
+  }
+
+  .exec__placeholder {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 4 / 5;
+    background:
+      radial-gradient(circle at 50% 38%, rgb(255 138 76 / 0.35), transparent 60%),
+      var(--night-800);
+    transform: rotate(var(--tilt));
+    outline: 10px solid #eef0f4;
+  }
+
+  .exec__placeholder span {
+    font-size: 3.4rem;
+    color: var(--chalk);
+  }
+
+  .exec__body {
+    display: grid;
+    gap: 0.35rem;
+    align-content: start;
+    container-type: inline-size;
+  }
+
+  .exec__dept {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--hot);
+  }
+
+  .exec__role {
+    font-size: min(clamp(1rem, 0.86rem + 0.5vw, 1.3rem), 100cqi / var(--fit, 0.01));
+    line-height: 1.05;
+    color: var(--peri);
+  }
+
+  .exec__name {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.2rem 0.5rem;
+    font-size: var(--step-2);
+    line-height: 1.1;
+  }
+
+  .exec__pronouns {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    color: var(--fg-muted);
+  }
+
+  .exec__program {
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+
+  .exec__bio {
+    margin-top: 0.25rem;
+    font-size: var(--step--1);
+    line-height: 1.6;
+    color: var(--fg-muted);
+  }
+
+  .exec__facts {
+    display: grid;
+    gap: 0.3rem;
+    margin: 0.5rem 0 0;
+    padding-top: 0.6rem;
+    border-top: 1px dashed var(--line-strong);
+  }
+
+  .exec__facts div {
+    display: grid;
+    grid-template-columns: 5.5rem 1fr;
+    gap: 0.5rem;
+    font-size: var(--step--1);
+  }
+
+  .exec__facts dt {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    padding-top: 0.15rem;
+  }
+
+  .exec__facts dd {
+    margin: 0;
+  }
+
+  .exec__email {
+    min-height: 40px;
+    font-size: 0.72rem;
+    text-transform: none;
+    letter-spacing: 0.02em;
+  }
+</style>

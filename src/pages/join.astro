@@ -1,0 +1,271 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/layout/PageHero.astro';
+import Steps from '../components/ui/Steps.astro';
+import Faq from '../components/ui/Faq.astro';
+import Icon from '../components/ui/Icon.astro';
+import TornEdge from '../components/ui/TornEdge.astro';
+import Scribble from '../components/ui/Scribble.astro';
+import { getPage, getSettings } from '../lib/content';
+import type { IconName } from '../lib/icons';
+
+const [page, settings] = await Promise.all([getPage('join', 'join'), getSettings()]);
+const { data } = page;
+const benefitIcons: IconName[] = ['ticket', 'microphone', 'guitar', 'megaphone'];
+const membershipUrl = settings.links.membership;
+const steps = data.steps.map((step, i) => (i === 0 && membershipUrl ? { ...step, href: membershipUrl, linkLabel: 'Open CampusBase' } : step));
+---
+
+<BaseLayout title="Join" description={data.intro} image={data.heroPhoto.src} imageAlt={data.heroPhoto.alt}>
+  <PageHero eyebrow="Membership" index="B5" title={data.title} intro={data.intro} photo={data.heroPhoto} duo="pink">
+    {
+      membershipUrl && (
+        <div class="btn-row join-hero__actions">
+          <a class="btn" href={membershipUrl} target="_blank" rel="noopener noreferrer">
+            <span class="btn__label">Become a member</span>
+            <Icon name="arrow-up-right" />
+          </a>
+          <a class="btn btn--ghost" href="#benefits">
+            <span class="btn__label">What you get</span>
+          </a>
+        </div>
+      )
+    }
+  </PageHero>
+
+  <section class="booth theme-paper texture-paper" aria-labelledby="prices-title">
+    <TornEdge position="top" seed="join-top" />
+    <div class="container">
+      <header class="booth__head">
+        <p class="eyebrow"><span class="eyebrow__index">Box office</span><span>{data.term}</span></p>
+        <h2 class="booth__title display" id="prices-title" data-reveal="stutter">Door prices</h2>
+        <Scribble variant="arrow" class="booth__arrow" color="var(--orange-ink)" width={3} />
+      </header>
+      <ul class="booth__grid" role="list">
+        {
+          data.prices.map((price, i) => (
+            <li class="price" data-reveal style={`--i:${i}`}>
+              <p class="price__audience">{price.audience}</p>
+              <div class="price__row">
+                <div>
+                  <p class="price__label">New member</p>
+                  <p class="price__value display">{price.newPrice}</p>
+                </div>
+                <div>
+                  <p class="price__label">Returning</p>
+                  <p class="price__value price__value--muted display">{price.returningPrice}</p>
+                </div>
+              </div>
+              <span class="price__punch" aria-hidden="true" />
+              <span class="price__stamp" aria-hidden="true">Admit one</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="benefits theme-night section" id="benefits" aria-labelledby="benefits-title">
+    <div class="container">
+      <header class="benefits__head">
+        <p class="eyebrow"><span class="eyebrow__index">01</span><span>Membership perks</span></p>
+        <h2 class="benefits__title display" id="benefits-title" data-reveal="stutter">What you get</h2>
+      </header>
+      <ul class="benefits__grid" role="list">
+        {
+          data.benefits.map((benefit, i) => (
+            <li class="benefit" data-reveal style={`--i:${i}`}>
+              <Icon name={benefitIcons[i % benefitIcons.length]} size="2rem" class="benefit__icon" />
+              <h3 class="benefit__title serif">{benefit.title}</h3>
+              <p class="benefit__text">{benefit.text}</p>
+            </li>
+          ))
+        }
+      </ul>
+
+      <div class="join__steps">
+        <h2 class="benefits__title display" data-reveal="stutter">How to join</h2>
+        <Steps steps={steps} />
+      </div>
+
+      <div class="join__faq">
+        <Faq items={data.faq} title="FAQ" id="join-faq" />
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .join-hero__actions {
+    margin-top: var(--space-s);
+  }
+
+  .booth {
+    position: relative;
+    padding-block: var(--space-3xl);
+  }
+
+  .booth__head {
+    position: relative;
+    display: grid;
+    gap: var(--space-s);
+    margin-bottom: var(--space-2xl);
+  }
+
+  .booth__head :global(.booth__arrow) {
+    position: absolute;
+    right: 8%;
+    bottom: -2.5rem;
+    width: 7rem;
+    height: auto;
+    transform: rotate(12deg);
+  }
+
+  .booth__title,
+  .benefits__title {
+    font-size: var(--display-xl);
+    font-weight: 900;
+    line-height: 0.9;
+  }
+
+  .booth__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+    gap: var(--space-l);
+  }
+
+  /* Riso-printed admission cards: cobalt ink, white type. */
+  .price {
+    position: relative;
+    overflow: hidden;
+    padding: 1.6rem 1.6rem 1.9rem;
+    background: var(--cobalt-deep);
+    color: #ffffff;
+    box-shadow: 7px 7px 0 var(--ink);
+  }
+
+  .price::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle, rgb(255 255 255 / 0.14) 0.9px, transparent 1.3px);
+    background-size: 5px 5px;
+  }
+
+  .price:nth-child(odd) {
+    transform: rotate(-1deg);
+  }
+
+  .price:nth-child(even) {
+    transform: rotate(1.2deg);
+  }
+
+  .price__audience {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: var(--step-3);
+  }
+
+  .price__row {
+    display: flex;
+    gap: var(--space-xl);
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px dashed rgb(255 255 255 / 0.4);
+  }
+
+  .price__label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #dde3ff;
+  }
+
+  .price__value {
+    font-size: clamp(2.8rem, 2rem + 3vw, 4.8rem);
+    font-weight: 900;
+    line-height: 0.95;
+  }
+
+  .price__value--muted {
+    color: #dde3ff;
+  }
+
+  .price__punch {
+    position: absolute;
+    top: 1.4rem;
+    right: 1.4rem;
+    width: 1.1rem;
+    height: 1.1rem;
+    border-radius: 50%;
+    background: var(--paper-50);
+    box-shadow: inset 0 2px 3px rgb(0 0 0 / 0.4);
+  }
+
+  .price__stamp {
+    position: absolute;
+    right: -0.5rem;
+    bottom: 1.2rem;
+    padding: 0.2rem 0.7rem;
+    border: 2px solid var(--orange);
+    color: var(--orange);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    transform: rotate(-12deg);
+    opacity: 0.9;
+  }
+
+  .benefits__head {
+    display: grid;
+    gap: var(--space-s);
+    margin-bottom: var(--space-2xl);
+  }
+
+  /* Cells draw their own right and bottom rules, so a part-filled last row leaves no grey gap. */
+  .benefits__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+    border-top: 1px solid var(--line-strong);
+    border-left: 1px solid var(--line-strong);
+  }
+
+  .benefit {
+    display: grid;
+    align-content: start;
+    gap: 0.6rem;
+    padding: 1.75rem 1.5rem 2rem;
+    border-right: 1px solid var(--line-strong);
+    border-bottom: 1px solid var(--line-strong);
+    background: var(--night-950);
+  }
+
+  .benefit :global(.benefit__icon) {
+    color: var(--orange);
+  }
+
+  .benefit__title {
+    font-size: var(--step-2);
+    line-height: 1.1;
+  }
+
+  .benefit__text {
+    font-size: var(--step--1);
+    line-height: 1.6;
+    color: var(--fg-muted);
+  }
+
+  .join__steps {
+    display: grid;
+    gap: var(--space-xl);
+    margin-top: var(--space-3xl);
+  }
+
+  .join__faq {
+    margin-top: var(--space-3xl);
+  }
+</style>

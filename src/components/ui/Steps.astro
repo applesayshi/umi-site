@@ -1,0 +1,78 @@
+---
+import { inline } from '../../lib/content';
+import Icon from './Icon.astro';
+
+interface Props {
+  steps: { title: string; text: string; href?: string; linkLabel?: string }[];
+  class?: string;
+}
+
+const { steps, class: className } = Astro.props;
+---
+
+<ol class:list={['steps', className]} role="list">
+  {
+    steps.map((step, i) => (
+      <li class="steps__item" data-reveal style={`--i:${i}`}>
+        <span class="steps__num display" aria-hidden="true">
+          {String(i + 1).padStart(2, '0')}
+        </span>
+        <h3 class="steps__title">{step.title}</h3>
+        <p class="steps__text" set:html={inline(step.text)} />
+        {step.href && (
+          <a class="link-arrow steps__link" href={step.href} target={step.href.startsWith('http') ? '_blank' : undefined} rel={step.href.startsWith('http') ? 'noopener noreferrer' : undefined}>
+            <span>{step.linkLabel ?? 'Open'}</span>
+            <Icon name="arrow-up-right" />
+          </a>
+        )}
+      </li>
+    ))
+  }
+</ol>
+
+<style>
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+    counter-reset: step;
+    border-top: 1px solid var(--line-strong);
+  }
+
+  .steps__item {
+    position: relative;
+    display: grid;
+    align-content: start;
+    gap: 0.5rem;
+    padding: 1.5rem 1.5rem 1.75rem 0;
+    border-bottom: 1px solid var(--line-strong);
+  }
+
+  .steps__num {
+    font-size: clamp(2.1rem, 1.7rem + 1.4vw, 3.1rem);
+    font-weight: 900;
+    line-height: 0.85;
+    color: var(--hot);
+  }
+
+  .steps__title {
+    font-family: var(--font-serif);
+    font-size: var(--step-2);
+    line-height: 1.1;
+  }
+
+  .steps__text {
+    max-width: 38ch;
+    color: var(--fg-muted);
+  }
+
+  .steps__link {
+    margin-top: 0.25rem;
+  }
+
+  @media (min-width: 760px) {
+    .steps__item + .steps__item {
+      padding-left: 1.5rem;
+      border-left: 1px solid var(--line-strong);
+    }
+  }
+</style>

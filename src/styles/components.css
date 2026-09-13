@@ -1,0 +1,551 @@
+/* ==========================================================================
+   Shared component styles (unscoped so Markdown and CMS content can use them)
+   ========================================================================== */
+
+@layer components {
+  /* ---- Buttons ---------------------------------------------------------- */
+  .btn {
+    --btn-bg: var(--accent);
+    --btn-fg: var(--accent-fg);
+    --btn-border: var(--btn-bg);
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.7em;
+    min-height: 48px;
+    padding: 0.8em 1.4em;
+    border: 1px solid var(--btn-border);
+    border-radius: var(--radius-s);
+    background: var(--btn-bg);
+    color: var(--btn-fg);
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      transform var(--dur-fast) var(--ease-out),
+      background-color var(--dur-base) var(--ease-out),
+      color var(--dur-base) var(--ease-out),
+      border-color var(--dur-base) var(--ease-out);
+  }
+
+  .btn__label {
+    display: inline-block;
+    transition:
+      transform var(--dur-base) var(--ease-out),
+      text-shadow var(--dur-base) var(--ease-out);
+  }
+
+  .btn svg {
+    width: 1.15em;
+    height: 1.15em;
+    flex: none;
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+
+  @media (hover: hover) {
+    /* Step-printed hover: the label stutters forward and leaves a ghost trail. */
+    .btn:hover .btn__label {
+      transform: translateX(3px);
+      text-shadow:
+        -3px 0 0 color-mix(in srgb, currentColor 32%, transparent),
+        -6px 0 0 color-mix(in srgb, currentColor 14%, transparent);
+    }
+
+    .btn:hover svg {
+      transform: translateX(4px);
+    }
+
+    .btn--ghost:hover {
+      --btn-bg: var(--fg);
+      --btn-fg: var(--bg);
+      --btn-border: var(--fg);
+    }
+  }
+
+  .btn:active {
+    transform: scale(0.97);
+  }
+
+  .btn--ghost {
+    --btn-bg: transparent;
+    --btn-fg: var(--fg);
+    --btn-border: var(--line-strong);
+  }
+
+  .btn--hot {
+    --btn-bg: var(--hot);
+    --btn-fg: var(--night-950);
+  }
+
+  .theme-paper .btn--hot {
+    --btn-fg: var(--paper-50);
+  }
+
+  .btn--small {
+    min-height: 44px;
+    padding: 0.6em 1em;
+    font-size: var(--step--2);
+  }
+
+  .btn-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+
+  /* ---- Text links --------------------------------------------------------- */
+  .link {
+    color: inherit;
+    text-decoration: none;
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 100% 1px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    padding-bottom: 0.08em;
+    transition: background-size var(--dur-base) var(--ease-out), color var(--dur-fast);
+  }
+
+  @media (hover: hover) {
+    .link:hover {
+      background-size: 0% 1px;
+      background-position: 100% 100%;
+    }
+  }
+
+  .link-arrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55em;
+    min-height: 44px;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--fg);
+  }
+
+  .link-arrow svg {
+    width: 1.1em;
+    height: 1.1em;
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+
+  .link-arrow span {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0% 1px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size var(--dur-base) var(--ease-out);
+  }
+
+  @media (hover: hover) {
+    .link-arrow:hover span {
+      background-size: 100% 1px;
+    }
+
+    .link-arrow:hover svg {
+      transform: translate(3px, -3px);
+    }
+  }
+
+  /* ---- Chips / tags ------------------------------------------------------- */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45em;
+    min-height: 32px;
+    padding: 0.3em 0.8em;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-pill);
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fg);
+    white-space: nowrap;
+  }
+
+  .chip svg {
+    width: 1.1em;
+    height: 1.1em;
+  }
+
+  .chip--solid {
+    background: var(--fg);
+    border-color: var(--fg);
+    color: var(--bg);
+  }
+
+  .chip-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+  }
+
+  /* A rubber-stamp label marking CMS sample content still to be replaced. */
+  .sample-tag {
+    display: inline-block;
+    padding: 0.15em 0.5em 0.1em;
+    border: 1.5px solid var(--hot);
+    color: var(--hot);
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    font-weight: 500;
+    line-height: 1.3;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    transform: rotate(-4deg);
+    opacity: 0.9;
+  }
+
+  /* ---- Prose (Markdown bodies) ------------------------------------------ */
+  .prose {
+    max-width: var(--max-text);
+    font-size: var(--step-0);
+    line-height: 1.7;
+  }
+
+  .prose > * + * {
+    margin-block-start: 1.1em;
+  }
+
+  .prose h2 {
+    margin-block-start: 1.8em;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-stretch: 125%;
+    font-size: var(--display-m);
+    line-height: 0.98;
+    text-transform: uppercase;
+  }
+
+  .prose h3 {
+    margin-block-start: 1.6em;
+    font-family: var(--font-serif);
+    font-size: var(--step-2);
+    line-height: 1.15;
+  }
+
+  .prose a {
+    color: var(--fg);
+    text-decoration-color: var(--hot);
+    text-decoration-thickness: 2px;
+  }
+
+  .prose em {
+    font-family: var(--font-serif);
+    font-size: 1.12em;
+    font-style: italic;
+    line-height: 1;
+  }
+
+  .prose strong {
+    font-weight: 600;
+  }
+
+  .prose ul,
+  .prose ol {
+    padding-inline-start: 1.25em;
+  }
+
+  .prose li + li {
+    margin-block-start: 0.4em;
+  }
+
+  .prose li::marker {
+    color: var(--hot);
+  }
+
+  .prose blockquote {
+    padding-inline-start: 1em;
+    border-inline-start: 2px solid var(--hot);
+    font-family: var(--font-serif);
+    font-size: var(--step-2);
+    font-style: italic;
+    line-height: 1.3;
+  }
+
+  .prose img {
+    width: 100%;
+  }
+
+  .prose hr {
+    border: 0;
+    border-top: 1px dashed var(--line-strong);
+  }
+
+  /* ---- Forms ------------------------------------------------------------ */
+  .field {
+    display: grid;
+    align-content: start;
+    gap: 0.45rem;
+  }
+
+  .field label,
+  .field legend {
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg);
+  }
+
+  .field .req {
+    color: var(--hot);
+  }
+
+  .input,
+  .select,
+  .textarea {
+    width: 100%;
+    min-height: 52px;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-s);
+    background: color-mix(in srgb, var(--bg) 70%, var(--fg) 4%);
+    color: var(--fg);
+    font-size: 1rem;
+    line-height: 1.4;
+    transition: border-color var(--dur-fast), box-shadow var(--dur-fast), background-color var(--dur-fast);
+  }
+
+  .textarea {
+    min-height: 10rem;
+    resize: vertical;
+  }
+
+  .input::placeholder,
+  .textarea::placeholder {
+    color: color-mix(in srgb, var(--fg-muted) 80%, transparent);
+  }
+
+  .input:focus-visible,
+  .select:focus-visible,
+  .textarea:focus-visible {
+    outline: none;
+    border-color: var(--focus);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 35%, transparent);
+  }
+
+  .input[aria-invalid='true'],
+  .select[aria-invalid='true'],
+  .textarea[aria-invalid='true'] {
+    border-color: var(--hot);
+  }
+
+  .field__hint {
+    font-size: var(--step--1);
+    color: var(--fg-muted);
+  }
+
+  .field__error {
+    display: flex;
+    gap: 0.4em;
+    align-items: center;
+    font-size: var(--step--1);
+    color: var(--hot);
+  }
+
+  /* ---- Accordion (details/summary) -------------------------------------- */
+  .faq {
+    border-top: 1px solid var(--line-strong);
+  }
+
+  .faq details {
+    border-bottom: 1px solid var(--line-strong);
+  }
+
+  .faq summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-m);
+    min-height: 64px;
+    padding-block: var(--space-s);
+    cursor: pointer;
+    list-style: none;
+    font-family: var(--font-serif);
+    font-size: var(--step-2);
+    line-height: 1.2;
+  }
+
+  .faq summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq summary .faq__icon {
+    position: relative;
+    flex: none;
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  .faq summary .faq__icon::before,
+  .faq summary .faq__icon::after {
+    content: '';
+    position: absolute;
+    inset: 50% 0 auto;
+    height: 1.5px;
+    background: currentColor;
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+
+  .faq summary .faq__icon::after {
+    transform: rotate(90deg);
+  }
+
+  .faq details[open] summary .faq__icon::after {
+    transform: rotate(0deg);
+  }
+
+  .faq__answer {
+    padding-block-end: var(--space-m);
+    max-width: 62ch;
+    color: var(--fg-muted);
+  }
+
+  .faq__answer > * + * {
+    margin-top: 0.8em;
+  }
+
+  /* ---- Riso duotone ----------------------------------------------------- */
+  /*
+   * Wrap an image in .riso and add the three layers:
+   *   <span class="riso__ink riso__ink--dark"></span>
+   *   <span class="riso__ink riso__ink--light"></span>
+   *   <span class="riso__screen"></span>
+   * Lighten lifts shadows to the dark ink, multiply tints highlights with the light ink,
+   * and a halftone screen sits on top. Hovering develops the photo into full colour.
+   */
+  .riso {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .riso img {
+    filter: grayscale(1) contrast(1.18) brightness(1.04);
+    transition: filter var(--dur-slow) var(--ease-out), transform var(--dur-cinematic) var(--ease-out);
+  }
+
+  .riso__ink,
+  .riso__screen {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    transition: opacity var(--dur-slow) var(--ease-out);
+  }
+
+  .riso__ink--dark {
+    background: var(--ink-a, var(--duo-dark, var(--night-950)));
+    mix-blend-mode: lighten;
+  }
+
+  .riso__ink--light {
+    background: var(--ink-b, var(--duo-light, var(--peri)));
+    mix-blend-mode: multiply;
+  }
+
+  .riso__screen {
+    background-image: radial-gradient(circle, rgb(7 11 31 / 0.55) 0.8px, transparent 1.25px);
+    background-size: 4px 4px;
+    mix-blend-mode: multiply;
+    opacity: 0.35;
+  }
+
+  .duo-peri { --ink-a: #0b1650; --ink-b: #a9b7f2; }
+  .duo-orange { --ink-a: #1a0f2e; --ink-b: #ff6a3d; }
+  .duo-mint { --ink-a: #0f1a1c; --ink-b: #aff5d2; }
+  .duo-pink { --ink-a: #1f2270; --ink-b: #ff94cc; }
+  .duo-teal { --ink-a: #03161c; --ink-b: #7fe0e8; }
+  .duo-sun { --ink-a: #3a0d12; --ink-b: #ffe45e; }
+
+  @media (hover: hover) {
+    .riso-hover:hover .riso img,
+    .riso:hover img {
+      filter: none;
+    }
+
+    .riso-hover:hover .riso__ink,
+    .riso-hover:hover .riso__screen,
+    .riso:hover .riso__ink,
+    .riso:hover .riso__screen {
+      opacity: 0;
+    }
+  }
+
+  /* ---- Textures ----------------------------------------------------------- */
+  /* Film grain: one fixed layer for the whole page. Animated only on devices
+     with a fine pointer; phones get a still grain to save battery. */
+  .grain {
+    position: fixed;
+    inset: -180px;
+    z-index: var(--z-grain);
+    pointer-events: none;
+    opacity: 0.06;
+    background-image: url('/textures/grain.webp');
+    background-size: 180px 180px;
+  }
+
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .grain {
+      animation: grain-shift 0.9s steps(1) infinite;
+    }
+  }
+
+  @keyframes grain-shift {
+    0% { transform: translate(0, 0); }
+    16% { transform: translate(-54px, 36px); }
+    33% { transform: translate(72px, -90px); }
+    50% { transform: translate(-108px, 126px); }
+    66% { transform: translate(144px, 18px); }
+    83% { transform: translate(-18px, -144px); }
+    100% { transform: translate(0, 0); }
+  }
+
+  /* Xerox toner speckle for paper sections. */
+  .texture-paper {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .texture-paper::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.55;
+    background-image: url('/textures/paper.webp');
+    background-size: 256px 256px;
+  }
+
+  .halftone {
+    background-image: radial-gradient(circle, color-mix(in srgb, var(--fg) 22%, transparent) 1px, transparent 1.4px);
+    background-size: 7px 7px;
+  }
+
+  /* Masking tape strip. Place inside a positioned parent. */
+  .tape {
+    position: absolute;
+    z-index: 3;
+    width: var(--tape-w, 6.5rem);
+    height: 1.7rem;
+    background:
+      linear-gradient(90deg, rgb(255 255 255 / 0.08), transparent 30%, rgb(255 255 255 / 0.06) 70%, transparent),
+      rgb(222 226 236 / 0.78);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.25);
+    clip-path: polygon(3% 0, 97% 4%, 100% 22%, 97% 45%, 100% 70%, 96% 100%, 4% 96%, 0 78%, 3% 52%, 0 26%);
+    pointer-events: none;
+  }
+}

@@ -1,0 +1,74 @@
+---
+/** Circular rotating text sticker, like a promo sticker slapped on a record sleeve. */
+import { hash } from '../../lib/random';
+
+interface Props {
+  text: string;
+  class?: string;
+}
+
+const { text, class: className } = Astro.props;
+const id = `sticker-${hash(text)}`;
+const ring = `${text.toUpperCase()} ✦ ${text.toUpperCase()} ✦ `;
+---
+
+<div class:list={['sticker', className]} aria-hidden="true">
+  <svg viewBox="0 0 200 200" focusable="false">
+    <defs>
+      <path id={id} d="M100,100 m-74,0 a74,74 0 1,1 148,0 a74,74 0 1,1 -148,0"></path>
+    </defs>
+    <circle cx="100" cy="100" r="98" class="sticker__bg"></circle>
+    <g class="sticker__ring">
+      <text>
+        <textPath href={`#${id}`} textLength="462" lengthAdjust="spacing">{ring}</textPath>
+      </text>
+    </g>
+    <path class="sticker__star" d="M100 64 L108 92 L136 100 L108 108 L100 136 L92 108 L64 100 L92 92 Z"></path>
+  </svg>
+</div>
+
+<style>
+  .sticker {
+    aspect-ratio: 1;
+    filter: drop-shadow(0 6px 10px rgb(0 0 0 / 0.35));
+  }
+
+  .sticker svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .sticker__bg {
+    fill: var(--orange);
+  }
+
+  .sticker__ring {
+    transform-origin: 100px 100px;
+    animation: sticker-spin 18s linear infinite;
+  }
+
+  .sticker text {
+    font-family: var(--font-mono);
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    fill: var(--ink);
+  }
+
+  .sticker__star {
+    fill: var(--ink);
+  }
+
+  @keyframes sticker-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sticker__ring {
+      animation: none;
+    }
+  }
+</style>

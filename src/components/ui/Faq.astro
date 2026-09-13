@@ -1,0 +1,61 @@
+---
+import { inline } from '../../lib/content';
+import { fitStyle } from '../../lib/fit';
+
+interface Props {
+  items: { question: string; answer: string }[];
+  title?: string;
+  id?: string;
+}
+
+const { items, title = 'Questions', id = 'faq' } = Astro.props;
+---
+
+{
+  items.length > 0 && (
+    <section class="faq-block" aria-labelledby={`${id}-title`}>
+      <div class="faq-block__head">
+        <h2 class="faq-block__title display" id={`${id}-title`} data-reveal="stutter" style={fitStyle(title)}>
+          {title}
+        </h2>
+      </div>
+      <div class="faq">
+        {items.map((item) => (
+          <details>
+            <summary>
+              <span>{item.question}</span>
+              <span class="faq__icon" aria-hidden="true" />
+            </summary>
+            <div class="faq__answer">
+              <p set:html={inline(item.answer)} />
+            </div>
+          </details>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .faq-block {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-xl);
+  }
+
+  .faq-block__head {
+    container-type: inline-size;
+  }
+
+  .faq-block__title {
+    font-size: min(var(--display-l), 100cqi / var(--fit, 0.01));
+    font-weight: 900;
+  }
+
+  @media (min-width: 960px) {
+    .faq-block {
+      grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+      align-items: start;
+    }
+  }
+</style>

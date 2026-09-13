@@ -1,0 +1,319 @@
+---
+import { render } from 'astro:content';
+import { Picture } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SongCard from '../../components/produce/SongCard.astro';
+import Steps from '../../components/ui/Steps.astro';
+import Faq from '../../components/ui/Faq.astro';
+import CtaBand from '../../components/ui/CtaBand.astro';
+import Icon from '../../components/ui/Icon.astro';
+import GlitchStrip from '../../components/ui/GlitchStrip.astro';
+import produceLogo from '../../assets/brand/produceumi-logo.png';
+import { getPage, getSongsByYear } from '../../lib/content';
+import { dateParts } from '../../lib/dates';
+
+const [page, years] = await Promise.all([getPage('produce', 'produce'), getSongsByYear()]);
+const { data } = page;
+const { Content } = await render(page);
+
+const statusCopy = {
+  open: { label: 'Sign-ups open', tone: 'go' },
+  waitlist: { label: 'Join the waitlist', tone: 'warn' },
+  closed: { label: 'Sign-ups closed', tone: 'stop' },
+} as const;
+const status = statusCopy[data.status];
+const signupHref = data.signupUrl ?? `/contact?topic=${encodeURIComponent('ProduceUMI')}`;
+const signupExternal = signupHref.startsWith('http');
+
+// UBC's school year starts in September.
+const today = dateParts(new Date());
+const thisYear = today.month >= 9 ? today.year : today.year - 1;
+const yearNote = (year: number) => (year === thisYear ? 'This year' : year === thisYear - 1 ? 'Last year' : '');
+---
+
+<BaseLayout title="ProduceUMI" description={data.intro} ogImagePath="/og-produceumi.jpg" imageAlt="The ProduceUMI logo">
+  <section class="produce-hero theme-navy" aria-labelledby="page-title">
+    <div class="produce-hero__fields" aria-hidden="true"><i></i><i></i></div>
+    <div class="container produce-hero__inner">
+      <div class="produce-hero__logo">
+        <Picture src={produceLogo} alt="" widths={[420, 640, 900, 1280]} sizes="(min-width: 960px) 38vw, 86vw" formats={['avif', 'webp']} priority />
+      </div>
+      <div class="produce-hero__copy">
+        <p class="eyebrow"><span class="eyebrow__index">A3</span><span>A UMI workshop</span></p>
+        <h1 class="visually-hidden" id="page-title">{data.title}</h1>
+        <p class="produce-hero__intro subtitle">{data.intro}</p>
+        <p class={`produce-status produce-status--${status.tone}`}>
+          <span class="produce-status__light" aria-hidden="true"></span>
+          <span>{status.label}</span>
+          {data.statusNote && <span class="produce-status__note">{data.statusNote}</span>}
+          {data.sample && <span class="sample-tag">Sample</span>}
+        </p>
+        <div class="btn-row">
+          <a class="btn" href={signupHref} target={signupExternal ? '_blank' : undefined} rel={signupExternal ? 'noopener noreferrer' : undefined}>
+            <span class="btn__label">Make a song with us</span>
+            <Icon name={signupExternal ? 'arrow-up-right' : 'arrow-right'} />
+          </a>
+          <a class="btn btn--ghost" href="#songs">
+            <Icon name="headphones" />
+            <span class="btn__label">Hear the songs</span>
+          </a>
+        </div>
+      </div>
+    </div>
+    <GlitchStrip seed="produce-hero" height={18} class="produce-hero__strip" />
+  </section>
+
+  <section class="produce-how theme-night section" aria-labelledby="how-title">
+    <div class="container produce-how__inner">
+      <div class="produce-how__about">
+        <h2 class="produce-how__title display" id="how-title" data-reveal="stutter">How it works</h2>
+        <div class="prose">
+          <Content />
+        </div>
+      </div>
+      <Steps steps={data.steps} />
+    </div>
+  </section>
+
+  <section class="songs theme-night" id="songs" aria-labelledby="songs-title">
+    <div class="container">
+      <header class="songs__head">
+        <p class="eyebrow"><span class="eyebrow__index">02</span><span>Made in the workshop</span></p>
+        <h2 class="songs__title display" id="songs-title" data-reveal="stutter">The songs</h2>
+      </header>
+      {
+        years.length === 0 ? (
+          <p class="songs__empty serif">The first songs are still in the studio. Check back soon.</p>
+        ) : (
+          years.map(({ year, label, songs }) => (
+            <div class="songs__year">
+              <h3 class="songs__year-label">
+                <span class="display">{label}</span>
+                {yearNote(year) && <span class="songs__year-note">{yearNote(year)}</span>}
+              </h3>
+              <div class="songs__grid">
+                {songs.map((song, i) => (
+                  <SongCard song={song} index={i} />
+                ))}
+              </div>
+            </div>
+          ))
+        )
+      }
+    </div>
+  </section>
+
+  {
+    data.faq.length > 0 && (
+      <section class="theme-night section" aria-label="Frequently asked questions">
+        <div class="container">
+          <Faq items={data.faq} title="ProduceUMI FAQ" id="produce-faq" />
+        </div>
+      </section>
+    )
+  }
+
+  <CtaBand
+    title="Got a song idea?"
+    text="Bring a voice memo, some lyrics or a finished demo. We'll help you turn it into a track."
+    href={signupHref}
+    label="Make a song with us"
+    external={signupExternal}
+  />
+</BaseLayout>
+
+<style>
+  .produce-hero {
+    position: relative;
+    overflow: hidden;
+    padding-top: calc(var(--header-h) + var(--space-2xl));
+    padding-bottom: var(--space-3xl);
+  }
+
+  .produce-hero__fields i {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+  }
+
+  .produce-hero__fields i:nth-child(1) {
+    top: 10%;
+    right: 4%;
+    width: 46vw;
+    height: 40vw;
+    background: radial-gradient(closest-side, rgb(44 82 224 / 0.6), transparent);
+  }
+
+  .produce-hero__fields i:nth-child(2) {
+    bottom: -10%;
+    left: -6%;
+    width: 36vw;
+    height: 26vw;
+    background: radial-gradient(closest-side, rgb(255 90 43 / 0.22), transparent);
+  }
+
+  .produce-hero__inner {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-xl);
+    align-items: center;
+  }
+
+  .produce-hero__copy {
+    display: grid;
+    gap: var(--space-m);
+    justify-items: start;
+  }
+
+  .produce-hero__intro {
+    max-width: 30ch;
+    font-size: var(--step-3);
+  }
+
+  .produce-status {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 0.7rem;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tone);
+  }
+
+  .produce-status--go { --tone: var(--mint); }
+  .produce-status--warn { --tone: var(--sun); }
+  .produce-status--stop { --tone: var(--orange); }
+
+  .produce-status__light {
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    background: var(--tone);
+    box-shadow: 0 0 10px var(--tone);
+  }
+
+  .produce-status__note {
+    width: 100%;
+    font-family: var(--font-sans);
+    font-size: var(--step--1);
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--fg-muted);
+  }
+
+  .produce-hero__logo {
+    justify-self: center;
+    width: min(88%, 34rem);
+  }
+
+  .produce-hero__logo :global(img) {
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(0 0 30px rgb(147 163 230 / 0.35));
+  }
+
+  :global(.produce-hero__strip) {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+  .produce-how__inner {
+    display: grid;
+    gap: var(--space-2xl);
+  }
+
+  .produce-how__about {
+    display: grid;
+    gap: var(--space-l);
+    align-content: start;
+  }
+
+  @media (min-width: 960px) {
+    .produce-how__about {
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      align-items: end;
+      gap: var(--space-3xl);
+    }
+  }
+
+  .produce-how__title,
+  .songs__title {
+    font-size: var(--display-xl);
+    font-weight: 900;
+    line-height: 0.9;
+  }
+
+  .produce-how .prose {
+    max-width: 60ch;
+    font-size: var(--step-1);
+  }
+
+  .songs {
+    padding-bottom: var(--section);
+  }
+
+  .songs__head {
+    display: grid;
+    gap: var(--space-s);
+    margin-bottom: var(--space-2xl);
+  }
+
+  .songs__year + .songs__year {
+    margin-top: var(--space-3xl);
+  }
+
+  .songs__year-label {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: var(--space-xl);
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--line-strong);
+  }
+
+  .songs__year-label .display {
+    font-size: var(--display-m);
+    font-weight: 900;
+    color: var(--peri);
+  }
+
+  .songs__year-note {
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+
+  .songs__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+    gap: var(--space-2xl) var(--space-xl);
+  }
+
+  .songs__empty {
+    font-size: var(--step-3);
+    color: var(--fg-muted);
+  }
+
+  @media (min-width: 960px) {
+    .produce-hero__inner {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .produce-hero__copy {
+      order: 1;
+    }
+
+    .produce-hero__logo {
+      order: 2;
+      justify-self: end;
+    }
+  }
+</style>

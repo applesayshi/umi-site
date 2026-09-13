@@ -1,0 +1,283 @@
+---
+import { Picture, getImage } from 'astro:assets';
+import { getEntry } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Lightbox from '../../components/gallery/Lightbox.astro';
+import DateStamp from '../../components/ui/DateStamp.astro';
+import Icon from '../../components/ui/Icon.astro';
+import { getAlbums } from '../../lib/content';
+import { longDate } from '../../lib/dates';
+import { fitStyle } from '../../lib/fit';
+
+export const getStaticPaths = (async () => {
+  const albums = await getAlbums();
+  return albums.map((album) => ({ params: { slug: album.id }, props: { album, others: albums.filter((a) => a.id !== album.id).slice(0, 3) } }));
+}) satisfies GetStaticPaths;
+
+const { album, others } = Astro.props;
+const { data } = album;
+const event = data.event ? await getEntry(data.event) : undefined;
+
+// Large renditions for the lightbox (the grid uses smaller responsive images).
+const full = await Promise.all(
+  data.photos.map(async (photo) => {
+    const widths = [960, 1600, 2200].filter((w) => w <= photo.src.width);
+    const sizes = widths.length ? widths : [photo.src.width];
+    const renditions = await Promise.all(sizes.map((w) => getImage({ src: photo.src, width: w, format: 'webp', quality: 80 })));
+    return {
+      src: renditions[renditions.length - 1].src,
+      srcset: renditions.map((r, i) => `${r.src} ${sizes[i]}w`).join(', '),
+    };
+  }),
+);
+---
+
+<BaseLayout title={`${data.title} photos`} description={`${data.photos.length} photos from ${data.title}, ${longDate(data.date)}.`} image={data.cover} imageAlt={data.coverAlt}>
+  <section class="album-page theme-night" aria-labelledby="album-title">
+    <div class="container">
+      <header class="album-page__head">
+        <a class="link-arrow" href="/gallery">
+          <Icon name="arrow-left" />
+          <span>All albums</span>
+        </a>
+        <p class="eyebrow">
+          <span class="eyebrow__index">Roll</span>
+          <span>{longDate(data.date)}</span>
+          {data.sample && <span class="sample-tag">Sample</span>}
+        </p>
+        <h1 class="album-page__title display" id="album-title" style={fitStyle(data.title)}>
+          <span class="album-page__title-inner">{data.title}</span>
+        </h1>
+        <p class="album-page__meta">
+          <span>{data.photos.length} photos</span>
+          {data.photographer && <span>Photos by {data.photographer}</span>}
+          {
+            event && (
+              <a class="link-arrow" href={`/events/${event.id}`}>
+                <span>About the show</span>
+                <Icon name="arrow-up-right" />
+              </a>
+            )
+          }
+        </p>
+      </header>
+
+      <ul class="masonry" role="list">
+        {
+          data.photos.map((photo, i) => (
+            <li class="masonry__item" id={`photo-${i + 1}`} data-reveal style={`--i:${i % 3}`}>
+              <button
+                class="masonry__button"
+                type="button"
+                data-lightbox-src={full[i].src}
+                data-lightbox-srcset={full[i].srcset}
+                data-lightbox-alt={photo.alt}
+                data-lightbox-caption={photo.caption ?? ''}
+              >
+                <span class="visually-hidden">Open photo {i + 1} of {data.photos.length}:</span>
+                <span class="masonry__frame" data-flash>
+                  <Picture
+                    src={photo.src}
+                    alt={photo.alt}
+                    widths={[360, 540, 720, 960]}
+                    sizes="(min-width: 1100px) 31vw, (min-width: 640px) 46vw, 92vw"
+                    formats={['avif', 'webp']}
+                  />
+                  <DateStamp date={data.date} class="masonry__stamp" />
+                </span>
+                {photo.caption && <span class="masonry__caption">{photo.caption}</span>}
+              </button>
+            </li>
+          ))
+        }
+      </ul>
+
+      {
+        others.length > 0 && (
+          <nav class="album-page__others" aria-label="More albums">
+            <h2 class="display">More rolls</h2>
+            <ul role="list">
+              {others.map((other) => (
+                <li>
+                  <a href={`/gallery/${other.id}`} class="other">
+                    <span class="other__img">
+                      <Picture src={other.data.cover} alt="" widths={[240, 360]} sizes="12rem" formats={['avif', 'webp']} />
+                    </span>
+                    <span class="other__title display" style={fitStyle(other.data.title)}>{other.data.title}</span>
+                    <span class="other__count">{other.data.photos.length} photos</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )
+      }
+    </div>
+  </section>
+  <Lightbox />
+</BaseLayout>
+
+<style>
+  .album-page {
+    padding-top: calc(var(--header-h) + var(--space-2xl));
+    padding-bottom: var(--section);
+  }
+
+  .album-page__head {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-s);
+    margin-bottom: var(--space-2xl);
+    container-type: inline-size;
+  }
+
+  .album-page__title {
+    font-size: min(var(--display-xl), 100cqi / var(--fit, 0.01));
+    font-weight: 900;
+    line-height: 0.84;
+  }
+
+  .album-page__title-inner {
+    display: inline-block;
+    animation: rise-in var(--dur-slower) var(--ease-out) both 60ms;
+  }
+
+  .album-page__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 1.5rem;
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+
+  .masonry {
+    columns: 1;
+    column-gap: 1rem;
+  }
+
+  .masonry__item {
+    break-inside: avoid;
+    margin-bottom: 1rem;
+    scroll-margin-top: calc(var(--header-h) + 1rem);
+  }
+
+  .masonry__button {
+    display: grid;
+    gap: 0.5rem;
+    width: 100%;
+    text-align: left;
+    cursor: zoom-in;
+  }
+
+  .masonry__frame {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    background: var(--night-800);
+  }
+
+  .masonry__frame :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    transition: transform var(--dur-cinematic) var(--ease-out), filter var(--dur-slow);
+  }
+
+  .masonry__frame :global(.masonry__stamp) {
+    position: absolute;
+    right: 0.7rem;
+    bottom: 0.6rem;
+    z-index: 3;
+    font-size: 0.8rem;
+  }
+
+  .masonry__caption {
+    font-family: var(--font-serif);
+    font-style: italic;
+    color: var(--fg-muted);
+  }
+
+  @media (hover: hover) {
+    .masonry__button:hover :global(img) {
+      transform: scale(1.03);
+    }
+  }
+
+  @media (min-width: 640px) {
+    .masonry {
+      columns: 2;
+    }
+  }
+
+  @media (min-width: 1100px) {
+    .masonry {
+      columns: 3;
+    }
+  }
+
+  .album-page__others {
+    margin-top: var(--space-3xl);
+    padding-top: var(--space-2xl);
+    border-top: 1px solid var(--line);
+  }
+
+  .album-page__others h2 {
+    margin-bottom: var(--space-l);
+    font-size: var(--display-m);
+    font-weight: 900;
+  }
+
+  .album-page__others ul {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+    gap: var(--space-l);
+  }
+
+  .other {
+    display: grid;
+    gap: 0.4rem;
+    color: inherit;
+    text-decoration: none;
+    container-type: inline-size;
+  }
+
+  .other__img {
+    display: block;
+    aspect-ratio: 3 / 2;
+    overflow: hidden;
+  }
+
+  .other__img :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--dur-slow) var(--ease-out);
+  }
+
+  .other:hover .other__img :global(img) {
+    transform: scale(1.05);
+  }
+
+  .other__title {
+    font-size: min(clamp(0.95rem, 0.85rem + 0.4vw, 1.2rem), 100cqi / var(--fit, 0.01));
+  }
+
+  .other__count {
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .album-page__title-inner {
+      animation: none;
+    }
+  }
+</style>

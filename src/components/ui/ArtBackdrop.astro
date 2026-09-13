@@ -1,0 +1,265 @@
+---
+/**
+ * The club's "Brechella" xerox art, printed into the background like a riso layer and faded into the page.
+ * Decorative only. The stencils come from `npm run art` (src/assets/Art → src/assets/backdrops) and are
+ * tinted with CSS masks: a fine halftone screen in the main ink plus a faint orange misprint.
+ *
+ *   One piece: a large print on one side of a hero or section.
+ *     <ArtBackdrop slot="backdrop" pieces={['disc']} />                    (in a PageHero, replacing its glow)
+ *     <ArtBackdrop pieces={['guitar']} placement="section" strength={0.26} />
+ *   Several pieces: one big borderless blend of all of them, fixed behind the whole page.
+ *     <ArtBackdrop pieces={['crowd', 'guitar', 'desk', 'disc']} placement="page" />
+ *
+ * In a section, the content after it needs `position: relative` so it paints on top. The page blend sits
+ * behind everything, so the sections above it need transparent backgrounds.
+ */
+import { getImage } from 'astro:assets';
+import desk from '../../assets/backdrops/brechella-desk.png';
+import crowd from '../../assets/backdrops/brechella-crowd.png';
+import guitar from '../../assets/backdrops/brechella-guitar.png';
+import disc from '../../assets/backdrops/brechella-disc.png';
+import deskSoft from '../../assets/backdrops/brechella-desk-soft.png';
+import crowdSoft from '../../assets/backdrops/brechella-crowd-soft.png';
+import guitarSoft from '../../assets/backdrops/brechella-guitar-soft.png';
+import discSoft from '../../assets/backdrops/brechella-disc-soft.png';
+
+const ART = { desk, crowd, guitar, disc } as const;
+/** Copies with their edges faded away, so blended pieces melt into each other. */
+const SOFT = { desk: deskSoft, crowd: crowdSoft, guitar: guitarSoft, disc: discSoft } as const;
+export type ArtPiece = keyof typeof ART;
+
+interface Props {
+  pieces: ArtPiece[];
+  /** Side a single print sits on; it fades out towards the other side and the bottom. */
+  side?: 'left' | 'right';
+  /** Main ink colour. */
+  ink?: string;
+  /** How strongly it prints, 0 to 1. Keep it low behind body text. */
+  strength?: number;
+  /** hero: centred below the fixed header. section: anchored to the top of a section. page: fixed behind the whole page. */
+  placement?: 'hero' | 'section' | 'page';
+  class?: string;
+}
+
+const { pieces, side = 'right', ink = 'var(--peri)', strength = 0.5, placement = 'hero', class: className } = Astro.props;
+const layout = pieces.length > 1 ? 'blend' : 'single';
+
+// Single prints use the stencil at its own size: resampling adds soft grey edges to a crisp mask,
+// which makes the file bigger rather than smaller. Soft copies are already small.
+const urls = await Promise.all(
+  pieces.map(async (name) => {
+    const src = layout === 'blend' ? SOFT[name] : ART[name];
+    const image = await getImage({ src, format: 'webp', width: Math.min(src.width, 1200), quality: 72 });
+    return `url("${image.src}")`;
+  }),
+);
+---
+
+<div
+  class:list={['art', `art--${layout}`, `art--${side}`, `art--in-${placement}`, className]}
+  aria-hidden="true"
+  style={`--art-ink:${ink};--art-strength:${strength}`}
+  data-art-masks={urls.join(', ')}
+>
+  {
+    layout === 'blend' ? (
+      <>
+        <span class="art__blend art__blend--misprint" />
+        <span class="art__blend" />
+      </>
+    ) : (
+      <span class="art__print">
+        <span class="art__ink art__ink--misprint" />
+        <span class="art__ink" />
+      </span>
+    )
+  }
+</div>
+
+<style>
+  /* Hidden until its images are ready (see the script below), then it fades in. */
+  .art {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 900ms var(--ease-out);
+  }
+
+  .art.is-ready {
+    opacity: var(--art-reveal, 1);
+  }
+
+  /* The halftone screen every print is cut from. */
+  .art__ink,
+  .art__blend {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle, var(--art-ink) 0 48%, transparent 58%) 0 0 / 3px 3px;
+    opacity: var(--art-strength);
+  }
+
+  /* A second, offset pass in orange, like a riso drum that slipped. */
+  .art__ink--misprint,
+  .art__blend--misprint {
+    background: var(--orange);
+    opacity: calc(var(--art-strength) * 0.16);
+  }
+
+  /* ---- One large print, bleeding off its side ---- */
+
+  /* Fade the layer into the page: full strength on its side, gone towards the text and the bottom. */
+  .art--single.art--right {
+    -webkit-mask-image: linear-gradient(to left, #000 35%, transparent 90%), linear-gradient(to top, transparent, #000 35%);
+    -webkit-mask-composite: source-in;
+    mask-image: linear-gradient(to left, #000 35%, transparent 90%), linear-gradient(to top, transparent, #000 35%);
+    mask-composite: intersect;
+  }
+
+  .art--single.art--left {
+    -webkit-mask-image: linear-gradient(to right, #000 35%, transparent 90%), linear-gradient(to top, transparent, #000 35%);
+    -webkit-mask-composite: source-in;
+    mask-image: linear-gradient(to right, #000 35%, transparent 90%), linear-gradient(to top, transparent, #000 35%);
+    mask-composite: intersect;
+  }
+
+  .art__print {
+    position: absolute;
+    top: calc(50% + var(--header-h) / 2);
+    display: block;
+    width: clamp(20rem, 46vw, 42rem);
+    aspect-ratio: 1;
+    translate: 0 -50%;
+    /* Feather the scan's square edges so it melts into the page. */
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 14%, #000 86%, transparent), linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
+    -webkit-mask-composite: source-in;
+    mask-image: linear-gradient(to right, transparent, #000 14%, #000 86%, transparent), linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
+    mask-composite: intersect;
+  }
+
+  .art--right .art__print {
+    right: -6%;
+  }
+
+  .art--left .art__print {
+    left: -6%;
+  }
+
+  .art--in-section .art__print {
+    top: 0;
+    width: clamp(18rem, 42vw, 38rem);
+    translate: none;
+  }
+
+  .art__ink {
+    -webkit-mask: var(--art-masks) center / cover no-repeat;
+    mask: var(--art-masks) center / cover no-repeat;
+  }
+
+  .art__ink--misprint {
+    translate: 1.2% 0.8%;
+  }
+
+  /* ---- Blend: every piece at once, large and overlapping, with no edges ---- */
+  .art--in-page {
+    position: fixed;
+    z-index: -1;
+  }
+
+  /*
+   * Mask layers follow the order of `pieces`. Wide screens: the first print fills the top right, the second
+   * the left, the third the bottom right and the fourth the bottom left, each spilling past the edges.
+   */
+  .art__blend {
+    -webkit-mask-image: var(--art-masks);
+    mask-image: var(--art-masks);
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: 70vmax, 60vmax, 62vmax, 50vmax;
+    mask-size: 70vmax, 60vmax, 62vmax, 50vmax;
+    -webkit-mask-position:
+      right -14vmax top -16vmax,
+      left -16vmax top 6%,
+      right -8vmax bottom -22vmax,
+      left 22% bottom -20vmax;
+    mask-position:
+      right -14vmax top -16vmax,
+      left -16vmax top 6%,
+      right -8vmax bottom -22vmax,
+      left 22% bottom -20vmax;
+  }
+
+  .art__blend--misprint {
+    translate: 5px 4px;
+  }
+
+  /* Tall screens: the prints stack down the page instead. */
+  @media (max-aspect-ratio: 4 / 5) {
+    .art__blend {
+      -webkit-mask-size: 125vw, 115vw, 120vw, 100vw;
+      mask-size: 125vw, 115vw, 120vw, 100vw;
+      -webkit-mask-position:
+        right -40vw top -10vw,
+        left -45vw top 30%,
+        right -45vw top 62%,
+        left -20vw bottom -25vw;
+      mask-position:
+        right -40vw top -10vw,
+        left -45vw top 30%,
+        right -45vw top 62%,
+        left -20vw bottom -25vw;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .art {
+      transition: none;
+    }
+  }
+
+  @media (max-width: 959px) {
+    .art--single {
+      --art-reveal: 0.6;
+    }
+
+    /* Phones stack the hero, so a single print sits across the top (behind the title) and fades down,
+       instead of behind the intro text. */
+    .art--in-hero.art--single {
+      -webkit-mask-image: linear-gradient(to top, transparent 25%, #000 75%);
+      mask-image: linear-gradient(to top, transparent 25%, #000 75%);
+    }
+
+    .art--in-hero .art__print {
+      top: calc(var(--header-h) - 1.5rem);
+      right: auto;
+      left: 50%;
+      width: min(125vw, 42rem);
+      translate: -50% 0;
+    }
+  }
+</style>
+
+<script>
+  // The art is decoration, so it waits until the page has loaded (never competing with photos and fonts
+  // for the network), decodes its images, then fades in.
+  const reveal = () => {
+    document.querySelectorAll<HTMLElement>('.art[data-art-masks]').forEach((art) => {
+      const masks = art.dataset.artMasks ?? '';
+      const sources = [...masks.matchAll(/url\("([^"]+)"\)/g)].map((match) => match[1]);
+      Promise.all(
+        sources.map((src) => {
+          const image = new Image();
+          image.src = src;
+          return image.decode().catch(() => undefined);
+        }),
+      ).then(() => {
+        art.style.setProperty('--art-masks', masks);
+        art.classList.add('is-ready');
+      });
+    });
+  };
+
+  if (document.readyState === 'complete') reveal();
+  else window.addEventListener('load', reveal, { once: true });
+</script>

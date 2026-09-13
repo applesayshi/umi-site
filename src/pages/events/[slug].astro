@@ -1,0 +1,452 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Photo from '../../components/ui/Photo.astro';
+import Icon from '../../components/ui/Icon.astro';
+import TicketStub from '../../components/events/TicketStub.astro';
+import { EVENT_TYPE_LABELS, eventEnd, getAlbumForEvent, getEvents, getSettings } from '../../lib/content';
+import { longDate, timeRange } from '../../lib/dates';
+import { googleCalendarUrl } from '../../lib/ics';
+import { fitStyle } from '../../lib/fit';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths = (async () => {
+  const events = await getEvents();
+  return events.map((event) => ({ params: { slug: event.id }, props: { event } }));
+}) satisfies GetStaticPaths;
+
+const { event } = Astro.props;
+const { data } = event;
+const { Content } = await render(event);
+const [settings, album, allEvents] = await Promise.all([getSettings(), getAlbumForEvent(event.id), getEvents()]);
+
+const end = eventEnd(event);
+const isPast = end <= new Date();
+const site = Astro.site ?? new URL('https://www.ubcmusicinitiative.com');
+const pageUrl = new URL(`/events/${event.id}`, site).href;
+const location = [data.venue, data.address].filter(Boolean).join(', ');
+const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location || settings.office.building)}`;
+const icsEvent = { uid: `${event.id}@ubcmusicinitiative.com`, title: data.title, start: data.start, end, description: data.summary, location, url: pageUrl };
+const more = allEvents.filter((e) => e.id !== event.id && eventEnd(e) > new Date()).slice(0, 3);
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Event',
+  name: data.title,
+  description: data.summary,
+  startDate: data.start.toISOString(),
+  endDate: end.toISOString(),
+  eventStatus: 'https://schema.org/EventScheduled',
+  eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+  location: {
+    '@type': 'Place',
+    name: data.venue,
+    address: data.address ?? settings.office.address,
+  },
+  organizer: { '@type': 'Organization', name: settings.siteName, url: site.href },
+  url: pageUrl,
+  ...(data.cover ? { image: [new URL(data.cover.src, site).href] } : {}),
+  ...(data.ticketUrl ? { offers: { '@type': 'Offer', url: data.ticketUrl, availability: 'https://schema.org/InStock' } } : {}),
+};
+---
+
+<BaseLayout title={data.title} description={data.summary} image={data.cover} imageAlt={data.coverAlt} jsonLd={[jsonLd]}>
+  <article class="event theme-night">
+    <div class="container event__inner">
+      <div class="event__copy">
+        <a class="link-arrow event__back" href="/events">
+          <Icon name="arrow-left" />
+          <span>All events</span>
+        </a>
+        <p class="eyebrow">
+          <span class="eyebrow__index">{EVENT_TYPE_LABELS[data.type]}</span>
+          <span>{isPast ? 'Past show' : 'Upcoming'}</span>
+          {data.sample && <span class="sample-tag">Sample</span>}
+        </p>
+        <h1 class="event__title display" style={fitStyle(data.title)}>
+          <span class="event__title-inner">{data.title}</span>
+        </h1>
+        <p class="event__summary subtitle">{data.summary}</p>
+
+        <dl class="event__facts">
+          <div>
+            <dt><Icon name="calendar" /> Date</dt>
+            <dd>{longDate(data.start)}</dd>
+          </div>
+          {
+            !data.hideTime && (
+              <div>
+                <dt><Icon name="clock" /> Time</dt>
+                <dd>{timeRange(data.start, data.end)}</dd>
+              </div>
+            )
+          }
+          <div>
+            <dt><Icon name="map-pin" /> Where</dt>
+            <dd>
+              {data.venue}
+              {data.address && <span class="event__address">{data.address}</span>}
+              <a class="link-arrow event__map" href={mapUrl} target="_blank" rel="noopener noreferrer">
+                <span>Map</span>
+                <Icon name="arrow-up-right" />
+              </a>
+            </dd>
+          </div>
+          {
+            (data.priceMember || data.priceGeneral) && (
+              <div>
+                <dt><Icon name="ticket" /> Entry</dt>
+                <dd>
+                  {data.priceMember && <span>Members {data.priceMember}</span>}
+                  {data.priceMember && data.priceGeneral && <span aria-hidden="true"> · </span>}
+                  {data.priceGeneral && <span>General {data.priceGeneral}</span>}
+                </dd>
+              </div>
+            )
+          }
+        </dl>
+
+        {
+          isPast ? (
+            <div class="event__ended">
+              <p class="serif">This show has wrapped.</p>
+              <div class="btn-row">
+                {album && (
+                  <a class="btn" href={`/gallery/${album.id}`}>
+                    <Icon name="images" />
+                    <span class="btn__label">See the photos</span>
+                  </a>
+                )}
+                <a class="btn btn--ghost" href="/events">
+                  <span class="btn__label">What's next</span>
+                </a>
+              </div>
+            </div>
+          ) : (
+            <div class="event__actions">
+              <div class="btn-row">
+                {data.ticketUrl && (
+                  <a class="btn" href={data.ticketUrl} target="_blank" rel="noopener noreferrer">
+                    <Icon name="ticket" />
+                    <span class="btn__label">Get tickets</span>
+                  </a>
+                )}
+                {data.performerUrl && (
+                  <a class="btn btn--hot" href={data.performerUrl} target="_blank" rel="noopener noreferrer">
+                    <Icon name="microphone" />
+                    <span class="btn__label">Sign up to perform</span>
+                  </a>
+                )}
+                {!data.ticketUrl && settings.links.membership && (
+                  <a class="btn" href="/join">
+                    <span class="btn__label">Members get in free</span>
+                    <Icon name="arrow-right" />
+                  </a>
+                )}
+              </div>
+              <div class="event__secondary">
+                <a class="link-arrow" href={googleCalendarUrl(icsEvent)} target="_blank" rel="noopener noreferrer">
+                  <Icon name="calendar-plus" />
+                  <span>Google Calendar</span>
+                </a>
+                <a class="link-arrow" href={`/events/${event.id}.ics`} download>
+                  <Icon name="calendar-plus" />
+                  <span>Apple / Outlook (.ics)</span>
+                </a>
+                <button class="link-arrow event__share" type="button" data-share data-url={pageUrl} data-title={data.title}>
+                  <Icon name="share" />
+                  <span data-share-label>Share</span>
+                </button>
+              </div>
+            </div>
+          )
+        }
+      </div>
+
+      {
+        data.cover && (
+          <div class="event__poster">
+            <Photo
+              src={data.cover}
+              alt={data.coverAlt ?? ''}
+              date={data.start}
+              sizes="(min-width: 960px) 40vw, 90vw"
+              widths={[480, 720, 960, 1280]}
+              aspect="4 / 5"
+              frame="print"
+              tape="corners"
+              tilt={2}
+              priority
+            />
+          </div>
+        )
+      }
+    </div>
+
+    <div class="container event__body">
+      <div class="prose">
+        <Content />
+      </div>
+    </div>
+
+    {
+      album && (
+        <section class="container event__album" aria-labelledby="album-title">
+          <div class="event__album-head">
+            <h2 class="display event__album-title" id="album-title">
+              From the floor
+            </h2>
+            <a class="link-arrow" href={`/gallery/${album.id}`}>
+              <span>Full album · {album.data.photos.length} photos</span>
+              <Icon name="arrow-up-right" />
+            </a>
+          </div>
+          <ul class="event__album-grid" role="list">
+            {album.data.photos.slice(0, 4).map((photo, i) => (
+              <li data-reveal style={`--i:${i}`}>
+                <a href={`/gallery/${album.id}#photo-${i + 1}`} class="event__album-link">
+                  <Photo src={photo.src} alt={photo.alt} sizes="(min-width: 900px) 22vw, 45vw" widths={[320, 480, 640]} aspect="1 / 1" />
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    {
+      more.length > 0 && (
+        <section class="event__more" aria-labelledby="more-title">
+          <div class="container">
+            <h2 class="display event__more-title" id="more-title">
+              More upcoming events
+            </h2>
+            <ul class="event__more-list" role="list">
+              {more.map((e, i) => (
+                <li>
+                  <TicketStub event={e} index={i} />
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )
+    }
+  </article>
+</BaseLayout>
+
+<style>
+  .event {
+    padding-top: calc(var(--header-h) + var(--space-2xl));
+    padding-bottom: var(--section);
+  }
+
+  .event__inner {
+    display: grid;
+    gap: var(--space-2xl);
+    align-items: start;
+  }
+
+  .event__copy {
+    display: grid;
+    gap: var(--space-m);
+    justify-items: start;
+    container-type: inline-size;
+  }
+
+  .event__back {
+    margin-bottom: var(--space-s);
+  }
+
+  .event__title {
+    font-size: min(var(--display-xl), 100cqi / var(--fit, 0.01));
+    font-weight: 900;
+    line-height: 0.84;
+  }
+
+  .event__title-inner {
+    display: inline-block;
+    animation: rise-in var(--dur-slower) var(--ease-out) both 60ms;
+  }
+
+  .event__summary {
+    max-width: 34ch;
+    font-size: var(--step-3);
+  }
+
+  .event__facts {
+    display: grid;
+    width: 100%;
+    margin: var(--space-s) 0 0;
+    border-top: 1px solid var(--line-strong);
+  }
+
+  .event__facts > div {
+    display: grid;
+    grid-template-columns: 7.5rem 1fr;
+    gap: 1rem;
+    padding-block: 0.9rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .event__facts dt {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+
+  .event__facts dd {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.2rem 0.75rem;
+    margin: 0;
+    font-weight: 600;
+  }
+
+  .event__address {
+    flex-basis: 100%;
+    font-weight: 400;
+    font-size: var(--step--1);
+    color: var(--fg-muted);
+  }
+
+  .event__map {
+    min-height: auto;
+  }
+
+  .event__actions,
+  .event__ended {
+    display: grid;
+    gap: var(--space-m);
+    margin-top: var(--space-s);
+  }
+
+  .event__ended .serif {
+    font-size: var(--step-3);
+    font-style: italic;
+    color: var(--peri);
+  }
+
+  .event__secondary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.5rem;
+  }
+
+  .event__share {
+    cursor: pointer;
+  }
+
+  .event__poster {
+    width: min(100%, 34rem);
+    justify-self: center;
+  }
+
+  .event__body {
+    margin-top: var(--space-3xl);
+  }
+
+  .event__body .prose:empty {
+    display: none;
+  }
+
+  .event__album {
+    margin-top: var(--space-3xl);
+  }
+
+  .event__album-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: var(--space-l);
+  }
+
+  .event__album-title,
+  .event__more-title {
+    font-size: var(--display-l);
+    font-weight: 900;
+  }
+
+  .event__album-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem;
+  }
+
+  .event__album-link {
+    display: block;
+  }
+
+  .event__more {
+    margin-top: var(--space-3xl);
+    padding-top: var(--space-3xl);
+    border-top: 1px solid var(--line);
+  }
+
+  .event__more-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+    gap: var(--space-xl) var(--space-l);
+    margin-top: var(--space-xl);
+    padding-inline: 0.5rem;
+  }
+
+  @media (min-width: 900px) {
+    .event__album-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  @media (min-width: 960px) {
+    .event__inner {
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    }
+
+    .event__poster {
+      position: sticky;
+      top: calc(var(--header-h) + var(--space-l));
+      justify-self: end;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .event__title-inner {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('[data-share]').forEach((button) => {
+    const label = button.querySelector('[data-share-label]');
+    button.addEventListener('click', async () => {
+      const url = button.dataset.url ?? location.href;
+      const title = button.dataset.title ?? document.title;
+      if (navigator.share) {
+        try {
+          await navigator.share({ title, url });
+        } catch {
+          /* dismissed */
+        }
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(url);
+        if (label) {
+          label.textContent = 'Link copied';
+          setTimeout(() => (label.textContent = 'Share'), 2400);
+        }
+      } catch {
+        window.prompt('Copy this link:', url);
+      }
+    });
+  });
+</script>

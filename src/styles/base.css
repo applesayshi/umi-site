@@ -1,0 +1,283 @@
+/* ==========================================================================
+   Reset + base typography
+   ========================================================================== */
+
+@layer reset {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    color-scheme: dark;
+    scroll-padding-top: calc(var(--header-h) + 1.5rem);
+    hanging-punctuation: first last;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    background: var(--night-950);
+    color: var(--chalk);
+    font-family: var(--font-sans);
+    font-size: var(--step-0);
+    font-weight: 400;
+    line-height: 1.6;
+    font-synthesis-weight: none;
+    font-optical-sizing: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: clip;
+  }
+
+  img,
+  picture,
+  svg,
+  video,
+  canvas {
+    display: block;
+    max-width: 100%;
+  }
+
+  img {
+    height: auto;
+  }
+
+  input,
+  button,
+  textarea,
+  select {
+    font: inherit;
+    color: inherit;
+    letter-spacing: inherit;
+  }
+
+  button {
+    cursor: pointer;
+    background: none;
+    border: 0;
+    padding: 0;
+    touch-action: manipulation;
+  }
+
+  a {
+    color: inherit;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.22em;
+    touch-action: manipulation;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin: 0;
+    font-weight: 400;
+    text-wrap: balance;
+  }
+
+  p,
+  figure,
+  blockquote,
+  dl,
+  dd {
+    margin: 0;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ul[role='list'],
+  ol[role='list'] {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  table {
+    border-collapse: collapse;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+}
+
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--focus, var(--peri));
+    outline-offset: 3px;
+  }
+
+  ::selection {
+    background: var(--peri);
+    color: var(--ink);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html:focus-within {
+      scroll-behavior: smooth;
+    }
+  }
+
+  .skip-link {
+    position: fixed;
+    top: 0.75rem;
+    left: 0.75rem;
+    z-index: calc(var(--z-grain) + 1);
+    padding: 0.75rem 1.1rem;
+    background: var(--peri);
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-200%);
+    transition:
+      transform var(--dur-fast) var(--ease-out),
+      opacity var(--dur-fast) linear;
+  }
+
+  .skip-link:focus-visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
+    outline-color: var(--ink);
+  }
+
+  .visually-hidden {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+  }
+
+  /* ---- Layout primitives ---------------------------------------------- */
+  .container {
+    width: 100%;
+    max-width: var(--max);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  .section {
+    position: relative;
+    padding-block: var(--section);
+  }
+
+  .stack > * + * {
+    margin-block-start: var(--stack-space, var(--space-m));
+  }
+
+  /* ---- Type roles ----------------------------------------------------- */
+  /* Expanded heavy caps, like the UMI logo lettering. */
+  .display {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-stretch: 125%;
+    text-transform: uppercase;
+    line-height: 0.94;
+    letter-spacing: -0.012em;
+    font-kerning: normal;
+    overflow-wrap: break-word;
+  }
+
+  /* Nurture-style blurred glow behind a headline: set data-text to the heading text. */
+  .glow-title {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .glow-title::before {
+    content: attr(data-text);
+    content: attr(data-text) / ''; /* empty alt text: the glow copy isn't read aloud */
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    color: var(--glow, var(--peri));
+    filter: blur(0.14em);
+    opacity: 0.55;
+    transform: translate(0.04em, 0.05em);
+    pointer-events: none;
+  }
+
+  /* Tracklist lettering: wide-spaced lowercase mono, like a record's back cover. */
+  .tracked {
+    font-family: var(--font-mono);
+    font-weight: 400;
+    text-transform: lowercase;
+    letter-spacing: 0.32em;
+  }
+
+  .serif {
+    font-family: var(--font-serif);
+    font-weight: 400;
+  }
+
+  .mono {
+    font-family: var(--font-mono);
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8em;
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    font-weight: 500;
+    line-height: 1.3;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--fg-muted);
+  }
+
+  .eyebrow__index {
+    color: var(--hot);
+  }
+
+  .subtitle {
+    font-family: var(--font-serif);
+    font-style: italic;
+    line-height: 1.25;
+    color: var(--peri);
+  }
+
+  .theme-paper .subtitle,
+  .theme-cobalt .subtitle {
+    color: var(--fg);
+  }
+
+  .lede {
+    font-size: var(--step-1);
+    line-height: 1.5;
+    color: var(--fg-muted);
+    max-width: 58ch;
+  }
+
+  .muted {
+    color: var(--fg-muted);
+  }
+
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .nowrap {
+    white-space: nowrap;
+  }
+}

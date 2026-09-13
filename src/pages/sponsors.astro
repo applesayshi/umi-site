@@ -1,0 +1,366 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/layout/PageHero.astro';
+import CtaBand from '../components/ui/CtaBand.astro';
+import Icon from '../components/ui/Icon.astro';
+import TornEdge from '../components/ui/TornEdge.astro';
+import Scribble from '../components/ui/Scribble.astro';
+import { getPage, getSettings, getSponsors } from '../lib/content';
+import { fitStyle } from '../lib/fit';
+
+const [page, sponsors, settings] = await Promise.all([getPage('sponsorsPage', 'sponsors'), getSponsors(), getSettings()]);
+const { data } = page;
+const tierLabels = { headliner: 'Headliner', support: 'Support', opener: 'Opener', 'member-perk': 'Member perk' } as const;
+const contactHref = `/contact?topic=${encodeURIComponent('Sponsorship')}`;
+---
+
+<BaseLayout title="Sponsors & partners" description={data.intro} image={data.heroPhoto.src} imageAlt={data.heroPhoto.alt}>
+  <PageHero eyebrow="Partner with UMI" index="B3" title={data.title} intro={data.intro} photo={data.heroPhoto} duo="teal">
+    <div class="btn-row sponsors-hero__actions">
+      <a class="btn" href={contactHref}>
+        <Icon name="handshake" />
+        <span class="btn__label">Become a sponsor</span>
+      </a>
+      {data.sample && <span class="sample-tag">Sample page content</span>}
+    </div>
+  </PageHero>
+
+  <section class="partners theme-night section" aria-labelledby="partners-title">
+    <div class="container">
+      <header class="partners__head">
+        <p class="eyebrow"><span class="eyebrow__index">01</span><span>Thank you</span></p>
+        <h2 class="sponsors__title display" id="partners-title" data-reveal="stutter">Our partners</h2>
+      </header>
+      <ul class="wall" role="list">
+        {
+          sponsors.map((sponsor, i) => {
+            const inner = (
+              <>
+                <span class="wall__tier">{tierLabels[sponsor.data.tier]}</span>
+                {sponsor.data.logo ? (
+                  <Image src={sponsor.data.logo} alt={sponsor.data.name} class="wall__logo" width={320} />
+                ) : (
+                  <span class="wall__name display" style={fitStyle(sponsor.data.name)}>{sponsor.data.name}</span>
+                )}
+                {sponsor.data.perk && <span class="wall__perk">{sponsor.data.perk}</span>}
+                {sponsor.data.sample && <span class="sample-tag">Sample</span>}
+              </>
+            );
+            return (
+              <li class="wall__item" data-reveal style={`--i:${i % 4}`}>
+                {sponsor.data.url ? (
+                  <a class="wall__card" href={sponsor.data.url} target="_blank" rel="noopener noreferrer">
+                    {inner}
+                  </a>
+                ) : (
+                  <div class="wall__card">{inner}</div>
+                )}
+              </li>
+            );
+          })
+        }
+        <li class="wall__item" data-reveal>
+          <a class="wall__card wall__card--open" href={contactHref}>
+            <span class="wall__tier">Available</span>
+            <span class="wall__name display">Your name here</span>
+            <span class="wall__perk">Put your brand on UBC's stages.</span>
+            <Icon name="arrow-up-right" size="1.4rem" />
+          </a>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="why theme-paper texture-paper" aria-labelledby="why-title">
+    <TornEdge position="top" seed="sponsors-top" />
+    <div class="container">
+      <header class="why__head">
+        <p class="eyebrow"><span class="eyebrow__index">02</span><span>Why partner with us</span></p>
+        <h2 class="sponsors__title display" id="why-title" data-reveal="stutter">Reach the room</h2>
+        <Scribble variant="burst" class="why__burst" color="var(--orange-ink)" width={3} />
+      </header>
+
+      <dl class="why__stats" style={fitStyle(data.stats.map((stat) => stat.value).join(' '))}>
+        {
+          data.stats.map((stat, i) => (
+            <div class="why__stat" data-reveal style={`--i:${i}`}>
+              <dt>{stat.label}</dt>
+              <dd class="display">{stat.value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+
+      <ul class="why__reasons" role="list">
+        {
+          data.reasons.map((reason, i) => (
+            <li class="reason" data-reveal style={`--i:${i}`}>
+              <span class="reason__num display">0{i + 1}</span>
+              <h3 class="reason__title serif">{reason.title}</h3>
+              <p>{reason.text}</p>
+            </li>
+          ))
+        }
+      </ul>
+
+      <h2 class="sponsors__title display why__tiers-title" data-reveal="stutter">Billing</h2>
+      <ul class="tiers" role="list" style={fitStyle(data.tiers.map((tier) => tier.name).join(' '))}>
+        {
+          data.tiers.map((tier, i) => (
+            <li class:list={['tier', i === data.tiers.length - 1 && 'tier--top']} data-reveal style={`--i:${i}`}>
+              <p class="tier__slot">Slot {i + 1}</p>
+              <h3 class="tier__name display">{tier.name}</h3>
+              <p class="tier__price">{tier.price}</p>
+              <ul class="tier__perks" role="list">
+                {tier.perks.map((perk) => (
+                  <li>
+                    <Icon name="check" size="1em" />
+                    <span>{perk}</span>
+                  </li>
+                ))}
+              </ul>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <CtaBand
+    title="Let's build a night together"
+    text={data.contactText}
+    href={contactHref}
+    label="Start a conversation"
+    secondaryHref={`mailto:${settings.email}?subject=${encodeURIComponent('Sponsorship')}`}
+    secondaryLabel="Email us"
+  />
+</BaseLayout>
+
+<style>
+  .sponsors-hero__actions {
+    align-items: center;
+    margin-top: var(--space-s);
+  }
+
+  .sponsors__title {
+    font-size: var(--display-xl);
+    font-weight: 900;
+    line-height: 0.9;
+  }
+
+  .partners__head,
+  .why__head {
+    position: relative;
+    display: grid;
+    gap: var(--space-s);
+    margin-bottom: var(--space-2xl);
+  }
+
+  .why__head :global(.why__burst) {
+    position: absolute;
+    top: -1.5rem;
+    right: 6%;
+    width: 5rem;
+    height: 5rem;
+  }
+
+  /* Cells draw their own right and bottom rules, so a part-filled last row leaves no grey gap. */
+  .wall {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+    border-top: 1px solid var(--line-strong);
+    border-left: 1px solid var(--line-strong);
+  }
+
+  .wall__item {
+    border-right: 1px solid var(--line-strong);
+    border-bottom: 1px solid var(--line-strong);
+  }
+
+  .wall__card {
+    display: grid;
+    align-content: start;
+    justify-items: start;
+    gap: 0.6rem;
+    height: 100%;
+    min-height: 13rem;
+    padding: 1.5rem;
+    background: var(--night-950);
+    color: inherit;
+    text-decoration: none;
+    transition: background-color var(--dur-base);
+    container-type: inline-size;
+  }
+
+  a.wall__card:hover {
+    background: var(--night-850);
+  }
+
+  .wall__card--open {
+    background: repeating-linear-gradient(-45deg, var(--night-950) 0 12px, var(--night-900) 12px 24px);
+  }
+
+  .wall__card--open .wall__name {
+    color: var(--orange);
+  }
+
+  .wall__tier {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--peri);
+  }
+
+  .wall__name {
+    font-size: min(var(--display-s), 100cqi / var(--fit, 0.01));
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .wall :global(.wall__logo) {
+    max-height: 4.5rem;
+    width: auto;
+    filter: grayscale(1) brightness(1.6);
+  }
+
+  .wall__perk {
+    font-size: var(--step--1);
+    color: var(--fg-muted);
+  }
+
+  .why {
+    position: relative;
+    padding-block: var(--section);
+  }
+
+  /* Flex rather than grid: a short last row stretches instead of leaving an empty grey cell. */
+  .why__stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1px;
+    margin: 0 0 var(--space-2xl);
+    background: var(--line-strong);
+    border: 1px solid var(--line-strong);
+  }
+
+  .why__stat {
+    flex: 1 1 12rem;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 0.3rem;
+    padding: 1.3rem;
+    background: var(--paper-50);
+    container-type: inline-size;
+  }
+
+  .why__stat dt {
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  .why__stat dd {
+    margin: 0;
+    font-size: min(var(--display-l), 100cqi / var(--fit, 0.01));
+    font-weight: 900;
+    line-height: 0.95;
+    color: var(--cobalt-deep);
+  }
+
+  .why__reasons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+    gap: var(--space-xl);
+  }
+
+  .reason {
+    display: grid;
+    gap: 0.5rem;
+    align-content: start;
+  }
+
+  .reason__num {
+    font-size: var(--display-m);
+    font-weight: 900;
+    line-height: 0.95;
+    color: var(--orange-ink);
+  }
+
+  .reason__title {
+    font-size: var(--step-2);
+  }
+
+  .reason p {
+    color: var(--fg-muted);
+  }
+
+  .why__tiers-title {
+    margin-block: var(--space-3xl) var(--space-xl);
+  }
+
+  .tiers {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+    gap: var(--space-l);
+    align-items: stretch;
+  }
+
+  .tier {
+    display: grid;
+    align-content: start;
+    gap: 0.5rem;
+    padding: 1.6rem;
+    border: 2px solid var(--ink);
+    background: var(--paper-50);
+    box-shadow: 6px 6px 0 var(--ink);
+    container-type: inline-size;
+  }
+
+  .tier--top {
+    background: var(--cobalt-deep);
+    color: #ffffff;
+    box-shadow: 6px 6px 0 var(--orange);
+  }
+
+  .tier__slot {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--orange-ink);
+  }
+
+  .tier--top .tier__slot {
+    color: var(--sun);
+  }
+
+  .tier__name {
+    font-size: min(var(--display-m), 100cqi / var(--fit, 0.01));
+    font-weight: 900;
+    line-height: 0.95;
+  }
+
+  .tier__price {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: var(--step-2);
+  }
+
+  .tier__perks {
+    display: grid;
+    gap: 0.45rem;
+    margin-top: 0.6rem;
+    padding-top: 0.9rem;
+    border-top: 1px dashed currentColor;
+  }
+
+  .tier__perks li {
+    display: flex;
+    gap: 0.5rem;
+    align-items: baseline;
+  }
+</style>

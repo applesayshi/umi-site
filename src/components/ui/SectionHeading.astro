@@ -1,0 +1,77 @@
+---
+import { fitStyle } from '../../lib/fit';
+
+interface Props {
+  eyebrow?: string;
+  /** Track-style index shown before the eyebrow, e.g. "A2". */
+  index?: string;
+  title: string;
+  intro?: string;
+  /** Heading level. (A prop named `as` stops astro check from reading this interface.) */
+  tag?: 'h1' | 'h2' | 'h3';
+  size?: 'm' | 'l' | 'xl';
+  id?: string;
+  class?: string;
+}
+
+const { eyebrow, index, title, intro, tag: Tag = 'h2', size = 'l', id, class: className } = Astro.props;
+---
+
+<header class:list={['section-heading', `section-heading--${size}`, className]}>
+  <div class="section-heading__text">
+    {
+      eyebrow && (
+        <p class="eyebrow" data-reveal="fade">
+          {index && <span class="eyebrow__index">{index}</span>}
+          <span>{eyebrow}</span>
+        </p>
+      )
+    }
+    <Tag class="display section-heading__title" id={id} data-reveal="stutter" style={fitStyle(title)}>{title}</Tag>
+    {intro && <p class="lede section-heading__intro" data-reveal style="--i:1">{intro}</p>}
+  </div>
+  {
+    Astro.slots.has('action') && (
+      <div class="section-heading__action" data-reveal style="--i:2">
+        <slot name="action" />
+      </div>
+    )
+  }
+</header>
+
+<style>
+  .section-heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-m) var(--space-xl);
+    margin-bottom: var(--space-2xl);
+  }
+
+  .section-heading__text {
+    flex: 1 1 28rem;
+    display: grid;
+    gap: var(--space-s);
+    max-width: 62rem;
+    container-type: inline-size;
+  }
+
+  .section-heading__title {
+    --size: var(--display-xl);
+    font-size: min(var(--size), 100cqi / var(--fit, 0.01));
+    font-weight: 900;
+  }
+
+  .section-heading--m .section-heading__title {
+    --size: var(--display-l);
+  }
+
+  .section-heading--xl .section-heading__title {
+    --size: var(--display-2xl);
+  }
+
+  .section-heading__intro {
+    margin-top: var(--space-2xs);
+  }
+</style>

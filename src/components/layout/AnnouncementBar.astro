@@ -1,0 +1,109 @@
+---
+import Icon from '../ui/Icon.astro';
+
+interface Props {
+  announcement: { enabled: boolean; text?: string; linkLabel?: string; url?: string };
+  storageKey: string;
+}
+
+const { announcement, storageKey } = Astro.props;
+const show = announcement.enabled && announcement.text;
+---
+
+{
+  show && (
+    <aside class="announcement theme-cobalt" aria-label="Announcement" data-announcement data-key={storageKey}>
+      <div class="announcement__inner">
+        <span class="announcement__dot" aria-hidden="true" />
+        <p class="announcement__text">
+          {announcement.text}
+          {announcement.url && announcement.linkLabel && (
+            <a class="announcement__link" href={announcement.url}>
+              {announcement.linkLabel}
+              <Icon name="arrow-right" size="1em" />
+            </a>
+          )}
+        </p>
+        <button class="announcement__close" type="button" data-announcement-close>
+          <span class="visually-hidden">Dismiss announcement</span>
+          <Icon name="x" size="1rem" />
+        </button>
+      </div>
+    </aside>
+  )
+}
+
+<style>
+  .announcement {
+    position: relative;
+    z-index: calc(var(--z-header) + 1);
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    letter-spacing: 0.06em;
+  }
+
+  :global(html[data-announcement='dismissed']) .announcement {
+    display: none;
+  }
+
+  .announcement__inner {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    max-width: var(--max);
+    min-height: 44px;
+    margin-inline: auto;
+    padding-inline: var(--gutter) 0.25rem;
+  }
+
+  .announcement__dot {
+    flex: none;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--orange);
+    box-shadow: 0 0 0 3px rgb(255 90 43 / 0.3);
+  }
+
+  .announcement__text {
+    flex: 1;
+    padding-block: 0.55rem;
+    line-height: 1.45;
+    text-transform: uppercase;
+  }
+
+  .announcement__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    margin-inline-start: 0.6em;
+    font-weight: 500;
+    text-underline-offset: 0.25em;
+  }
+
+  .announcement__close {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 44px;
+    height: 44px;
+    color: currentColor;
+  }
+
+  .announcement__close:hover {
+    background: rgb(255 255 255 / 0.14);
+  }
+</style>
+
+<script>
+  const bar = document.querySelector<HTMLElement>('[data-announcement]');
+  bar?.querySelector('[data-announcement-close]')?.addEventListener('click', () => {
+    document.documentElement.dataset.announcement = 'dismissed';
+    try {
+      localStorage.setItem('umi-announcement-dismissed', bar.dataset.key ?? '');
+    } catch {
+      /* storage unavailable: dismissal lasts for this page view */
+    }
+    document.querySelector<HTMLElement>('#main')?.focus({ preventScroll: true });
+  });
+</script>

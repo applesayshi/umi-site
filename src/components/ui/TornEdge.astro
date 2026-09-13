@@ -1,0 +1,52 @@
+---
+/** A ragged, torn-paper edge in the section's own background colour. Deterministic per seed. */
+import { seeded } from '../../lib/random';
+
+interface Props {
+  position: 'top' | 'bottom';
+  seed: string;
+  color?: string;
+}
+
+const { position, seed, color = 'var(--bg)' } = Astro.props;
+const rand = seeded(seed);
+const points: string[] = [];
+const steps = 64;
+for (let i = 0; i <= steps; i++) {
+  const x = (i / steps) * 100;
+  const y = 30 + rand() * 55 + (i % 7 === 0 ? rand() * 15 : 0);
+  points.push(`${x.toFixed(2)},${y.toFixed(1)}`);
+}
+const path = `M0,100 L${points.join(' L')} L100,100 Z`;
+---
+
+<svg
+  class:list={['torn-edge', `torn-edge--${position}`]}
+  viewBox="0 0 100 100"
+  preserveAspectRatio="none"
+  aria-hidden="true"
+  focusable="false"
+  style={`color:${color}`}
+>
+  <path d={path} fill="currentColor"></path>
+</svg>
+
+<style>
+  .torn-edge {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: clamp(14px, 1.6vw, 26px);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .torn-edge--top {
+    bottom: calc(100% - 1px);
+  }
+
+  .torn-edge--bottom {
+    top: calc(100% - 1px);
+    transform: scaleY(-1);
+  }
+</style>

@@ -1,0 +1,353 @@
+---
+/**
+ * A strip of 35mm film you can drag, swipe or scroll through. Each frame links to its album.
+ */
+import { Picture } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import SectionHeading from '../ui/SectionHeading.astro';
+import Icon from '../ui/Icon.astro';
+import DateStamp from '../ui/DateStamp.astro';
+
+interface Frame {
+  src: ImageMetadata;
+  alt: string;
+  href: string;
+  album: string;
+  date: Date;
+}
+
+interface Props {
+  title: string;
+  intro?: string;
+  frames: Frame[];
+}
+
+const { title, intro, frames } = Astro.props;
+const inks = ['peri', 'orange', 'teal', 'pink', 'mint'] as const;
+---
+
+<section class="sheet section theme-night" aria-labelledby="sheet-title">
+  <div class="container">
+    <SectionHeading eyebrow="Gallery" index="A4" title={title} intro={intro} id="sheet-title">
+      <a slot="action" class="btn btn--ghost" href="/gallery">
+        <Icon name="images" />
+        <span class="btn__label">All albums</span>
+      </a>
+    </SectionHeading>
+  </div>
+
+  <div class="sheet__strip" data-reveal="fade">
+    <div class="sheet__edge sheet__edge--top" aria-hidden="true">
+      <span>UMI 400</span><span>▸ 24</span><span>UMI 400</span><span>▸ 25</span><span>UMI 400</span><span>▸ 26</span>
+    </div>
+    <ul class="sheet__frames" role="list" data-drag-scroll tabindex="0" aria-label="Photo film strip, scroll horizontally">
+      {
+        frames.map((frame, i) => (
+          <li class="sheet__frame">
+            <a class="sheet__link riso-hover" href={frame.href} draggable="false">
+              <span class={`sheet__img riso duo-${inks[i % inks.length]}`}>
+                <Picture
+                  src={frame.src}
+                  alt={frame.alt}
+                  widths={[320, 480, 640]}
+                  sizes="(min-width: 900px) 26vw, 70vw"
+                  formats={['avif', 'webp']}
+                  draggable="false"
+                />
+                <span class="riso__ink riso__ink--dark" aria-hidden="true"></span>
+                <span class="riso__ink riso__ink--light" aria-hidden="true"></span>
+                <span class="riso__screen" aria-hidden="true"></span>
+                <DateStamp date={frame.date} class="sheet__stamp" />
+              </span>
+              <span class="sheet__caption">
+                <span class="sheet__num">{String(i + 12).padStart(2, '0')}A</span>
+                <span class="sheet__album">{frame.album}</span>
+              </span>
+              {i === 1 && (
+                <svg class="sheet__circle" viewBox="0 0 200 140" aria-hidden="true" focusable="false">
+                  <path d="M18 74 C 12 30, 70 10, 112 12 C 162 14, 196 40, 188 80 C 180 120, 120 134, 74 128 C 30 122, 8 100, 22 60 C 30 40, 60 26, 92 22" />
+                </svg>
+              )}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+    <div class="sheet__edge sheet__edge--bottom" aria-hidden="true">
+      <span>◂ 12</span><span>SAFETY</span><span>◂ 13</span><span>UMI 400</span><span>◂ 14</span><span>SAFETY</span>
+    </div>
+  </div>
+
+  <div class="container sheet__controls">
+    <button class="sheet__btn" type="button" data-sheet-prev>
+      <span class="visually-hidden">Previous photos</span>
+      <Icon name="arrow-left" />
+    </button>
+    <button class="sheet__btn" type="button" data-sheet-next>
+      <span class="visually-hidden">Next photos</span>
+      <Icon name="arrow-right" />
+    </button>
+  </div>
+</section>
+
+<style>
+  .sheet {
+    overflow: hidden;
+  }
+
+  .sheet__strip {
+    position: relative;
+    padding-block: 2.3rem;
+    background:
+      radial-gradient(ellipse at 50% 0%, rgb(255 138 76 / 0.07), transparent 60%),
+      #04061a;
+    transform: rotate(-1deg);
+    margin-inline: -1vw;
+    box-shadow: 0 30px 60px -30px rgb(0 0 0 / 0.8);
+  }
+
+  /* Sprocket holes */
+  .sheet__strip::before,
+  .sheet__strip::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 0.8rem;
+    background: repeating-linear-gradient(90deg, transparent 0 0.9rem, var(--night-800) 0.9rem 2rem);
+    mask: repeating-linear-gradient(90deg, transparent 0 0.9rem, #000 0.9rem 2rem);
+    pointer-events: none;
+  }
+
+  .sheet__strip::before {
+    top: 0.55rem;
+  }
+
+  .sheet__strip::after {
+    bottom: 0.55rem;
+  }
+
+  .sheet__edge {
+    position: absolute;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-around;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    color: rgb(255 138 76 / 0.55);
+    pointer-events: none;
+  }
+
+  .sheet__edge--top {
+    top: 1.45rem;
+  }
+
+  .sheet__edge--bottom {
+    bottom: 1.45rem;
+  }
+
+  .sheet__frames {
+    display: flex;
+    gap: 0.7rem;
+    padding: 0.9rem max(var(--gutter), calc((100vw - var(--max)) / 2 + var(--gutter)));
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: none;
+    cursor: grab;
+  }
+
+  .sheet__frames::-webkit-scrollbar {
+    display: none;
+  }
+
+  .sheet__frames.is-dragging {
+    cursor: grabbing;
+    scroll-snap-type: none;
+  }
+
+  .sheet__frames.is-dragging .sheet__link {
+    pointer-events: none;
+  }
+
+  .sheet__frame {
+    flex: none;
+    width: clamp(15rem, 26vw, 24rem);
+    scroll-snap-align: start;
+  }
+
+  .sheet__link {
+    position: relative;
+    display: grid;
+    gap: 0.5rem;
+    color: inherit;
+    text-decoration: none;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  .sheet__img {
+    position: relative;
+    display: block;
+    aspect-ratio: 3 / 2;
+    overflow: hidden;
+    background: var(--night-800);
+  }
+
+  .sheet__img :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition:
+      transform var(--dur-cinematic) var(--ease-out),
+      filter var(--dur-slow) var(--ease-out);
+  }
+
+  .sheet__img :global(.sheet__stamp) {
+    position: absolute;
+    right: 0.6rem;
+    bottom: 0.5rem;
+    z-index: 3;
+    font-size: 0.72rem;
+  }
+
+  .sheet__caption {
+    display: flex;
+    gap: 0.75rem;
+    align-items: baseline;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .sheet__num {
+    color: var(--sodium);
+  }
+
+  .sheet__album {
+    color: var(--mist);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .sheet__circle {
+    position: absolute;
+    inset: -14% -8% auto;
+    width: 116%;
+    height: auto;
+    fill: none;
+    stroke: var(--orange);
+    stroke-width: 3;
+    stroke-linecap: round;
+    pointer-events: none;
+    stroke-dasharray: 700;
+    stroke-dashoffset: 700;
+    transition: stroke-dashoffset 1.4s var(--ease-out) 0.3s;
+  }
+
+  :global(html:not(.js)) .sheet__circle,
+  .sheet__strip:global(.is-in) .sheet__circle {
+    stroke-dashoffset: 0;
+  }
+
+  @media (hover: hover) {
+    .sheet__link:hover :global(img) {
+      transform: scale(1.05);
+    }
+
+    .sheet__link:hover .sheet__album {
+      color: var(--chalk);
+    }
+  }
+
+  .sheet__controls {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: var(--space-l);
+  }
+
+  .sheet__btn {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 50%;
+    transition: background-color var(--dur-fast), color var(--dur-fast);
+  }
+
+  .sheet__btn:hover {
+    background: var(--chalk);
+    color: var(--ink);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sheet__circle {
+      stroke-dashoffset: 0;
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-drag-scroll]').forEach((strip) => {
+    const section = strip.closest('section');
+    const step = () => strip.clientWidth * 0.8;
+    const smooth = window.matchMedia('(prefers-reduced-motion: no-preference)').matches ? 'smooth' : 'auto';
+    section?.querySelector('[data-sheet-prev]')?.addEventListener('click', () => strip.scrollBy({ left: -step(), behavior: smooth }));
+    section?.querySelector('[data-sheet-next]')?.addEventListener('click', () => strip.scrollBy({ left: step(), behavior: smooth }));
+
+    // Mouse drag-to-scroll. Touch devices use native swiping.
+    let startX = 0;
+    let startScroll = 0;
+    let moved = false;
+    let pointerId: number | null = null;
+    strip.addEventListener('pointerdown', (event) => {
+      if (event.pointerType !== 'mouse' || event.button !== 0) return;
+      pointerId = event.pointerId;
+      startX = event.clientX;
+      startScroll = strip.scrollLeft;
+      moved = false;
+    });
+    strip.addEventListener('pointermove', (event) => {
+      if (pointerId !== event.pointerId) return;
+      const dx = event.clientX - startX;
+      if (!moved && Math.abs(dx) > 6) {
+        moved = true;
+        strip.classList.add('is-dragging');
+        strip.setPointerCapture(event.pointerId);
+      }
+      if (moved) strip.scrollLeft = startScroll - dx;
+    });
+    const end = (event: PointerEvent) => {
+      if (pointerId !== event.pointerId) return;
+      pointerId = null;
+      requestAnimationFrame(() => strip.classList.remove('is-dragging'));
+    };
+    strip.addEventListener('pointerup', end);
+    strip.addEventListener('pointercancel', end);
+    // A drag should not count as a click on the frame underneath.
+    strip.addEventListener(
+      'click',
+      (event) => {
+        if (moved) {
+          event.preventDefault();
+          moved = false;
+        }
+      },
+      true,
+    );
+
+    // Keyboard: arrow keys scroll the strip when it has focus.
+    strip.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowRight') strip.scrollBy({ left: step(), behavior: smooth });
+      if (event.key === 'ArrowLeft') strip.scrollBy({ left: -step(), behavior: smooth });
+    });
+  });
+</script>

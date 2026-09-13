@@ -1,0 +1,350 @@
+---
+/**
+ * Seven-segment countdown to the next event. The build renders a correct
+ * snapshot; the script keeps it live and rolls forward to the next event if the
+ * site hasn't been rebuilt since one ended.
+ */
+import { eventEnd, EVENT_TYPE_LABELS, type EventEntry } from '../../lib/content';
+import { longDate, shortDate, time } from '../../lib/dates';
+import Icon from './Icon.astro';
+
+interface Props {
+  events: EventEntry[];
+  class?: string;
+}
+
+const { events, class: className } = Astro.props;
+const payload = events.slice(0, 8).map((e) => ({
+  title: e.data.title,
+  href: `/events/${e.id}`,
+  start: e.data.start.toISOString(),
+  end: eventEnd(e).toISOString(),
+  when: `${shortDate(e.data.start)}${e.data.hideTime ? '' : ` · ${time(e.data.start)}`}`,
+  label: `${longDate(e.data.start)}${e.data.hideTime ? '' : ` at ${time(e.data.start)}`}`,
+  venue: e.data.venue,
+  type: EVENT_TYPE_LABELS[e.data.type],
+}));
+const next = payload[0];
+const now = Date.now();
+const diff = next ? Math.max(0, new Date(next.start).valueOf() - now) : 0;
+const units = [
+  { key: 'd', label: 'Days', value: Math.min(99, Math.floor(diff / 86400000)) },
+  { key: 'h', label: 'Hrs', value: Math.floor(diff / 3600000) % 24 },
+  { key: 'm', label: 'Min', value: Math.floor(diff / 60000) % 60 },
+  { key: 's', label: 'Sec', value: Math.floor(diff / 1000) % 60 },
+];
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+
+<aside class:list={['countdown', className]} aria-label="Next UMI show" data-countdown>
+  <script is:inline type="application/json" data-countdown-events set:html={JSON.stringify(payload)} />
+  <div class="countdown__bar" aria-hidden="true">
+    <span class="countdown__dots"><i></i><i></i><i></i></span>
+    <span class="countdown__file">next_show.txt</span>
+    <span class="countdown__grip"></span>
+  </div>
+  <div class="countdown__head">
+    <span class="countdown__rec" aria-hidden="true"></span>
+    <span class="countdown__eyebrow" data-countdown-state>{next ? 'Next show' : 'Stage is dark'}</span>
+    <span class="countdown__type" data-countdown-type>{next?.type}</span>
+  </div>
+
+  <div class="countdown__clock" aria-hidden="true" data-countdown-clock hidden={!next}>
+    {
+      units.map((u, i) => (
+        <>
+          <span class="countdown__unit">
+            <svg class="countdown__digits" viewBox="0 0 30 20" data-unit={u.key}>
+              <use href="#seg-ghost" x="1" class="countdown__ghost" />
+              <use href="#seg-ghost" x="16" class="countdown__ghost" />
+              <use href={`#seg-${pad(u.value)[0]}`} x="1" data-digit="0" />
+              <use href={`#seg-${pad(u.value)[1]}`} x="16" data-digit="1" />
+            </svg>
+            <span class="countdown__label">{u.label}</span>
+          </span>
+          {i < units.length - 1 && <span class="countdown__colon">:</span>}
+        </>
+      ))
+    }
+  </div>
+
+  {
+    next ? (
+      <a class="countdown__event" href={next.href} data-countdown-link>
+        <span class="countdown__title display" data-countdown-title>
+          {next.title}
+        </span>
+        <span class="countdown__when" data-countdown-when>
+          {next.when} — {next.venue}
+        </span>
+        <span class="visually-hidden" data-countdown-label>
+          {next.label}
+        </span>
+        <span class="countdown__arrow" aria-hidden="true">
+          <Icon name="arrow-up-right" size="1.1rem" />
+        </span>
+      </a>
+    ) : (
+      <p class="countdown__empty">New line-up coming soon. Follow @ubcmusicinitiative for the announcement.</p>
+    )
+  }
+</aside>
+
+<style>
+  /* A small program window pinned to the poster. */
+  .countdown {
+    position: relative;
+    display: grid;
+    gap: 0.8rem;
+    width: min(100%, 23rem);
+    padding: 0 1.1rem 1.1rem;
+    border: 1px solid rgb(10 15 38 / 0.55);
+    background: #eef0f4;
+    color: var(--ink);
+    box-shadow: 8px 8px 0 rgb(3 5 18 / 0.5);
+  }
+
+  .countdown::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.45;
+    background-image: url('/textures/paper.webp');
+    background-size: 256px 256px;
+  }
+
+  .countdown__bar {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    height: 1.7rem;
+    margin-inline: -1.1rem;
+    padding-inline: 0.55rem;
+    border-bottom: 1px solid rgb(10 15 38 / 0.55);
+    background: var(--peri);
+    font-family: var(--font-mono);
+    font-size: 0.64rem;
+    letter-spacing: 0.08em;
+  }
+
+  .countdown__dots {
+    display: flex;
+    gap: 3px;
+  }
+
+  .countdown__dots i {
+    display: block;
+    width: 8px;
+    height: 8px;
+    border: 1px solid var(--ink);
+  }
+
+  .countdown__dots i:first-child {
+    background: var(--orange);
+  }
+
+  .countdown__file {
+    flex: 1;
+  }
+
+  .countdown__grip {
+    width: 22px;
+    height: 8px;
+    background: repeating-linear-gradient(90deg, var(--ink) 0 1px, transparent 1px 3px);
+    opacity: 0.6;
+  }
+
+  .countdown__head {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .countdown__rec {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: var(--orange-ink);
+    animation: rec-blink 1.2s steps(1) infinite;
+  }
+
+  @keyframes rec-blink {
+    50% {
+      opacity: 0.2;
+    }
+  }
+
+  .countdown__type {
+    margin-left: auto;
+    color: var(--ink-soft);
+  }
+
+  .countdown__clock {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.3rem;
+    padding: 0.6rem 0.7rem 0.45rem;
+    background: #090d20;
+    border-radius: 3px;
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.06), inset 0 8px 18px rgb(0 0 0 / 0.6);
+  }
+
+  .countdown__unit {
+    display: grid;
+    justify-items: center;
+    gap: 0.25rem;
+    flex: 1;
+  }
+
+  .countdown__digits {
+    width: 100%;
+    max-width: 3.4rem;
+    height: auto;
+    fill: var(--sodium);
+    filter: drop-shadow(0 0 3px rgb(255 138 76 / 0.8));
+    transform: skewX(-6deg);
+  }
+
+  .countdown__ghost {
+    fill: rgb(255 138 76 / 0.08);
+  }
+
+  .countdown__label {
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgb(255 138 76 / 0.75);
+  }
+
+  .countdown__colon {
+    padding-top: 0.2rem;
+    font-family: var(--font-mono);
+    font-size: 1.2rem;
+    line-height: 1;
+    color: rgb(255 138 76 / 0.7);
+  }
+
+  .countdown__event {
+    position: relative;
+    display: grid;
+    gap: 0.2rem;
+    padding-right: 2rem;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .countdown__event::after {
+    content: '';
+    position: absolute;
+    inset: -3.5rem -1.1rem -1.1rem;
+  }
+
+  .countdown__title {
+    font-size: 1.3rem;
+    line-height: 1.02;
+  }
+
+  .countdown__when {
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+
+  .countdown__arrow {
+    position: absolute;
+    right: 0;
+    bottom: 0.2rem;
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: var(--orange);
+    color: var(--ink);
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+
+  .countdown:hover .countdown__arrow {
+    transform: translate(2px, -2px) rotate(8deg);
+  }
+
+  .countdown__empty {
+    font-family: var(--font-serif);
+    font-size: var(--step-1);
+    line-height: 1.3;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .countdown__rec {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  interface Payload {
+    title: string;
+    href: string;
+    start: string;
+    end: string;
+    when: string;
+    label: string;
+    venue: string;
+    type: string;
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-countdown]').forEach((root) => {
+    const data: Payload[] = JSON.parse(root.querySelector('[data-countdown-events]')?.textContent ?? '[]');
+    const clock = root.querySelector<HTMLElement>('[data-countdown-clock]');
+    if (!clock || data.length === 0) return;
+
+    const set = (unit: string, value: number) => {
+      const svg = clock.querySelector(`[data-unit="${unit}"]`);
+      const text = String(Math.min(99, value)).padStart(2, '0');
+      svg?.querySelectorAll('[data-digit]').forEach((use, i) => use.setAttribute('href', `#seg-${text[i]}`));
+    };
+
+    const pickEvent = () => data.find((e) => new Date(e.end).valueOf() > Date.now());
+
+    let current = pickEvent();
+    const render = () => {
+      const now = Date.now();
+      if (current && new Date(current.end).valueOf() <= now) current = pickEvent();
+      if (!current) {
+        clock.hidden = true;
+        return;
+      }
+      const link = root.querySelector<HTMLAnchorElement>('[data-countdown-link]');
+      if (link && link.getAttribute('href') !== current.href) {
+        link.href = current.href;
+        root.querySelector('[data-countdown-title]')!.textContent = current.title;
+        root.querySelector('[data-countdown-when]')!.textContent = `${current.when} — ${current.venue}`;
+        root.querySelector('[data-countdown-label]')!.textContent = current.label;
+        root.querySelector('[data-countdown-type]')!.textContent = current.type;
+      }
+      const start = new Date(current.start).valueOf();
+      const live = now >= start;
+      root.querySelector('[data-countdown-state]')!.textContent = live ? 'On stage now' : 'Next show';
+      const diff = Math.max(0, start - now);
+      set('d', Math.floor(diff / 86400000));
+      set('h', Math.floor(diff / 3600000) % 24);
+      set('m', Math.floor(diff / 60000) % 60);
+      set('s', Math.floor(diff / 1000) % 60);
+    };
+
+    render();
+    let timer = window.setInterval(render, 1000);
+    document.addEventListener('visibilitychange', () => {
+      window.clearInterval(timer);
+      if (!document.hidden) {
+        render();
+        timer = window.setInterval(render, 1000);
+      }
+    });
+  });
+</script>

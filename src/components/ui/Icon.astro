@@ -1,0 +1,21 @@
+---
+import { icons, type IconName } from '../../lib/icons';
+
+interface Props {
+  name: IconName;
+  /** Accessible label. Omit for decorative icons next to visible text. */
+  label?: string;
+  size?: string;
+  class?: string;
+}
+
+const { name, label, size = '1.25em', class: className = '' } = Astro.props;
+const escape = (value: string) => value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+const a11y = label ? `role="img" aria-label="${escape(label)}"` : 'aria-hidden="true" focusable="false"';
+const svg = icons[name].replace(
+  '<svg ',
+  `<svg class="icon ${escape(className)}" width="${size}" height="${size}" style="width:${size};height:${size}" ${a11y} `,
+);
+---
+
+<Fragment set:html={svg} />

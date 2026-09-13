@@ -1,0 +1,54 @@
+---
+/**
+ * The orange LCD date-back stamp from a 90s point-and-shoot, drawn as seven-segment
+ * SVG glyphs referenced from the sprite in BaseLayout (so each stamp is a few <use> tags).
+ */
+import { stamp } from '../../lib/dates';
+
+interface Props {
+  date: Date;
+  class?: string;
+}
+
+const { date, class: className = '' } = Astro.props;
+const text = stamp(date); // "'26 10 09"
+const glyphs = [...text];
+const advance = 13;
+const width = glyphs.reduce((w, ch) => w + (ch === ' ' ? 7 : ch === "'" ? 5 : advance), 0);
+let x = 0;
+const placed = glyphs.map((ch) => {
+  const at = x;
+  x += ch === ' ' ? 7 : ch === "'" ? 5 : advance;
+  return { ch, at };
+});
+---
+
+<svg
+  class:list={['date-stamp', className]}
+  viewBox={`0 0 ${width} 20`}
+  aria-hidden="true"
+  focusable="false"
+>
+  <g transform="skewX(-9) translate(3 0)">
+    {
+      placed.map(({ ch, at }) =>
+        ch === ' ' ? null : ch === "'" ? (
+          <rect x={at + 1} y="0" width="2" height="5" rx="1" />
+        ) : (
+          <use href={`#seg-${ch}`} x={at} />
+        ),
+      )
+    }
+  </g>
+</svg>
+
+<style>
+  .date-stamp {
+    width: auto;
+    height: 1.05em;
+    fill: var(--sodium);
+    filter: drop-shadow(0 0 2px rgb(255 138 76 / 0.85)) drop-shadow(0 0 7px rgb(255 90 43 / 0.45));
+    opacity: 0.94;
+    overflow: visible;
+  }
+</style>

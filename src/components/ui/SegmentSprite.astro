@@ -1,0 +1,39 @@
+---
+/** Seven-segment digit symbols, rendered once per page and reused by DateStamp and countdowns. */
+const segments = {
+  a: 'M1.6 1 L2.6 0 H9.4 L10.4 1 L9.4 2 H2.6 Z',
+  b: 'M11 1.6 L12 2.6 V8.4 L11 9.4 L10 8.4 V2.6 Z',
+  c: 'M11 10.6 L12 11.6 V17.4 L11 18.4 L10 17.4 V11.6 Z',
+  d: 'M1.6 19 L2.6 18 H9.4 L10.4 19 L9.4 20 H2.6 Z',
+  e: 'M1 10.6 L2 11.6 V17.4 L1 18.4 L0 17.4 V11.6 Z',
+  f: 'M1 1.6 L2 2.6 V8.4 L1 9.4 L0 8.4 V2.6 Z',
+  g: 'M1.6 10 L2.6 9 H9.4 L10.4 10 L9.4 11 H2.6 Z',
+};
+const digits: Record<string, (keyof typeof segments)[]> = {
+  '0': ['a', 'b', 'c', 'd', 'e', 'f'],
+  '1': ['b', 'c'],
+  '2': ['a', 'b', 'g', 'e', 'd'],
+  '3': ['a', 'b', 'g', 'c', 'd'],
+  '4': ['f', 'g', 'b', 'c'],
+  '5': ['a', 'f', 'g', 'c', 'd'],
+  '6': ['a', 'f', 'g', 'e', 'c', 'd'],
+  '7': ['a', 'b', 'c'],
+  '8': ['a', 'b', 'c', 'd', 'e', 'f', 'g'],
+  '9': ['a', 'b', 'c', 'd', 'f', 'g'],
+};
+---
+
+<svg width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true" focusable="false">
+  <defs>
+    {
+      Object.entries(digits).map(([digit, segs]) => (
+        <symbol id={`seg-${digit}`} viewBox="0 0 12 20" width="12" height="20" overflow="visible">
+          <path d={segs.map((s) => segments[s]).join(' ')} />
+        </symbol>
+      ))
+    }
+    <symbol id="seg-ghost" viewBox="0 0 12 20" width="12" height="20" overflow="visible">
+      <path d={Object.values(segments).join(' ')} />
+    </symbol>
+  </defs>
+</svg>

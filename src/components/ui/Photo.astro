@@ -1,0 +1,192 @@
+---
+/**
+ * A photograph, printed like a risograph zine page: two-ink duotone with a
+ * halftone screen that develops into full colour on hover, optional white print
+ * border, masking tape, misregistration edge, camera date stamp and flash reveal.
+ * Always renders responsive AVIF/WebP with reserved space (no layout shift).
+ *
+ * Duotones apply in CSS, so every photo uploaded through the CMS gets the look automatically.
+ */
+import type { ImageMetadata } from 'astro';
+import { Picture } from 'astro:assets';
+import DateStamp from './DateStamp.astro';
+import type { Duo } from '../../lib/riso';
+
+interface Props {
+  src: ImageMetadata;
+  alt: string;
+  sizes: string;
+  widths?: number[];
+  /** CSS aspect-ratio, e.g. "4 / 5". Defaults to the image's own ratio. */
+  aspect?: string;
+  date?: Date;
+  caption?: string;
+  tape?: 'none' | 'top' | 'corners';
+  tilt?: number;
+  /** Riso ink pairing. "theme" follows the section's colours; "none" keeps the photo natural. */
+  duo?: Duo;
+  frame?: 'bleed' | 'print';
+  /** Offset colour edge, like a riso layer printed slightly out of register. */
+  misregister?: boolean;
+  flash?: boolean;
+  priority?: boolean;
+  position?: string;
+  class?: string;
+}
+
+const {
+  src,
+  alt,
+  sizes,
+  widths = [360, 540, 720, 960, 1280, 1600],
+  aspect,
+  date,
+  caption,
+  tape = 'none',
+  tilt = 0,
+  duo = 'theme',
+  frame = 'bleed',
+  misregister = false,
+  flash = false,
+  priority = false,
+  position = 'center',
+  class: className,
+} = Astro.props;
+
+const usableWidths = widths.filter((w) => w <= src.width);
+if (usableWidths.length === 0) usableWidths.push(src.width);
+const ratio = aspect ?? `${src.width} / ${src.height}`;
+---
+
+<figure
+  class:list={['photo', `photo--${frame}`, duo !== 'none' && duo !== 'theme' && `duo-${duo}`, misregister && 'photo--misregister', className]}
+  style={`--tilt:${tilt}deg;--ratio:${ratio};--pos:${position}`}
+>
+  <div class:list={['photo__frame', duo !== 'none' && 'riso']} data-flash={flash ? '' : undefined}>
+    <Picture
+      src={src}
+      alt={alt}
+      widths={usableWidths}
+      sizes={sizes}
+      formats={['avif', 'webp']}
+      priority={priority}
+      class="photo__img"
+    />
+    {
+      duo !== 'none' && (
+        <>
+          <span class="riso__ink riso__ink--dark" aria-hidden="true" />
+          <span class="riso__ink riso__ink--light" aria-hidden="true" />
+          <span class="riso__screen" aria-hidden="true" />
+        </>
+      )
+    }
+    {date && <DateStamp date={date} class="photo__stamp" />}
+  </div>
+  {tape === 'top' && <span class="tape photo__tape photo__tape--top" aria-hidden="true" />}
+  {
+    tape === 'corners' && (
+      <>
+        <span class="tape photo__tape photo__tape--tl" aria-hidden="true" />
+        <span class="tape photo__tape photo__tape--br" aria-hidden="true" />
+      </>
+    )
+  }
+  {caption && <figcaption class="photo__caption">{caption}</figcaption>}
+</figure>
+
+<style>
+  .photo {
+    position: relative;
+    margin: 0;
+    transform: rotate(var(--tilt));
+  }
+
+  .photo__frame {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: var(--ratio);
+    background: var(--night-800);
+  }
+
+  .photo--print {
+    padding: clamp(6px, 0.9vw, 12px);
+  }
+
+  .photo--print .photo__frame {
+    outline: clamp(6px, 0.9vw, 12px) solid #eef0f4;
+    box-shadow: var(--shadow-lift);
+  }
+
+  .photo--misregister .photo__frame {
+    box-shadow:
+      6px -5px 0 color-mix(in srgb, var(--orange) 85%, transparent),
+      var(--shadow-lift);
+  }
+
+  .photo--print.photo--misregister .photo__frame {
+    box-shadow:
+      calc(clamp(6px, 0.9vw, 12px) + 5px) calc(-1 * clamp(6px, 0.9vw, 12px) - 4px) 0 color-mix(in srgb, var(--orange) 85%, transparent),
+      var(--shadow-lift);
+  }
+
+  .photo :global(picture),
+  .photo :global(.photo__img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .photo :global(.photo__img) {
+    object-fit: cover;
+    object-position: var(--pos);
+    transition:
+      transform var(--dur-cinematic) var(--ease-out),
+      filter var(--dur-slow) var(--ease-out);
+  }
+
+  /* Duotone layers come from the global .riso utility in components.css. */
+  @media (hover: hover) {
+    .photo:hover :global(.photo__img) {
+      transform: scale(1.035);
+    }
+  }
+
+  /* DateStamp is a child component, so its class needs :global() to receive these styles. */
+  .photo :global(.photo__stamp) {
+    position: absolute;
+    right: 0.85em;
+    bottom: 0.7em;
+    z-index: 3;
+    font-size: clamp(0.72rem, 0.6rem + 0.35vw, 0.95rem);
+  }
+
+  .photo__tape--top {
+    top: -0.7rem;
+    left: 50%;
+    translate: -50% 0;
+    rotate: -3deg;
+  }
+
+  .photo__tape--tl {
+    top: -0.4rem;
+    left: -1.4rem;
+    rotate: -38deg;
+    --tape-w: 5.2rem;
+  }
+
+  .photo__tape--br {
+    right: -1.4rem;
+    bottom: -0.2rem;
+    rotate: -40deg;
+    --tape-w: 5.2rem;
+  }
+
+  .photo__caption {
+    margin-top: 0.7rem;
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    letter-spacing: 0.06em;
+    color: var(--fg-muted);
+  }
+</style>

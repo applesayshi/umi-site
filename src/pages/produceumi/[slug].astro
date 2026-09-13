@@ -1,0 +1,263 @@
+---
+import { render } from 'astro:content';
+import { Picture } from 'astro:assets';
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Vinyl from '../../components/ui/Vinyl.astro';
+import EmbedFacade from '../../components/ui/EmbedFacade.astro';
+import SongCard from '../../components/produce/SongCard.astro';
+import SnippetButton from '../../components/produce/SnippetButton.astro';
+import Icon from '../../components/ui/Icon.astro';
+import produceLogo from '../../assets/brand/produceumi-logo.png';
+import { getSongs, schoolYearLabel, songSnippet } from '../../lib/content';
+import { fitStyle } from '../../lib/fit';
+
+export const getStaticPaths = (async () => {
+  const songs = await getSongs();
+  return songs.map((song) => {
+    // Other songs from the same year first, then the rest.
+    const others = songs.filter((s) => s.id !== song.id);
+    const more = [...others.filter((s) => s.data.schoolYear === song.data.schoolYear), ...others.filter((s) => s.data.schoolYear !== song.data.schoolYear)].slice(0, 3);
+    return { params: { slug: song.id }, props: { song, more } };
+  });
+}) satisfies GetStaticPaths;
+
+const { song, more } = Astro.props;
+const { data } = song;
+const { Content } = await render(song);
+const year = schoolYearLabel(data.schoolYear);
+const snippet = songSnippet(song);
+---
+
+<BaseLayout
+  title={`${data.title} by ${data.artist}`}
+  description={data.summary ?? `${data.title} by ${data.artist}, made in UMI's ProduceUMI workshop (${year}).`}
+  image={data.cover}
+  ogImagePath="/og-produceumi.jpg"
+  imageAlt={data.coverAlt}
+>
+  <article class="track theme-night">
+    <div class="container track__inner">
+      <div class="track__media">
+        {
+          data.cover ? (
+            <Vinyl
+              src={data.cover}
+              alt={data.coverAlt ?? ''}
+              label={data.title}
+              sizes="(min-width: 960px) 34vw, 70vw"
+              snippet={snippet ? { src: snippet, title: data.title, artist: data.artist } : undefined}
+            />
+          ) : (
+            <div class="track__logo-tile" data-snippet-root>
+              <Picture src={produceLogo} alt="" widths={[360, 540, 720]} sizes="(min-width: 960px) 30vw, 60vw" formats={['webp']} />
+              {snippet && <SnippetButton variant="cover" src={snippet} title={data.title} artist={data.artist} text="Snippet" />}
+            </div>
+          )
+        }
+      </div>
+
+      <div class="track__copy">
+        <a class="link-arrow" href="/produceumi">
+          <Icon name="arrow-left" />
+          <span>All ProduceUMI songs</span>
+        </a>
+        <p class="eyebrow">
+          <span class="eyebrow__index">ProduceUMI</span>
+          <span>{year}</span>
+          {data.sample && <span class="sample-tag">Sample</span>}
+        </p>
+        <h1 class="track__title display" style={fitStyle(data.title)}>
+          <span class="track__title-inner">{data.title}</span>
+        </h1>
+        <p class="track__artist">by {data.artist}</p>
+        <p class="track__meta">
+          {data.genre && <span class="chip chip--solid">{data.genre}</span>}
+          {data.producers && <span class="track__producers">{data.producers}</span>}
+          {
+            data.spotifyUrl && (
+              <a class="track__spotify" href={data.spotifyUrl} target="_blank" rel="noopener noreferrer">
+                <Icon name="spotify" size="1.35rem" />
+                <span>Spotify</span>
+                <span class="visually-hidden">(opens in a new tab)</span>
+              </a>
+            )
+          }
+        </p>
+        {data.summary && <p class="track__summary subtitle">{data.summary}</p>}
+        <EmbedFacade url={data.listenUrl ?? data.spotifyUrl} title={`${data.title} by ${data.artist}`} class="track__embed" />
+        <div class="prose track__story">
+          <Content />
+        </div>
+      </div>
+    </div>
+
+    {
+      more.length > 0 && (
+        <section class="container track__more" aria-labelledby="more-songs">
+          <h2 class="display track__more-title" id="more-songs">
+            More songs
+          </h2>
+          <div class="track__more-grid">
+            {more.map((s, i) => (
+              <SongCard song={s} index={i} />
+            ))}
+          </div>
+        </section>
+      )
+    }
+  </article>
+</BaseLayout>
+
+<style>
+  .track {
+    padding-top: calc(var(--header-h) + var(--space-2xl));
+    padding-bottom: var(--section);
+  }
+
+  .track__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-2xl);
+    align-items: start;
+  }
+
+  .track__media {
+    width: min(64%, 30rem);
+  }
+
+  .track__logo-tile {
+    position: relative;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    padding: 12%;
+    background: var(--navy);
+    box-shadow: var(--shadow-lift);
+    container-type: inline-size;
+  }
+
+  .track__logo-tile :global(.snippet) {
+    --snippet-size: clamp(2.75rem, 13cqi, 3.5rem);
+    --snippet-inset: clamp(0.6rem, 3.5cqi, 1rem);
+  }
+
+  @container (max-width: 17.5rem) {
+    .track__logo-tile :global(.snippet__text) {
+      display: none;
+    }
+  }
+
+  .track__logo-tile :global(img) {
+    width: 100%;
+    height: auto;
+  }
+
+  .track__copy {
+    display: grid;
+    gap: var(--space-m);
+    justify-items: start;
+    container-type: inline-size;
+  }
+
+  .track__title {
+    font-size: min(var(--display-xl), 100cqi / var(--fit, 0.01));
+    font-weight: 900;
+    line-height: 0.86;
+  }
+
+  .track__title-inner {
+    display: inline-block;
+    animation: rise-in var(--dur-slower) var(--ease-out) both 60ms;
+  }
+
+  .track__artist {
+    margin-top: -0.4rem;
+    font-family: var(--font-serif);
+    font-size: var(--step-3);
+    font-style: italic;
+    line-height: 1.1;
+    color: var(--peri);
+  }
+
+  .track__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem 1rem;
+  }
+
+  .track__producers {
+    font-size: var(--step--1);
+    color: var(--fg-muted);
+  }
+
+  .track__spotify {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 44px;
+    padding: 0.35rem 0.95rem 0.35rem 0.65rem;
+    border-radius: var(--radius-pill);
+    box-shadow: inset 0 0 0 1px var(--line-strong);
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg);
+    text-decoration: none;
+    transition:
+      color var(--dur-fast),
+      box-shadow var(--dur-fast);
+  }
+
+  .track__spotify:hover {
+    color: #1ed760;
+    box-shadow: inset 0 0 0 1px #1ed760;
+  }
+
+  .track__summary {
+    max-width: 34ch;
+    font-size: var(--step-2);
+  }
+
+  :global(.track__embed) {
+    width: min(100%, 30rem);
+  }
+
+  .track__more {
+    margin-top: var(--space-3xl);
+    padding-top: var(--space-3xl);
+    border-top: 1px solid var(--line);
+  }
+
+  .track__more-title {
+    margin-bottom: var(--space-xl);
+    font-size: var(--display-l);
+    font-weight: 900;
+  }
+
+  .track__more-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+    gap: var(--space-2xl) var(--space-xl);
+  }
+
+  @media (min-width: 960px) {
+    .track__inner {
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    }
+
+    .track__media {
+      position: sticky;
+      top: calc(var(--header-h) + var(--space-xl));
+      width: 78%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .track__title-inner {
+      animation: none;
+    }
+  }
+</style>

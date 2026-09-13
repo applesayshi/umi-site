@@ -1,0 +1,58 @@
+---
+/**
+ * A band of pixel-sorted colour bars, like a scan that slipped in the photocopier.
+ * Deterministic per seed so it's identical between builds. Decorative.
+ */
+import { seeded, between } from '../../lib/random';
+
+interface Props {
+  seed: string;
+  /** Band height in px (the SVG stretches to the container width). */
+  height?: number;
+  class?: string;
+  palette?: string[];
+}
+
+const {
+  seed,
+  height = 36,
+  class: className,
+  palette = ['#93a3e6', '#2c52e0', '#ff5a2b', '#eef1fa', '#9ef0c9', '#0c1a57', '#ff7cc2', '#ffe45e'],
+} = Astro.props;
+
+const rand = seeded(seed);
+const bars: { x: number; y: number; w: number; h: number; c: string; o: number }[] = [];
+let y = 0;
+while (y < height) {
+  const rowH = Math.max(1, Math.round(between(rand, 1, height / 5)));
+  let x = between(rand, -20, 120);
+  while (x < 1000) {
+    const w = between(rand, 30, 320);
+    if (rand() > 0.35) {
+      bars.push({ x, y, w, h: rowH, c: palette[Math.floor(rand() * palette.length)], o: Number(between(rand, 0.55, 1).toFixed(2)) });
+    }
+    x += w + between(rand, 10, 180);
+  }
+  y += rowH + (rand() > 0.6 ? Math.round(between(rand, 1, 4)) : 0);
+}
+---
+
+<svg
+  class:list={['glitch-strip', className]}
+  viewBox={`0 0 1000 ${height}`}
+  preserveAspectRatio="none"
+  aria-hidden="true"
+  focusable="false"
+  style={`height:${height}px`}
+>
+  {bars.map((b) => <rect x={b.x.toFixed(1)} y={b.y} width={b.w.toFixed(1)} height={b.h} fill={b.c} opacity={b.o} />)}
+</svg>
+
+<style>
+  .glitch-strip {
+    display: block;
+    width: 100%;
+    pointer-events: none;
+    shape-rendering: crispEdges;
+  }
+</style>

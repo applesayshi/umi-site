@@ -1,0 +1,28 @@
+# Rebuilds the site every morning so finished events move to "Past shows" and the three-week
+# upcoming lists roll forward, even when nobody has edited anything.
+#
+# Setup (one time):
+#   1. Netlify: Site configuration → Build & deploy → Build hooks → Add build hook.
+#   2. GitHub repo: Settings → Secrets and variables → Actions → New secret
+#      named NETLIFY_BUILD_HOOK containing the hook URL.
+
+name: Daily rebuild
+
+on:
+  schedule:
+    - cron: '0 10 * * *' # 3am in Vancouver during daylight time, 2am in winter
+  workflow_dispatch:
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Netlify build hook
+        env:
+          NETLIFY_BUILD_HOOK: ${{ secrets.NETLIFY_BUILD_HOOK }}
+        run: |
+          if [ -z "$NETLIFY_BUILD_HOOK" ]; then
+            echo "NETLIFY_BUILD_HOOK secret is not set; skipping."
+            exit 0
+          fi
+          curl --fail --silent --show-error -X POST -d '{}' "$NETLIFY_BUILD_HOOK"

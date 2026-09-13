@@ -1,0 +1,541 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/layout/PageHero.astro';
+import ArtBackdrop from '../../components/ui/ArtBackdrop.astro';
+import Calendar from '../../components/events/Calendar.astro';
+import EventRow from '../../components/events/EventRow.astro';
+import SectionHeading from '../../components/ui/SectionHeading.astro';
+import Icon from '../../components/ui/Icon.astro';
+import { EVENT_TYPE_LABELS, getAlbums, getEvents, eventEnd, isInUpcomingWindow, type EventEntry } from '../../lib/content';
+import { dateParts, dayKey, mediumDate, time } from '../../lib/dates';
+import type { CalendarEvent } from '../../lib/calendar';
+
+const now = new Date();
+const [events, albums] = await Promise.all([getEvents(), getAlbums()]);
+// Every event that hasn't ended gets a row, but only the next three weeks' are visible. The page script
+// re-checks in the browser, so the list rolls forward even if the site hasn't been rebuilt.
+const upcoming = events.filter((e) => eventEnd(e) > now).map((event) => ({ event, soon: isInUpcomingWindow(event, now) }));
+const soonCount = upcoming.filter((u) => u.soon).length;
+const past = events.filter((e) => eventEnd(e) <= now).reverse();
+const albumFor = (id: string) => albums.find((a) => a.data.event?.id === id);
+
+// Group past events by UBC academic year (September to August), newest first.
+const seasons = new Map<string, EventEntry[]>();
+for (const e of past) {
+  const { year, month } = dateParts(e.data.start);
+  const startYear = month >= 9 ? year : year - 1;
+  const label = `${startYear}/${String(startYear + 1).slice(-2)}`;
+  seasons.set(label, [...(seasons.get(label) ?? []), e]);
+}
+const pastYears = [...new Set([past.at(-1), past[0]].filter((e) => e !== undefined).map((e) => dateParts(e.data.start).year))];
+const pastSummary = `${past.length} ${past.length === 1 ? 'event' : 'events'} · ${pastYears.join('–')}`;
+
+const calendarEvents: CalendarEvent[] = events.map((e) => ({
+  id: e.id,
+  title: e.data.title,
+  type: e.data.type,
+  typeLabel: EVENT_TYPE_LABELS[e.data.type],
+  day: dayKey(e.data.start),
+  time: e.data.hideTime ? '' : time(e.data.start),
+  href: `/events/${e.id}`,
+}));
+
+// Filter chips for every kind of event on the calendar and in the archive.
+const presentTypes = [...new Set(events.map((e) => e.data.type))];
+const site = Astro.site ?? new URL('https://www.ubcmusicinitiative.com');
+const feedPath = new URL('/calendar.ics', site);
+const webcal = `webcal://${feedPath.host}${feedPath.pathname}`;
+const googleSubscribe = `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(webcal)}`;
+---
+
+<BaseLayout title="Events" description="UMI's calendar of showcases, open mics, workshops and socials at UBC, plus our archive of past shows.">
+  <PageHero
+    eyebrow="Calendar"
+    index="A2"
+    title="Shows & events"
+    intro="Showcases, open mics, workshops and members-only nights. Add them to your own calendar and never miss a set."
+  >
+    <ArtBackdrop slot="backdrop" pieces={['crowd']} strength={0.42} />
+    <div class="btn-row events-subscribe">
+      <a class="btn" href={webcal}>
+        <Icon name="calendar-plus" />
+        <span class="btn__label">Subscribe</span>
+      </a>
+      <a class="btn btn--ghost" href={googleSubscribe} target="_blank" rel="noopener noreferrer">
+        <span class="btn__label">Google Calendar</span>
+        <Icon name="arrow-up-right" />
+      </a>
+    </div>
+  </PageHero>
+
+  <div class="events theme-night" data-events-root data-filter="all">
+    <div class="container">
+      <div class="events__filters" role="group" aria-label="Filter events by type">
+        <button class="events__filter" type="button" data-filter="all" aria-pressed="true">All</button>
+        {
+          presentTypes.map((type) => (
+            <button class={`events__filter type-${type}`} type="button" data-filter={type} aria-pressed="false">
+              <span class="events__filter-dot" aria-hidden="true" />
+              {EVENT_TYPE_LABELS[type]}
+            </button>
+          ))
+        }
+      </div>
+      <p class="visually-hidden" aria-live="polite" data-filter-status></p>
+
+      <section class="events__block" aria-labelledby="calendar-title">
+        <h2 class="visually-hidden" id="calendar-title">Monthly calendar</h2>
+        <Calendar events={calendarEvents} />
+      </section>
+
+      <section class="events__block" aria-labelledby="upcoming-title">
+        <SectionHeading eyebrow="Next 3 weeks" title="Upcoming events" id="upcoming-title" size="m" />
+        <ol class="events__list" role="list" data-list="upcoming" hidden={soonCount === 0}>
+          {
+            upcoming.map(({ event, soon }, i) => (
+              <EventRow event={event} index={i} hidden={!soon} albumHref={albumFor(event.id) ? `/gallery/${albumFor(event.id)!.id}` : undefined} />
+            ))
+          }
+        </ol>
+        <p class="events__empty" data-empty="upcoming" hidden={soonCount > 0}>
+          Nothing in the next three weeks. Later dates are on the calendar above, or follow <a class="link" href="https://www.instagram.com/ubcmusicinitiative/">@ubcmusicinitiative</a> for the next announcement.
+        </p>
+      </section>
+
+      {
+        past.length > 0 && (
+          <section class="events__block events__block--past" aria-labelledby="past-title">
+            <h2 class="visually-hidden" id="past-title">Past shows</h2>
+            <details class="past" id="past" data-past data-reveal>
+              <summary class="past__summary">
+                <span class="past__label">
+                  <span class="past__title display">Past shows</span>
+                  <span class="past__count" data-past-count data-all={pastSummary}>
+                    {pastSummary}
+                  </span>
+                </span>
+                <span class="past__icon" aria-hidden="true">
+                  <Icon name="caret-down" size="1.1rem" />
+                </span>
+              </summary>
+              <div class="past__body">
+                {[...seasons.entries()].map(([season, list]) => (
+                  <div class="past__season" data-season>
+                    <h3 class="past__season-label">
+                      <span class="serif">{season}</span> season
+                    </h3>
+                    <ol class="past__list" role="list">
+                      {list.map((event) => {
+                        const album = albumFor(event.id);
+                        return (
+                          <li class={`past__item type-${event.data.type}`} data-event-type={event.data.type}>
+                            <time class="past__date" datetime={event.data.start.toISOString()}>
+                              {mediumDate(event.data.start)}
+                            </time>
+                            <span class="past__main">
+                              <a class="past__link" href={`/events/${event.id}`}>
+                                {event.data.title}
+                              </a>
+                              <span class="past__meta">
+                                <span class="past__dot" aria-hidden="true" />
+                                {EVENT_TYPE_LABELS[event.data.type]} · {event.data.venue}
+                                {event.data.sample && <span class="sample-tag">Sample</span>}
+                              </span>
+                            </span>
+                            {album && (
+                              <a class="chip past__photos" href={`/gallery/${album.id}`}>
+                                <Icon name="images" />
+                                Photos
+                              </a>
+                            )}
+                          </li>
+                        );
+                      })}
+                    </ol>
+                  </div>
+                ))}
+                <p class="past__none" data-past-none hidden>
+                  No past events of this type in the archive.
+                </p>
+              </div>
+            </details>
+          </section>
+        )
+      }
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .events-subscribe {
+    margin-top: var(--space-s);
+  }
+
+  .events {
+    padding-bottom: var(--section);
+  }
+
+  .events__filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding-bottom: var(--space-l);
+  }
+
+  .events__filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-pill);
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: background-color var(--dur-fast), color var(--dur-fast), border-color var(--dur-fast);
+  }
+
+  .events__filter:hover {
+    border-color: var(--fg);
+  }
+
+  .events__filter[aria-pressed='true'] {
+    background: var(--chalk);
+    border-color: var(--chalk);
+    color: var(--ink);
+  }
+
+  .events__filter-dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: var(--dot);
+  }
+
+  .events__block + .events__block {
+    margin-top: var(--space-3xl);
+  }
+
+  .events__list {
+    border-top: 1px solid var(--line-strong);
+  }
+
+  .events__empty {
+    padding-block: var(--space-l);
+    font-family: var(--font-serif);
+    font-size: var(--step-2);
+    color: var(--fg-muted);
+  }
+
+  /* ---- Past shows: one compact dropdown, in the same style as the exec department dropdowns ---- */
+  .events__block + .events__block--past {
+    margin-top: var(--space-2xl);
+  }
+
+  .past {
+    border-block: 1px solid var(--line-strong);
+  }
+
+  .past__summary {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 1rem;
+    min-height: 4.75rem;
+    padding-block: 1rem;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .past__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  /* Title and count share a line when there's room; the count drops below on narrow phones. */
+  .past__label {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.35rem 1.25rem;
+  }
+
+  .past__title {
+    font-size: var(--display-m);
+    font-weight: 900;
+    line-height: 0.95;
+    transition: color var(--dur-fast);
+  }
+
+  .past__summary:hover .past__title,
+  .past[open] .past__title {
+    color: var(--peri);
+  }
+
+  .past__count {
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+
+  .past__icon {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 50%;
+    transition:
+      transform var(--dur-base) var(--ease-out),
+      background-color var(--dur-fast),
+      color var(--dur-fast),
+      border-color var(--dur-fast);
+  }
+
+  .past__summary:hover .past__icon {
+    border-color: var(--fg);
+  }
+
+  .past[open] .past__icon {
+    background: var(--peri);
+    border-color: var(--peri);
+    color: var(--ink);
+    transform: rotate(180deg);
+  }
+
+  .past__body {
+    padding-block: 0.25rem var(--space-xl);
+  }
+
+  .past__season + .past__season {
+    margin-top: var(--space-l);
+  }
+
+  .past__season-label {
+    margin-bottom: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+
+  .past__season-label .serif {
+    margin-right: 0.3rem;
+    font-size: var(--step-2);
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--peri);
+  }
+
+  .past__list {
+    border-top: 1px solid var(--line);
+  }
+
+  /* One line per show on wide screens; date above the title on phones. The whole row links to the event. */
+  .past__item {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'date photos'
+      'main photos';
+    align-items: center;
+    gap: 0.2rem 1rem;
+    min-height: 3.5rem;
+    padding-block: 0.65rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .past__item::before {
+    content: '';
+    position: absolute;
+    inset: 0 calc(var(--gutter) * -0.5);
+    z-index: -1;
+    background: color-mix(in srgb, var(--fg) 6%, transparent);
+    opacity: 0;
+    transition: opacity var(--dur-base) var(--ease-out);
+  }
+
+  .past__date {
+    grid-area: date;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+
+  .past__main {
+    grid-area: main;
+    display: grid;
+    gap: 0.15rem;
+    min-width: 0;
+  }
+
+  .past__link {
+    font-weight: 600;
+    line-height: 1.25;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .past__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .past__link:focus-visible {
+    outline: none;
+  }
+
+  .past__item:has(.past__link:focus-visible) {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  .past__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.2rem 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+
+  .past__dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--dot, var(--peri));
+  }
+
+  .past__photos {
+    grid-area: photos;
+    position: relative;
+    z-index: 1;
+    min-height: 40px;
+    text-decoration: none;
+  }
+
+  .past__photos:hover {
+    background: var(--fg);
+    color: var(--bg);
+  }
+
+  .past__none {
+    padding-block: var(--space-m);
+    font-family: var(--font-serif);
+    font-size: var(--step-1);
+    color: var(--fg-muted);
+  }
+
+  @media (hover: hover) {
+    .past__item:hover::before {
+      opacity: 1;
+    }
+
+    .past__item:hover .past__link {
+      text-decoration: underline;
+      text-underline-offset: 0.2em;
+    }
+  }
+
+  @media (min-width: 720px) {
+    .past__item {
+      grid-template-columns: 8.5rem minmax(0, 1fr) auto;
+      grid-template-areas: 'date main photos';
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .past__icon {
+      transition: none;
+    }
+  }
+
+  .type-show { --dot: var(--peri); }
+  .type-open-mic { --dot: var(--orange); }
+  .type-workshop { --dot: var(--mint); }
+  .type-social { --dot: #ff7cc2; }
+  .type-members-only { --dot: var(--sodium); }
+  .type-community { --dot: var(--chalk); }
+</style>
+
+<script>
+  import { inUpcomingWindow, upcomingUntil } from '../../lib/upcoming';
+
+  const root = document.querySelector<HTMLElement>('[data-events-root]');
+  if (root) {
+    const buttons = [...root.querySelectorAll<HTMLButtonElement>('[data-filter]')];
+    const status = root.querySelector('[data-filter-status]');
+    const upcomingList = root.querySelector<HTMLElement>('[data-list="upcoming"]');
+    const upcomingEmpty = root.querySelector<HTMLElement>('[data-empty="upcoming"]');
+    const past = root.querySelector<HTMLDetailsElement>('[data-past]');
+    const pastCount = past?.querySelector<HTMLElement>('[data-past-count]');
+    const pastNone = past?.querySelector<HTMLElement>('[data-past-none]');
+
+    // "Upcoming events" covers the next three weeks. Rows outside that window right now (ended since the
+    // last deploy, or still further out) are removed, so the type filter below can't bring them back.
+    const now = new Date();
+    const until = upcomingUntil(now);
+    upcomingList?.querySelectorAll<HTMLElement>('[data-event-end]').forEach((row) => {
+      if (!inUpcomingWindow(row.dataset.eventDay ?? '', row.dataset.eventEnd ?? '', now, until)) row.remove();
+    });
+
+    const apply = (filter: string) => {
+      root.dataset.filter = filter;
+      root.querySelectorAll<HTMLElement>('[data-event-type]').forEach((el) => {
+        el.hidden = filter !== 'all' && el.dataset.eventType !== filter;
+      });
+      const visibleUpcoming = upcomingList?.querySelectorAll('[data-event-type]:not([hidden])').length ?? 0;
+      if (upcomingList) upcomingList.hidden = visibleUpcoming === 0;
+      if (upcomingEmpty) upcomingEmpty.hidden = visibleUpcoming > 0;
+
+      if (past && pastCount) {
+        const items = past.querySelectorAll('[data-event-type]');
+        const shown = past.querySelectorAll('[data-event-type]:not([hidden])').length;
+        past.querySelectorAll<HTMLElement>('[data-season]').forEach((season) => {
+          season.hidden = !season.querySelector('[data-event-type]:not([hidden])');
+        });
+        pastCount.textContent = filter === 'all' ? (pastCount.dataset.all ?? '') : `${shown} of ${items.length} events`;
+        if (pastNone) pastNone.hidden = shown > 0;
+      }
+
+      buttons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.filter === filter)));
+      const label = buttons.find((b) => b.dataset.filter === filter)?.textContent?.trim() ?? 'All';
+      if (status) status.textContent = `Showing ${filter === 'all' ? 'all events' : label.toLowerCase()}. ${visibleUpcoming} in the next three weeks.`;
+    };
+
+    // Old /pastevents links land on #past: open the dropdown for them.
+    const openPast = () => {
+      if (past && (location.hash === '#past' || location.hash === '#past-title')) past.open = true;
+    };
+    openPast();
+    window.addEventListener('hashchange', openPast);
+
+    buttons.forEach((button) =>
+      button.addEventListener('click', () => {
+        const filter = button.dataset.filter ?? 'all';
+        apply(filter);
+        const url = new URL(location.href);
+        if (filter === 'all') url.searchParams.delete('type');
+        else url.searchParams.set('type', filter);
+        history.replaceState(null, '', url);
+      }),
+    );
+
+    root.addEventListener('calendar:render', () => apply(root.dataset.filter ?? 'all'));
+
+    const initial = new URLSearchParams(location.search).get('type');
+    apply(initial && buttons.some((b) => b.dataset.filter === initial) ? initial : 'all');
+  }
+</script>

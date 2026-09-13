@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /assets/uploads/
+Disallow: /contact/thanks/
+
+Sitemap: https://www.ubcmusicinitiative.com/sitemap-index.xml

@@ -1,0 +1,538 @@
+---
+import type { ImageMetadata } from 'astro';
+import { Picture } from 'astro:assets';
+import Photo from '../ui/Photo.astro';
+import Icon from '../ui/Icon.astro';
+import Countdown from '../ui/Countdown.astro';
+import Scribble from '../ui/Scribble.astro';
+import GlitchStrip from '../ui/GlitchStrip.astro';
+import DataRail from '../ui/DataRail.astro';
+import umiLogo from '../../assets/brand/umi-logo.png';
+import type { EventEntry } from '../../lib/content';
+
+interface Props {
+  timecode: string;
+  subtitle: string;
+  photos: { src: ImageMetadata; alt: string; date?: Date }[];
+  upcoming: EventEntry[];
+}
+
+const { timecode, subtitle, photos, upcoming } = Astro.props;
+const [first, second, third] = photos;
+---
+
+<section class="hero theme-night" aria-labelledby="hero-title">
+  <canvas class="hero__canvas" data-hero-canvas aria-hidden="true"></canvas>
+  <div class="hero__fields" aria-hidden="true"><i></i><i></i><i></i></div>
+  <div class="hero__shade" aria-hidden="true"></div>
+  <DataRail class="hero__rail" />
+
+  <div class="hero__inner container">
+    <div class="hero__copy">
+      <p class="hero__kicker">
+        <span class="hero__rec" aria-hidden="true">REC</span>
+        <span>{timecode}</span>
+      </p>
+
+      <h1 class="hero__title" id="hero-title">
+        <span class="visually-hidden">UBC Music Initiative (UMI)</span>
+        <Picture
+          src={umiLogo}
+          alt=""
+          class="hero__logo"
+          widths={[320, 480, 640, 960, 1137]}
+          sizes="(min-width: 1024px) 480px, (min-width: 480px) 416px, 88vw"
+          formats={['avif', 'webp']}
+          priority
+        />
+      </h1>
+
+      <p class="hero__subtitle subtitle">{subtitle}</p>
+
+      <div class="hero__actions btn-row">
+        <a class="btn" href="/join">
+          <span class="btn__label">Join UMI</span>
+          <Icon name="arrow-right" />
+        </a>
+        <a class="btn btn--ghost" href="/events">
+          <span class="btn__label">What's on</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="hero__collage" data-collage>
+      {
+        first && (
+          <div class="hero__print hero__print--1" data-depth="0.6">
+            <Photo
+              src={first.src}
+              alt={first.alt}
+              date={first.date}
+              sizes="(min-width: 1024px) 28vw, 58vw"
+              widths={[400, 600, 800, 1000]}
+              aspect="4 / 5"
+              tape="top"
+              tilt={3}
+              frame="print"
+              duo="peri"
+              misregister
+              priority
+            />
+          </div>
+        )
+      }
+      {
+        second && (
+          <div class="hero__print hero__print--2" data-depth="1">
+            <Photo
+              src={second.src}
+              alt={second.alt}
+              date={second.date}
+              sizes="(min-width: 1024px) 22vw, 46vw"
+              widths={[360, 540, 720, 900]}
+              aspect="3 / 2"
+              tape="corners"
+              tilt={-6}
+              frame="print"
+              duo="orange"
+            />
+            <Scribble variant="scribble" class="hero__scrawl" color="var(--chalk)" width={1.6} />
+          </div>
+        )
+      }
+      {
+        third && (
+          <div class="hero__print hero__print--3" data-depth="1.4">
+            <Photo
+              src={third.src}
+              alt={third.alt}
+              sizes="(min-width: 1024px) 12vw, 30vw"
+              widths={[240, 360, 480]}
+              aspect="1 / 1"
+              tilt={-9}
+              duo="mint"
+            />
+          </div>
+        )
+      }
+      <GlitchStrip seed="hero-strip" height={30} class="hero__glitch" />
+      <Scribble variant="star" class="hero__star" color="var(--sun)" width={2.5} />
+    </div>
+
+    <Countdown events={upcoming} class="hero__countdown" />
+  </div>
+
+  <a class="hero__scroll" href="#about-umi">
+    <span>Scroll</span>
+    <span class="hero__scroll-line" aria-hidden="true"></span>
+  </a>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    isolation: isolate;
+    min-height: max(100svh, 44rem);
+    overflow: hidden;
+    background: var(--night-950);
+  }
+
+  .hero__canvas,
+  .hero__shade,
+  .hero__fields {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .hero__canvas {
+    z-index: -3;
+  }
+
+  /* Blown-out colour fields behind the collage, like an overexposed stage photo. */
+  .hero__fields {
+    z-index: -2;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .hero__fields i {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.5;
+  }
+
+  .hero__fields i:nth-child(1) {
+    top: 8%;
+    right: 6%;
+    width: 38vw;
+    height: 30vw;
+    background: radial-gradient(closest-side, #ff5a2b, transparent);
+  }
+
+  .hero__fields i:nth-child(2) {
+    top: 34%;
+    right: 22%;
+    width: 26vw;
+    height: 22vw;
+    background: radial-gradient(closest-side, #ffe45e, transparent);
+    opacity: 0.32;
+  }
+
+  .hero__fields i:nth-child(3) {
+    bottom: -10%;
+    left: 20%;
+    width: 44vw;
+    height: 30vw;
+    background: radial-gradient(closest-side, #2c52e0, transparent);
+    opacity: 0.55;
+  }
+
+  .hero__shade {
+    z-index: -1;
+    background:
+      radial-gradient(80% 70% at 16% 58%, rgb(7 11 31 / 0.86), transparent 70%),
+      linear-gradient(180deg, rgb(7 11 31 / 0.7) 0%, transparent 24%, transparent 70%, rgb(7 11 31 / 0.96) 100%);
+  }
+
+  :global(.hero__rail) {
+    display: none !important;
+  }
+
+  .hero__inner {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: end;
+    gap: var(--space-xl);
+    min-height: inherit;
+    padding-top: calc(var(--header-h) + var(--space-l));
+    padding-bottom: var(--space-2xl);
+  }
+
+  .hero__copy {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    gap: var(--space-m);
+    justify-items: start;
+  }
+
+  .hero__kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--mist);
+  }
+
+  .hero__rec {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--orange);
+  }
+
+  .hero__rec::before {
+    content: '';
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 10px currentColor;
+    animation: rec-pulse 1.2s steps(1) infinite;
+  }
+
+  @keyframes rec-pulse {
+    50% {
+      opacity: 0.15;
+    }
+  }
+
+  /* ---- Logo ------------------------------------------------------------ */
+  /* The heading is a box in the logo's exact proportions, so its space is reserved from the
+     first frame. (Some loads briefly lay the image out at zero height before it arrives, which
+     used to shove the photo collage down.) */
+  .hero__title {
+    position: relative;
+    width: min(100%, 26rem);
+    aspect-ratio: 1137 / 971;
+    margin-block: var(--space-2xs) 0;
+  }
+
+  .hero__title :global(picture) {
+    position: absolute;
+    inset: 0;
+  }
+
+  /* The glow is static; only opacity and position animate, so the entrance stays smooth. */
+  .hero__title :global(.hero__logo) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 0 28px rgb(147 163 230 / 0.3));
+    animation: rise-in 1100ms var(--ease-out) both 100ms;
+  }
+
+  .hero__subtitle {
+    max-width: 26ch;
+    font-size: var(--step-3);
+    text-shadow: 0 2px 12px rgb(0 0 0 / 0.8);
+    animation: fade-up var(--dur-slower) var(--ease-out) both 700ms;
+  }
+
+  .hero__actions {
+    animation: fade-up var(--dur-slower) var(--ease-out) both 850ms;
+  }
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 18px, 0);
+    }
+  }
+
+  /* ---- Collage -------------------------------------------------------- */
+  .hero__collage {
+    position: relative;
+    z-index: 1;
+    height: clamp(16rem, 66vw, 30rem);
+    margin-inline: calc(var(--gutter) * -0.25);
+  }
+
+  .hero__print {
+    position: absolute;
+    transition: transform 1.2s var(--ease-out);
+  }
+
+  .hero__print--1 {
+    top: 0;
+    right: 4%;
+    width: 50%;
+    z-index: 2;
+    animation: print-drop 1.1s var(--ease-out) both 350ms;
+  }
+
+  .hero__print--2 {
+    bottom: 4%;
+    left: 0;
+    width: 52%;
+    z-index: 3;
+    animation: print-drop 1.1s var(--ease-out) both 520ms;
+  }
+
+  .hero__print--2 :global(.hero__scrawl) {
+    position: absolute;
+    inset: 8% 10% auto auto;
+    z-index: 4;
+    width: 62%;
+    height: auto;
+    mix-blend-mode: screen;
+    opacity: 0.85;
+  }
+
+  .hero__print--3 {
+    top: 4%;
+    left: 8%;
+    width: 26%;
+    z-index: 1;
+    animation: print-drop 1.1s var(--ease-out) both 650ms;
+  }
+
+  .hero__collage :global(.hero__glitch) {
+    position: absolute;
+    left: -6%;
+    top: 58%;
+    z-index: 4;
+    width: 118%;
+    mix-blend-mode: screen;
+    opacity: 0.8;
+    transform: rotate(-2deg);
+  }
+
+  .hero__collage :global(.hero__star) {
+    position: absolute;
+    right: 2%;
+    bottom: 6%;
+    z-index: 5;
+    width: 3.2rem;
+    height: 3.2rem;
+    transform: rotate(12deg);
+  }
+
+  @keyframes print-drop {
+    from {
+      opacity: 0;
+      translate: 0 -30px;
+      scale: 1.06;
+    }
+  }
+
+  :global(.hero__countdown) {
+    position: relative;
+    z-index: 3;
+    animation: fade-up var(--dur-slower) var(--ease-out) both 1000ms;
+  }
+
+  .hero__scroll {
+    display: none;
+  }
+
+  /* ---- Desktop --------------------------------------------------------- */
+  @media (min-width: 1024px) {
+    :global(.hero__rail) {
+      position: absolute !important;
+      top: calc(var(--header-h) + 3rem);
+      bottom: 4rem;
+      left: 0.9rem;
+      z-index: 2;
+      display: flex !important;
+    }
+
+    .hero__inner {
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      grid-template-rows: 1fr auto;
+      align-items: end;
+    }
+
+    .hero__copy {
+      grid-column: 1;
+      grid-row: 1 / span 2;
+      align-self: end;
+    }
+
+    /* On laptops, shrink with short screens so the buttons stay above the fold (never below 18rem). */
+    .hero__title {
+      width: clamp(18rem, 52vh, 30rem);
+    }
+
+    .hero__subtitle {
+      max-width: 34ch;
+    }
+
+    .hero__collage {
+      grid-column: 2;
+      grid-row: 1;
+      align-self: stretch;
+      height: auto;
+      min-height: 26rem;
+      margin: 0;
+    }
+
+    .hero__print--1 {
+      top: 6%;
+      right: 2%;
+      width: 58%;
+    }
+
+    .hero__print--2 {
+      bottom: 6%;
+      left: -8%;
+      width: 58%;
+    }
+
+    .hero__print--3 {
+      top: 0;
+      left: 6%;
+      width: 28%;
+    }
+
+    :global(.hero__countdown) {
+      grid-column: 2;
+      grid-row: 2;
+      justify-self: end;
+    }
+
+    .hero__scroll {
+      position: absolute;
+      left: 50%;
+      bottom: 1.4rem;
+      z-index: 2;
+      display: grid;
+      justify-items: center;
+      gap: 0.5rem;
+      min-height: 44px;
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: var(--mist);
+      translate: -50% 0;
+    }
+
+    .hero__scroll-line {
+      width: 1px;
+      height: 2.6rem;
+      background: linear-gradient(var(--mist), transparent);
+      transform-origin: top;
+      animation: scroll-line 2.2s var(--ease-in-out) infinite;
+    }
+  }
+
+  @keyframes scroll-line {
+    0% {
+      transform: scaleY(0);
+    }
+    45% {
+      transform: scaleY(1);
+      transform-origin: top;
+    }
+    55% {
+      transform: scaleY(1);
+      transform-origin: bottom;
+    }
+    100% {
+      transform: scaleY(0);
+      transform-origin: bottom;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero__title :global(.hero__logo),
+    .hero__subtitle,
+    .hero__actions,
+    .hero__print,
+    :global(.hero__countdown),
+    .hero__rec::before,
+    .hero__scroll-line {
+      animation: none !important;
+    }
+  }
+</style>
+
+<script>
+  import { mountHeroCanvas } from '../../scripts/hero-canvas';
+
+  const canvas = document.querySelector<HTMLCanvasElement>('[data-hero-canvas]');
+  if (canvas) mountHeroCanvas(canvas);
+
+  // Pointer parallax on the photo collage (fine pointers only, never with reduced motion).
+  const collage = document.querySelector<HTMLElement>('[data-collage]');
+  const allowMotion = window.matchMedia('(pointer: fine) and (prefers-reduced-motion: no-preference)');
+  if (collage && allowMotion.matches) {
+    const prints = [...collage.querySelectorAll<HTMLElement>('[data-depth]')];
+    let raf = 0;
+    window.addEventListener(
+      'pointermove',
+      (event) => {
+        cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(() => {
+          const x = event.clientX / window.innerWidth - 0.5;
+          const y = event.clientY / window.innerHeight - 0.5;
+          for (const print of prints) {
+            const depth = Number(print.dataset.depth ?? 1);
+            print.style.transform = `translate3d(${x * depth * -22}px, ${y * depth * -16}px, 0)`;
+          }
+        });
+      },
+      { passive: true },
+    );
+  }
+</script>

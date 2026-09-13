@@ -1,0 +1,55 @@
+---
+/** A vertical measuring rail with tick marks and sideways mono text, like a film edge readout. Decorative. */
+interface Props {
+  text?: string;
+  class?: string;
+}
+
+const { text = 'UMI — UBC MUSIC INITIATIVE — AMS NEST RM 3308 — 49.2663° N 123.2502° W — SIGNAL: LIVE', class: className } = Astro.props;
+const ticks = Array.from({ length: 24 }, (_, i) => i);
+const colors = ['var(--peri)', 'var(--orange)', 'var(--mint)', 'var(--pink)'];
+---
+
+<div class:list={['data-rail', className]} aria-hidden="true">
+  <span class="data-rail__text">{text}</span>
+  <span class="data-rail__ruler">
+    {ticks.map((i) => <span class="data-rail__tick" style={i % 6 === 0 ? `--c:${colors[(i / 6) % colors.length]};--w:14px` : ''} />)}
+  </span>
+</div>
+
+<style>
+  .data-rail {
+    display: flex;
+    gap: 0.6rem;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .data-rail__text {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.28em;
+    white-space: nowrap;
+    color: color-mix(in srgb, var(--fg-muted) 80%, transparent);
+  }
+
+  .data-rail__ruler {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 14px;
+  }
+
+  .data-rail__tick {
+    display: block;
+    width: var(--w, 6px);
+    height: var(--h, 1px);
+    background: var(--c, var(--line-strong));
+  }
+
+  .data-rail__tick[style*='--c'] {
+    height: 2px;
+  }
+</style>

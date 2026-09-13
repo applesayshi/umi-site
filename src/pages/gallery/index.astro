@@ -1,0 +1,234 @@
+---
+import { Picture } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/layout/PageHero.astro';
+import ArtBackdrop from '../../components/ui/ArtBackdrop.astro';
+import DateStamp from '../../components/ui/DateStamp.astro';
+import { getAlbums } from '../../lib/content';
+import { mediumDate } from '../../lib/dates';
+import { fitStyle } from '../../lib/fit';
+
+const albums = await getAlbums();
+const years = [...new Set(albums.map((a) => a.data.date.getUTCFullYear()))];
+---
+
+<BaseLayout title="Gallery" description="Photos from UMI showcases, open mics and socials at UBC.">
+  <!-- All four Brechella prints blended behind the whole page (the hero and album sections are see-through). -->
+  <ArtBackdrop pieces={['crowd', 'guitar', 'desk', 'disc']} placement="page" strength={0.34} />
+  <PageHero eyebrow="Contact sheets" index="A4" title="Gallery" intro="Flash photos from the floor of every UMI night. Find yourself in the crowd." glow={false} />
+
+  <section class="gallery theme-night" aria-label="Photo albums">
+    <div class="container">
+      {
+        albums.length === 0 ? (
+          <p class="gallery__empty serif">The first roll is still developing. Check back after the next show.</p>
+        ) : (
+          years.map((year, yearIndex) => (
+            <div class="gallery__year">
+              <h2 class="gallery__year-label">
+                <span class="display">{year}</span>
+              </h2>
+              <ul class="albums" role="list">
+                {albums
+                  .filter((a) => a.data.date.getUTCFullYear() === year)
+                  .map((album, i) => (
+                    <li class="album" data-reveal style={`--i:${i}`}>
+                      <a class="album__link" href={`/gallery/${album.id}`}>
+                        <span class="album__cover">
+                          <span class="album__frame">
+                            <Picture
+                              src={album.data.cover}
+                              alt={album.data.coverAlt}
+                              widths={[360, 540, 720, 960]}
+                              sizes="(min-width: 900px) 30vw, 90vw"
+                              formats={['avif', 'webp']}
+                              priority={yearIndex === 0 && i === 0}
+                            />
+                            <DateStamp date={album.data.date} class="album__stamp" />
+                          </span>
+                        </span>
+                        <span class="album__meta">
+                          <span class="album__title display" style={fitStyle(album.data.title)}>{album.data.title}</span>
+                          <span class="album__info">
+                            {mediumDate(album.data.date)} · {album.data.photos.length} photos
+                            {album.data.sample && <span class="sample-tag">Sample</span>}
+                          </span>
+                        </span>
+                      </a>
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          ))
+        )
+      }
+      <aside class="gallery__note">
+        <p class="serif">Took photos at a UMI show?</p>
+        <p class="muted">Send them our way and we'll add them to the album, with credit.</p>
+        <a class="btn btn--ghost" href="/contact?topic=General%20question">
+          <span class="btn__label">Share your photos</span>
+        </a>
+      </aside>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* Let the blended art behind the page show through the hero and the album section. */
+  :global(main:has(> .art--in-page)) :global(.page-hero),
+  .gallery {
+    background-color: transparent;
+  }
+
+  .gallery {
+    padding-bottom: var(--section);
+  }
+
+  .gallery__year + .gallery__year {
+    margin-top: var(--space-3xl);
+  }
+
+  .gallery__year-label {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: var(--space-xl);
+  }
+
+  .gallery__year-label .display {
+    font-size: var(--display-l);
+    font-weight: 900;
+    color: var(--sodium);
+  }
+
+  .gallery__year-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--line-strong);
+  }
+
+  .albums {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+    gap: var(--space-2xl) var(--space-xl);
+  }
+
+  .album__link {
+    display: grid;
+    gap: 1.1rem;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  /* A small stack of prints: the cover photo on top of two blank sheets. */
+  .album__cover {
+    position: relative;
+    display: block;
+    isolation: isolate;
+    margin: 0.6rem;
+  }
+
+  .album__cover::before,
+  .album__cover::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: #dfe2ea;
+    box-shadow: var(--shadow-print);
+    transition: transform var(--dur-slow) var(--ease-spring);
+  }
+
+  .album__cover::before {
+    transform: rotate(-4deg);
+  }
+
+  .album__cover::after {
+    background: #c9cfdc;
+    transform: rotate(3deg);
+  }
+
+  .album__frame {
+    position: relative;
+    display: block;
+    aspect-ratio: 3 / 2;
+    overflow: hidden;
+    outline: 8px solid #eef0f4;
+    box-shadow: var(--shadow-print);
+    transform: rotate(-0.5deg);
+    transition: transform var(--dur-slow) var(--ease-spring);
+  }
+
+  .album :global(picture),
+  .album :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .album :global(.album__stamp) {
+    position: absolute;
+    right: 0.7rem;
+    bottom: 0.6rem;
+    font-size: 0.8rem;
+  }
+
+  .album__meta {
+    display: grid;
+    gap: 0.3rem;
+    margin-top: 0.4rem;
+    container-type: inline-size;
+  }
+
+  .album__title {
+    font-size: min(var(--display-s), 100cqi / var(--fit, 0.01));
+    font-weight: 900;
+    line-height: 0.9;
+  }
+
+  .album__info {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+
+  @media (hover: hover) {
+    .album__link:hover .album__cover::before {
+      transform: rotate(-8deg) translate(-4%, -2%);
+    }
+
+    .album__link:hover .album__cover::after {
+      transform: rotate(7deg) translate(4%, -1%);
+    }
+
+    .album__link:hover .album__frame {
+      transform: rotate(0deg) scale(1.02);
+    }
+  }
+
+  .gallery__empty {
+    font-size: var(--step-3);
+    color: var(--fg-muted);
+  }
+
+  .gallery__note {
+    display: grid;
+    justify-items: start;
+    gap: 0.6rem;
+    margin-top: var(--space-3xl);
+    padding: var(--space-xl);
+    border: 1px dashed var(--line-strong);
+  }
+
+  .gallery__note .serif {
+    font-size: var(--step-3);
+  }
+</style>

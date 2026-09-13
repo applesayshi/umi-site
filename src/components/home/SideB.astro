@@ -1,0 +1,297 @@
+---
+/** A cassette J-card tracklist of UMI's programmes. Rows preview a photo that follows the cursor. */
+import type { ImageMetadata } from 'astro';
+import { getImage } from 'astro:assets';
+import Icon from '../ui/Icon.astro';
+import TornEdge from '../ui/TornEdge.astro';
+import { fitStyle } from '../../lib/fit';
+import type { IconName } from '../../lib/icons';
+
+interface Track {
+  title: string;
+  text: string;
+  href: string;
+  label: string;
+  icon: IconName;
+  image: ImageMetadata;
+}
+
+interface Props {
+  title: string;
+  intro?: string;
+  tracks: Track[];
+}
+
+const { title, intro, tracks } = Astro.props;
+const previews = await Promise.all(tracks.map((t) => getImage({ src: t.image, width: 520, format: 'webp', quality: 72 })));
+---
+
+<section class="side-b theme-paper texture-paper" aria-labelledby="side-b-title">
+  <TornEdge position="top" seed="side-b-top" />
+  <div class="container side-b__inner">
+    <header class="side-b__head">
+      <p class="eyebrow" data-reveal="fade"><span class="eyebrow__index">B</span><span>Programs</span></p>
+      <h2 class="side-b__title display" id="side-b-title" data-reveal="stutter" style={fitStyle(title)}>{title}</h2>
+      {intro && <p class="side-b__intro subtitle" data-reveal style="--i:1">{intro}</p>}
+    </header>
+
+    <ol class="side-b__list" role="list" data-hover-preview style={fitStyle(tracks.map((track) => track.title).join(' '))}>
+      {
+        tracks.map((track, i) => (
+          <li class="side-b__item" data-reveal style={`--i:${i}`}>
+            <a class="side-b__link" href={track.href} data-preview={previews[i].src}>
+              <span class="side-b__num">B{i + 1}</span>
+              <span class="side-b__name display">{track.title}</span>
+              <span class="side-b__text">{track.text}</span>
+              <span class="side-b__label">
+                <Icon name={track.icon} size="1.1rem" />
+                {track.label}
+              </span>
+              <span class="side-b__arrow" aria-hidden="true">
+                <Icon name="arrow-up-right" size="1.3rem" />
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+  <div class="side-b__preview" aria-hidden="true" data-preview-el>
+    <img alt="" width="520" height="347" decoding="async" />
+  </div>
+</section>
+
+<style>
+  .side-b {
+    position: relative;
+    padding-block: var(--section);
+  }
+
+  .side-b__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-2xl);
+  }
+
+  .side-b__head {
+    display: grid;
+    gap: var(--space-s);
+    container-type: inline-size;
+  }
+
+  .side-b__title {
+    font-size: min(var(--display-2xl), 100cqi / var(--fit, 0.01));
+    font-weight: 900;
+    line-height: 0.85;
+  }
+
+  .side-b__intro {
+    font-size: var(--step-3);
+  }
+
+  .side-b__list {
+    border-top: 2px solid var(--ink);
+    container-type: inline-size;
+  }
+
+  .side-b__item {
+    border-bottom: 1px solid var(--line-strong);
+  }
+
+  .side-b__link {
+    position: relative;
+    display: grid;
+    grid-template-columns: 2.75rem minmax(0, 1fr) auto;
+    grid-template-areas:
+      'num name arrow'
+      '. text text'
+      '. label label';
+    align-items: baseline;
+    gap: 0.35rem 1rem;
+    padding-block: var(--space-m);
+    color: inherit;
+    text-decoration: none;
+    isolation: isolate;
+  }
+
+  .side-b__link::before {
+    content: '';
+    position: absolute;
+    inset: 0 calc(var(--gutter) * -0.5);
+    z-index: -1;
+    background: var(--cobalt-deep);
+    transform: scaleY(0);
+    transform-origin: bottom;
+    transition: transform var(--dur-slow) var(--ease-out);
+  }
+
+  .side-b__num {
+    grid-area: num;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    color: var(--orange-ink);
+  }
+
+  .side-b__name {
+    grid-area: name;
+    /* The name column is the list minus the number, arrow and gaps (plus room for the hover nudge). */
+    font-size: min(var(--display-l), (100cqi - 9rem) / var(--fit, 0.01));
+    font-weight: 900;
+    line-height: 0.95;
+    transition: transform var(--dur-base) var(--ease-out), color var(--dur-fast);
+  }
+
+  .side-b__text {
+    grid-area: text;
+    max-width: 46ch;
+    font-family: var(--font-serif);
+    font-size: var(--step-1);
+    font-style: italic;
+    line-height: 1.3;
+    color: var(--ink-soft);
+    transition: color var(--dur-fast);
+  }
+
+  .side-b__label {
+    grid-area: label;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    transition: color var(--dur-fast);
+  }
+
+  .side-b__arrow {
+    grid-area: arrow;
+    align-self: center;
+    display: grid;
+    place-items: center;
+    width: 3.2rem;
+    height: 3.2rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 50%;
+    transition:
+      transform var(--dur-base) var(--ease-out),
+      background-color var(--dur-fast),
+      color var(--dur-fast),
+      border-color var(--dur-fast);
+  }
+
+  @media (hover: hover) {
+    .side-b__link:hover::before {
+      transform: scaleY(1);
+      transform-origin: top;
+    }
+
+    .side-b__link:hover .side-b__name {
+      color: #ffffff;
+      transform: translateX(12px);
+    }
+
+    .side-b__link:hover .side-b__text,
+    .side-b__link:hover .side-b__label {
+      color: #dde3ff;
+    }
+
+    .side-b__link:hover .side-b__num {
+      color: var(--sun);
+    }
+
+    .side-b__link:hover .side-b__arrow {
+      background: var(--orange);
+      border-color: var(--orange);
+      color: var(--night-950);
+      transform: rotate(45deg);
+    }
+  }
+
+  .side-b__link:focus-visible {
+    outline-offset: 6px;
+  }
+
+  @media (min-width: 900px) {
+    .side-b__inner {
+      grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.4fr);
+      align-items: start;
+    }
+
+    .side-b__head {
+      position: sticky;
+      top: calc(var(--header-h) + var(--space-l));
+    }
+
+    .side-b__link {
+      grid-template-columns: 3rem minmax(0, 1fr) auto;
+    }
+  }
+
+  /* Cursor-following preview photo (fine pointers only) */
+  .side-b__preview {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: var(--z-sticky);
+    width: 16rem;
+    aspect-ratio: 3 / 2;
+    pointer-events: none;
+    opacity: 0;
+    transform: translate3d(var(--x, 0), var(--y, 0), 0) rotate(-4deg) scale(0.9);
+    transition:
+      opacity var(--dur-base) var(--ease-out),
+      scale var(--dur-base) var(--ease-out);
+    box-shadow: var(--shadow-lift);
+    outline: 8px solid var(--paper-50);
+  }
+
+  .side-b__preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .side-b__preview.is-visible {
+    opacity: 1;
+  }
+
+  @media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
+    .side-b__preview {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  const list = document.querySelector<HTMLElement>('[data-hover-preview]');
+  const preview = document.querySelector<HTMLElement>('[data-preview-el]');
+  const canHover = window.matchMedia('(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)');
+  if (list && preview && canHover.matches) {
+    const img = preview.querySelector('img')!;
+    let x = 0;
+    let y = 0;
+    let tx = 0;
+    let ty = 0;
+    let raf = 0;
+    const loop = () => {
+      x += (tx - x) * 0.2;
+      y += (ty - y) * 0.2;
+      preview.style.setProperty('--x', `${x}px`);
+      preview.style.setProperty('--y', `${y}px`);
+      raf = Math.abs(tx - x) + Math.abs(ty - y) > 0.5 ? requestAnimationFrame(loop) : 0;
+    };
+    list.querySelectorAll<HTMLAnchorElement>('[data-preview]').forEach((link) => {
+      link.addEventListener('pointerenter', () => {
+        img.src = link.dataset.preview ?? '';
+        preview.classList.add('is-visible');
+      });
+      link.addEventListener('pointerleave', () => preview.classList.remove('is-visible'));
+    });
+    list.addEventListener('pointermove', (event) => {
+      tx = event.clientX + 24;
+      ty = event.clientY - preview.offsetHeight / 2;
+      if (!raf) raf = requestAnimationFrame(loop);
+    });
+  }
+</script>

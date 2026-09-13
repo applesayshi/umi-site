@@ -1,0 +1,158 @@
+---
+/**
+ * Events in the next three weeks on the home page (at most five), in the same rows as the Events page
+ * so they read just as clearly. Later dates live on the full calendar.
+ */
+import EventRow from '../events/EventRow.astro';
+import Icon from '../ui/Icon.astro';
+import { isInUpcomingWindow, type EventEntry } from '../../lib/content';
+import { fitStyle } from '../../lib/fit';
+
+interface Props {
+  title: string;
+  intro?: string;
+  /** Events that haven't ended, soonest first. */
+  events: EventEntry[];
+  instagram?: string;
+}
+
+const { title, intro, events, instagram } = Astro.props;
+const LIMIT = 5;
+// A few later events ride along hidden, so the script can roll the list forward if the site
+// hasn't been rebuilt since an event ended or a new one came within three weeks.
+const now = new Date();
+let visible = 0;
+const rows = events.slice(0, LIMIT + 3).map((event) => {
+  const show = visible < LIMIT && isInUpcomingWindow(event, now);
+  if (show) visible++;
+  return { event, hidden: !show };
+});
+---
+
+<section class="upcoming theme-night" aria-labelledby="upcoming-title">
+  <div class="upcoming__fields" aria-hidden="true"><i></i><i></i></div>
+  <div class="container upcoming__inner">
+    <header class="upcoming__head">
+      <div class="upcoming__heading">
+        <p class="eyebrow" data-reveal="fade"><span class="eyebrow__index">A2</span><span>Next 3 weeks</span></p>
+        <h2 class="upcoming__title display glow-title" id="upcoming-title" data-text={title} data-reveal="stutter" style={fitStyle(title)}>{title}</h2>
+        {intro && <p class="lede">{intro}</p>}
+      </div>
+      <a class="btn btn--ghost upcoming__cta" href="/events">
+        <Icon name="calendar" />
+        <span class="btn__label">Full calendar</span>
+      </a>
+    </header>
+
+    {
+      rows.length > 0 && (
+        <ol class="upcoming__list" role="list" data-upcoming-list data-limit={LIMIT} hidden={visible === 0}>
+          {rows.map(({ event, hidden }, i) => (
+            <EventRow event={event} index={i} hidden={hidden} />
+          ))}
+        </ol>
+      )
+    }
+    <div class="upcoming__empty" data-upcoming-empty hidden={visible > 0}>
+      <p class="serif">Nothing in the next three weeks.</p>
+      <p class="muted">
+        Later dates are on the <a class="link" href="/events">full calendar</a>. Follow
+        {instagram ? <a class="link" href={instagram}>@ubcmusicinitiative</a> : '@ubcmusicinitiative'} to hear about new shows first.
+      </p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .upcoming {
+    position: relative;
+    overflow: hidden;
+    padding-block: var(--section);
+  }
+
+  .upcoming__fields i {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+  }
+
+  .upcoming__fields i:nth-child(1) {
+    top: -6%;
+    right: -8%;
+    width: 44vw;
+    height: 34vw;
+    background: radial-gradient(closest-side, rgb(255 90 43 / 0.24), transparent);
+  }
+
+  .upcoming__fields i:nth-child(2) {
+    bottom: 0;
+    left: -10%;
+    width: 40vw;
+    height: 30vw;
+    background: radial-gradient(closest-side, rgb(44 82 224 / 0.3), transparent);
+  }
+
+  .upcoming__inner {
+    position: relative;
+  }
+
+  .upcoming__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-m) var(--space-xl);
+    margin-bottom: var(--space-xl);
+  }
+
+  .upcoming__heading {
+    flex: 1 1 28rem;
+    display: grid;
+    gap: var(--space-s);
+    max-width: 52rem;
+    container-type: inline-size;
+  }
+
+  .upcoming__title {
+    --glow: var(--orange);
+    font-size: min(var(--display-xl), 100cqi / var(--fit, 0.01));
+    font-weight: 900;
+    line-height: 0.9;
+  }
+
+  .upcoming__list {
+    border-top: 1px solid var(--line-strong);
+  }
+
+  .upcoming__empty {
+    display: grid;
+    gap: 0.5rem;
+    padding: var(--space-xl);
+    border: 1px dashed var(--line-strong);
+  }
+
+  .upcoming__empty .serif {
+    font-size: var(--step-3);
+  }
+</style>
+
+<script>
+  import { inUpcomingWindow, upcomingUntil } from '../../lib/upcoming';
+
+  // Re-check the build's list: drop events that have ended since the last deploy, bring in ones
+  // that are now within three weeks, and show at most `data-limit` rows.
+  const now = new Date();
+  const until = upcomingUntil(now);
+  document.querySelectorAll<HTMLElement>('[data-upcoming-list]').forEach((list) => {
+    const limit = Number(list.dataset.limit ?? 5);
+    let visible = 0;
+    for (const row of list.querySelectorAll<HTMLElement>('[data-event-end]')) {
+      row.hidden = visible >= limit || !inUpcomingWindow(row.dataset.eventDay ?? '', row.dataset.eventEnd ?? '', now, until);
+      if (!row.hidden) visible++;
+    }
+    list.hidden = visible === 0;
+    const empty = list.parentElement?.querySelector<HTMLElement>('[data-upcoming-empty]');
+    if (empty) empty.hidden = visible > 0;
+  });
+</script>

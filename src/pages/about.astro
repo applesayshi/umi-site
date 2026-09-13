@@ -1,0 +1,582 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/layout/PageHero.astro';
+import ArtBackdrop from '../components/ui/ArtBackdrop.astro';
+import ExecCard from '../components/about/ExecCard.astro';
+import ExecDepartments from '../components/about/ExecDepartments.astro';
+import Photo from '../components/ui/Photo.astro';
+import Icon from '../components/ui/Icon.astro';
+import TornEdge from '../components/ui/TornEdge.astro';
+import Scribble from '../components/ui/Scribble.astro';
+import { getPage, getSettings, getTeam } from '../lib/content';
+import { DEPARTMENTS } from '../lib/constants';
+import { fitStyle } from '../lib/fit';
+import type { IconName } from '../lib/icons';
+
+const [about, team, settings] = await Promise.all([getPage('about', 'about'), getTeam(), getSettings()]);
+const { data } = about;
+const { Content } = await render(about);
+
+// One grid in department order: most departments have a single exec, so per-department rows waste space.
+const rank = (dept: string) => DEPARTMENTS.indexOf(dept as (typeof DEPARTMENTS)[number]);
+const execs = [...team].sort((a, b) => rank(a.data.department) - rank(b.data.department) || a.data.order - b.data.order);
+// Presidents and VPs get full cards; the department dropdowns list everyone.
+const leads = execs.filter((member) => member.data.lead);
+const pillarIcons: IconName[] = ['microphone', 'users', 'graduation-cap', 'hand-heart'];
+const pillarInks = ['var(--peri)', 'var(--orange)', 'var(--mint)', 'var(--pink)'];
+
+const sections = [
+  { id: 'about-umi', label: 'About UMI' },
+  { id: 'execs', label: 'Meet the execs' },
+  { id: 'story', label: data.storyTitle },
+];
+---
+
+<BaseLayout title="About" description={data.intro} image={data.heroPhoto.src} imageAlt={data.heroPhoto.alt}>
+  <PageHero eyebrow="Who we are" index="A1" title={data.title} intro={data.intro} photo={data.heroPhoto} duo="peri">
+    <ArtBackdrop slot="backdrop" pieces={['disc']} strength={0.5} />
+  </PageHero>
+
+  <div class="about theme-night">
+    <div class="container about__layout">
+      <nav class="about__nav" aria-label="On this page">
+        <p class="about__nav-label">On this page</p>
+        <ol role="list">
+          {
+            sections.map((s, i) => (
+              <li>
+                <a href={`#${s.id}`} data-spy-link={s.id}>
+                  <span class="about__nav-num">0{i + 1}</span>
+                  {s.label}
+                </a>
+              </li>
+            ))
+          }
+          {
+            settings.links.constitution && (
+              <li>
+                <a href={settings.links.constitution} target="_blank" rel="noopener noreferrer">
+                  <span class="about__nav-num">0{sections.length + 1}</span>
+                  Constitution
+                  <Icon name="arrow-up-right" size="0.9em" />
+                </a>
+              </li>
+            )
+          }
+        </ol>
+      </nav>
+
+      <div class="about__content">
+        <section class="about__section" id="about-umi" aria-labelledby="about-umi-title" data-spy-section>
+          <h2 class="visually-hidden" id="about-umi-title">About UMI</h2>
+          <div class="about__mission-wrap">
+            <p class="about__mission serif" data-reveal>{data.mission}</p>
+            <Scribble variant="underline" class="about__underline" color="var(--orange)" width={3} />
+          </div>
+          <ul class="pillars" role="list" style={fitStyle(data.pillars.map((pillar) => pillar.title).join(' '))}>
+            {
+              data.pillars.map((pillar, i) => (
+                <li class="pillar" data-reveal style={`--i:${i};--pillar-ink:${pillarInks[i % pillarInks.length]}`}>
+                  <span class="pillar__num">0{i + 1}</span>
+                  <Icon name={pillarIcons[i % pillarIcons.length]} size="1.8rem" class="pillar__icon" />
+                  <h3 class="pillar__title display">{pillar.title}</h3>
+                  <p class="pillar__text">{pillar.text}</p>
+                </li>
+              ))
+            }
+          </ul>
+        </section>
+
+        <section class="about__section" id="execs" aria-labelledby="execs-title" data-spy-section>
+          <header class="about__head">
+            <p class="eyebrow"><span class="eyebrow__index">02</span><span>The people behind the shows</span></p>
+            <h2 class="about__title display" id="execs-title" data-reveal="stutter">Meet the execs</h2>
+            <p class="lede">{data.execsIntro}</p>
+          </header>
+          {
+            leads.length > 0 && (
+              <>
+                <p class="execs__label">Presidents & VPs</p>
+                <div class="execs__grid">
+                  {leads.map((member, i) => (
+                    <ExecCard member={member} index={i} />
+                  ))}
+                </div>
+              </>
+            )
+          }
+          <div class="execs__all">
+            <div class="execs__all-head">
+              <h3 class="execs__all-title display">The whole team</h3>
+              <p class="muted">Open a department to see everyone who runs it.</p>
+            </div>
+            <ExecDepartments members={execs} />
+          </div>
+          <aside class="about__recruit">
+            <p class="serif">Want to help run the shows?</p>
+            <p class="muted">UMI hires new execs and volunteers every year. Tell us what you'd love to work on.</p>
+            <a class="btn" href="/contact?topic=General%20question">
+              <span class="btn__label">Get involved</span>
+              <Icon name="arrow-right" />
+            </a>
+          </aside>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <section class="story theme-paper texture-paper" id="story" aria-labelledby="story-title" data-spy-section>
+    <TornEdge position="top" seed="story-top" />
+    <Scribble variant="vine" class="story__vine" color="var(--ink)" width={2.2} />
+    <div class="container story__inner">
+      <header class="story__head">
+        <p class="eyebrow"><span class="eyebrow__index">03</span><span>Since the beginning</span></p>
+        <h2 class="about__title display" id="story-title" data-reveal="stutter" style={fitStyle(data.storyTitle)}>{data.storyTitle}</h2>
+      </header>
+
+      <div class="story__grid">
+        <div class="story__text prose">
+          <Content />
+        </div>
+        <div class="story__photos">
+          {
+            data.storyPhotos.map((photo, i) => (
+              <div class={`story__photo story__photo--${i + 1}`} data-reveal style={`--i:${i}`}>
+                <Photo
+                  src={photo.src}
+                  alt={photo.alt}
+                  date={photo.date}
+                  sizes="(min-width: 960px) 26vw, 70vw"
+                  widths={[360, 540, 720, 960]}
+                  aspect="4 / 3"
+                  frame="print"
+                  tape={i === 0 ? 'top' : 'corners'}
+                  tilt={i === 0 ? -3 : 4}
+                  duo={i === 0 ? 'mint' : 'pink'}
+                  flash
+                />
+              </div>
+            ))
+          }
+        </div>
+      </div>
+
+      <ol class="timeline" role="list">
+        {
+          data.timeline.map((item, i) => (
+            <li class="timeline__item" data-reveal style={`--i:${i}`}>
+              <p class="timeline__when display">{item.when}</p>
+              <div class="timeline__body">
+                <h3 class="timeline__title serif">
+                  {item.title}
+                  {item.sample && <span class="sample-tag">Sample</span>}
+                </h3>
+                <p class="timeline__text">{item.text}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .about {
+    padding-bottom: var(--section);
+  }
+
+  .about__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-xl);
+  }
+
+  /* ---- On-page nav --------------------------------------------------- */
+  .about__nav {
+    position: sticky;
+    top: var(--header-h);
+    z-index: var(--z-sticky);
+    margin-inline: calc(var(--gutter) * -1);
+    padding: 0.5rem var(--gutter);
+    background: rgb(7 11 31 / 0.9);
+    backdrop-filter: blur(10px);
+    border-block: 1px solid var(--line);
+  }
+
+  .about__nav-label {
+    display: none;
+  }
+
+  .about__nav ol {
+    display: flex;
+    gap: 0.25rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .about__nav a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    padding-inline: 0.8rem;
+    border-radius: var(--radius-pill);
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    white-space: nowrap;
+    color: var(--fg-muted);
+    transition: color var(--dur-fast), background-color var(--dur-fast);
+  }
+
+  .about__nav a:hover,
+  .about__nav a[aria-current='true'] {
+    color: var(--fg);
+  }
+
+  .about__nav a[aria-current='true'] {
+    background: color-mix(in srgb, var(--peri) 18%, transparent);
+  }
+
+  .about__nav-num {
+    color: var(--hot);
+  }
+
+  .about__content {
+    display: grid;
+    gap: var(--space-3xl);
+    min-width: 0;
+  }
+
+  @media (min-width: 1024px) {
+    .about__layout {
+      grid-template-columns: 15rem minmax(0, 1fr);
+      gap: var(--space-3xl);
+    }
+
+    .about__nav {
+      top: calc(var(--header-h) + var(--space-l));
+      align-self: start;
+      margin: 0;
+      padding: 0;
+      background: none;
+      backdrop-filter: none;
+      border: 0;
+    }
+
+    .about__nav-label {
+      display: block;
+      margin-bottom: 0.75rem;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--fg-muted);
+    }
+
+    .about__nav ol {
+      display: grid;
+      gap: 0;
+      border-top: 1px solid var(--line-strong);
+    }
+
+    .about__nav li {
+      border-bottom: 1px solid var(--line);
+    }
+
+    .about__nav a {
+      display: flex;
+      width: 100%;
+      padding: 0.8rem 0.25rem;
+      border-radius: 0;
+      font-size: 0.8rem;
+    }
+
+    .about__nav a[aria-current='true'] {
+      background: none;
+      color: var(--peri);
+    }
+  }
+
+  /* ---- Mission & pillars --------------------------------------------- */
+  .about__section {
+    scroll-margin-top: calc(var(--header-h) + 5rem);
+  }
+
+  .about__mission-wrap {
+    position: relative;
+  }
+
+  .about__mission {
+    max-width: 22ch;
+    font-size: clamp(2.2rem, 1.4rem + 3.2vw, 4.6rem);
+    line-height: 1.02;
+  }
+
+  .about__mission-wrap :global(.about__underline) {
+    width: 70%;
+    height: auto;
+    margin-top: 0.4rem;
+  }
+
+  /* Cells draw their own right and bottom rules, so a part-filled last row leaves no grey gap. */
+  .pillars {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+    margin-top: var(--space-2xl);
+    border-top: 1px solid var(--line-strong);
+    border-left: 1px solid var(--line-strong);
+  }
+
+  .pillar {
+    position: relative;
+    display: grid;
+    gap: 0.6rem;
+    align-content: start;
+    padding: 1.6rem 1.4rem 1.8rem;
+    border-right: 1px solid var(--line-strong);
+    border-bottom: 1px solid var(--line-strong);
+    background: var(--night-950);
+    transition: background-color var(--dur-base);
+    container-type: inline-size;
+  }
+
+  .pillar::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+    height: 3px;
+    background: var(--pillar-ink);
+  }
+
+  .pillar:hover {
+    background: var(--night-850);
+  }
+
+  .pillar__num {
+    position: absolute;
+    top: 1.2rem;
+    right: 1.2rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--fg-muted);
+  }
+
+  .pillar :global(.pillar__icon) {
+    color: var(--pillar-ink);
+  }
+
+  .pillar__title {
+    margin-top: 0.4rem;
+    font-size: min(clamp(1rem, 0.8rem + 0.7vw, 1.45rem), 100cqi / var(--fit, 0.01));
+    line-height: 1;
+  }
+
+  .pillar__text {
+    font-size: var(--step--1);
+    line-height: 1.6;
+    color: var(--fg-muted);
+  }
+
+  /* ---- Execs --------------------------------------------------------- */
+  .about__head {
+    display: grid;
+    gap: var(--space-s);
+    margin-bottom: var(--space-2xl);
+    container-type: inline-size;
+  }
+
+  .about__title {
+    font-size: min(var(--display-xl), 100cqi / var(--fit, 0.01));
+    font-weight: 900;
+    line-height: 0.9;
+  }
+
+  .execs__label {
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--line-strong);
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+
+  .execs__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 14.5rem), 1fr));
+    gap: var(--space-2xl) var(--space-l);
+    padding-top: var(--space-l);
+  }
+
+  .execs__all {
+    display: grid;
+    gap: var(--space-l);
+    margin-top: var(--space-3xl);
+  }
+
+  .execs__all-head {
+    display: grid;
+    gap: var(--space-2xs);
+  }
+
+  .execs__all-title {
+    font-size: var(--display-m);
+    font-weight: 900;
+    line-height: 0.95;
+  }
+
+  .about__recruit {
+    display: grid;
+    justify-items: start;
+    gap: 0.6rem;
+    margin-top: var(--space-3xl);
+    padding: var(--space-xl);
+    border: 1px dashed var(--line-strong);
+  }
+
+  .about__recruit .serif {
+    font-size: var(--step-3);
+    line-height: 1.1;
+  }
+
+  /* ---- Story --------------------------------------------------------- */
+  .story {
+    position: relative;
+    padding-block: var(--section);
+    scroll-margin-top: var(--header-h);
+  }
+
+  .story :global(.story__vine) {
+    position: absolute;
+    top: 6%;
+    right: 1.5%;
+    width: clamp(3rem, 6vw, 6rem);
+    height: auto;
+    opacity: 0.85;
+  }
+
+  .story__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-2xl);
+  }
+
+  .story__head {
+    display: grid;
+    gap: var(--space-s);
+    container-type: inline-size;
+  }
+
+  .story__grid {
+    display: grid;
+    gap: var(--space-2xl);
+    align-items: start;
+  }
+
+  .story__text {
+    font-size: var(--step-1);
+  }
+
+  .story__photos {
+    position: relative;
+    display: grid;
+    gap: var(--space-l);
+  }
+
+  .story__photo {
+    width: min(100%, 26rem);
+  }
+
+  .story__photo--2 {
+    justify-self: end;
+  }
+
+  .timeline {
+    display: grid;
+    border-top: 2px solid var(--ink);
+  }
+
+  .timeline__item {
+    display: grid;
+    gap: 0.4rem 2rem;
+    padding-block: var(--space-l);
+    border-bottom: 1px solid var(--line-strong);
+  }
+
+  .timeline__when {
+    font-size: clamp(1.2rem, 0.9rem + 1.2vw, 2rem);
+    line-height: 0.95;
+    color: var(--cobalt-deep);
+  }
+
+  .timeline__title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: var(--step-3);
+    line-height: 1.1;
+  }
+
+  .timeline__text {
+    max-width: 56ch;
+    margin-top: 0.3rem;
+    color: var(--fg-muted);
+  }
+
+  @media (min-width: 760px) {
+    .timeline__item {
+      grid-template-columns: 16rem minmax(0, 1fr);
+      align-items: baseline;
+    }
+  }
+
+  @media (min-width: 960px) {
+    .story__grid {
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    }
+
+    .story__photo--2 {
+      margin-top: -3rem;
+    }
+  }
+</style>
+
+<script>
+  // Highlight the on-page nav link for the last section whose top has passed 40% of the viewport.
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-spy-link]')];
+  const sections = [...document.querySelectorAll<HTMLElement>('[data-spy-section]')];
+  if (links.length && sections.length) {
+    let current = '';
+    let ticking = false;
+    const update = () => {
+      ticking = false;
+      const line = window.innerHeight * 0.4;
+      let id = sections[0].id;
+      for (const section of sections) {
+        if (section.getBoundingClientRect().top <= line) id = section.id;
+      }
+      if (id === current) return;
+      current = id;
+      links.forEach((link) => link.setAttribute('aria-current', String(link.dataset.spyLink === id)));
+    };
+    update();
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (!ticking) {
+          ticking = true;
+          requestAnimationFrame(update);
+        }
+      },
+      { passive: true },
+    );
+  }
+</script>
