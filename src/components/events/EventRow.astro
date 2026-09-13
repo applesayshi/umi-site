@@ -15,7 +15,7 @@ interface Props {
 
 const { event, variant = 'upcoming', albumHref, index = 0, hidden = false } = Astro.props;
 const { data } = event;
-const href = `/events/${event.id}`;
+const href = `/events/${event.id}/`;
 ---
 
 <li

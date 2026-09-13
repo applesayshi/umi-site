@@ -10,6 +10,7 @@ import Icon from '../../components/ui/Icon.astro';
 import GlitchStrip from '../../components/ui/GlitchStrip.astro';
 import produceLogo from '../../assets/brand/produceumi-logo.png';
 import { getPage, getSongsByYear } from '../../lib/content';
+import { pageHref } from '../../lib/site';
 import { dateParts } from '../../lib/dates';
 
 const [page, years] = await Promise.all([getPage('produce', 'produce'), getSongsByYear()]);
@@ -22,7 +23,7 @@ const statusCopy = {
   closed: { label: 'Sign-ups closed', tone: 'stop' },
 } as const;
 const status = statusCopy[data.status];
-const signupHref = data.signupUrl ?? `/contact?topic=${encodeURIComponent('ProduceUMI')}`;
+const signupHref = pageHref(data.signupUrl ?? `/contact/?topic=${encodeURIComponent('ProduceUMI')}`);
 const signupExternal = signupHref.startsWith('http');
 
 // UBC's school year starts in September.

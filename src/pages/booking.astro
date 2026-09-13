@@ -8,6 +8,7 @@ import Icon from '../components/ui/Icon.astro';
 import TornEdge from '../components/ui/TornEdge.astro';
 import Scribble from '../components/ui/Scribble.astro';
 import { getPage, getSettings } from '../lib/content';
+import { pageHref } from '../lib/site';
 import { fitStyle } from '../lib/fit';
 
 const [page, settings] = await Promise.all([getPage('booking', 'booking'), getSettings()]);
@@ -23,7 +24,7 @@ const rentalSteps = data.steps.map((step, i) => {
   ];
   return links[i]?.href ? { ...step, href: links[i].href, linkLabel: links[i].label } : step;
 });
-const performerHref = performers.requestUrl ?? `/contact?topic=${encodeURIComponent('Booking a performer')}`;
+const performerHref = pageHref(performers.requestUrl ?? `/contact/?topic=${encodeURIComponent('Booking a performer')}`);
 ---
 
 <BaseLayout title="Booking & rentals" description={data.intro} image={data.heroPhoto.src} imageAlt={data.heroPhoto.alt}>

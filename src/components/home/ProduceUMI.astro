@@ -45,7 +45,7 @@ const external = signupHref.startsWith('http');
                     )}
                   </span>
                   <span class="produce__song-text">
-                    <a class="produce__song-link" href={`/produceumi/${song.id}`}>
+                    <a class="produce__song-link" href={`/produceumi/${song.id}/`}>
                       <span class="produce__song-title">{song.data.title}</span>
                     </a>
                     <span class="produce__song-artist">
@@ -76,7 +76,7 @@ const external = signupHref.startsWith('http');
       }
 
       <div class="btn-row" data-reveal style="--i:5">
-        <a class="btn" href="/produceumi">
+        <a class="btn" href="/produceumi/">
           <Icon name="headphones" />
           <span class="btn__label">Hear the songs</span>
         </a>

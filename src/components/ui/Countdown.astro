@@ -16,7 +16,7 @@ interface Props {
 const { events, class: className } = Astro.props;
 const payload = events.slice(0, 8).map((e) => ({
   title: e.data.title,
-  href: `/events/${e.id}`,
+  href: `/events/${e.id}/`,
   start: e.data.start.toISOString(),
   end: eventEnd(e).toISOString(),
   when: `${shortDate(e.data.start)}${e.data.hideTime ? '' : ` · ${time(e.data.start)}`}`,

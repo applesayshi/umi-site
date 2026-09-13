@@ -18,7 +18,7 @@ performers:
       price: $200+
     - length: 30+ min
       price: Let's talk
-  requestUrl: /contact?topic=Booking%20a%20performer
+  requestUrl: /contact/?topic=Booking%20a%20performer
 rentals:
   title: Rent equipment
   text: Speakers, microphones and instruments for your show, rehearsal or club event. Rentals are signed for at pickup.

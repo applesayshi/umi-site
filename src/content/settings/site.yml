@@ -26,5 +26,5 @@ announcement:
   enabled: true
   text: Memberships are open. $10 for UBC students, and members get into UMI events free.
   linkLabel: Join UMI
-  url: /join
+  url: /join/
 landAcknowledgement: UMI gathers, rehearses and performs on the traditional, ancestral, and unceded territory of the xʷməθkʷəy̓əm (Musqueam) people.

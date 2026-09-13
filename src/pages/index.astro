@@ -10,6 +10,7 @@ import ContactSheet from '../components/home/ContactSheet.astro';
 import SideB from '../components/home/SideB.astro';
 import Membership from '../components/home/Membership.astro';
 import { getAlbums, getPage, getSettings, getSongs, getUpcomingEvents } from '../lib/content';
+import { pageHref } from '../lib/site';
 
 const [home, join, produce, lessons, booking, sponsors, about, settings, upcoming, songs, albums] = await Promise.all([
   getPage('home', 'home'),
@@ -26,7 +27,7 @@ const [home, join, produce, lessons, booking, sponsors, about, settings, upcomin
 ]);
 
 const h = home.data;
-const produceSignup = produce.data.signupUrl ?? `/contact?topic=${encodeURIComponent('ProduceUMI')}`;
+const produceSignup = pageHref(produce.data.signupUrl ?? `/contact/?topic=${encodeURIComponent('ProduceUMI')}`);
 
 // Interleave album photos so the strip mixes nights rather than showing one album in a row.
 const homeAlbums = albums.filter((a) => a.data.showOnHome);
@@ -35,7 +36,7 @@ for (let i = 0; i < 4 && frames.length < 10; i++) {
   for (const album of homeAlbums) {
     const photo = album.data.photos[i];
     if (photo && frames.length < 10) {
-      frames.push({ src: photo.src, alt: photo.alt, href: `/gallery/${album.id}`, album: album.data.title, date: album.data.date });
+      frames.push({ src: photo.src, alt: photo.alt, href: `/gallery/${album.id}/`, album: album.data.title, date: album.data.date });
     }
   }
 }
@@ -64,7 +65,7 @@ const tracks = [
   {
     title: 'Lessons',
     text: 'Learn an instrument from fellow students, one-on-one with volunteer instructors.',
-    href: '/lessons',
+    href: '/lessons/',
     label: 'Learn',
     icon: 'graduation-cap' as const,
     image: lessons.data.heroPhoto.src,
@@ -72,7 +73,7 @@ const tracks = [
   {
     title: 'Booking & rentals',
     text: 'Hire UMI performers for your event, or borrow speakers, mics and instruments.',
-    href: '/booking',
+    href: '/booking/',
     label: 'Hire & borrow',
     icon: 'speaker' as const,
     image: booking.data.heroPhoto.src,
@@ -80,7 +81,7 @@ const tracks = [
   {
     title: 'Sponsors & partners',
     text: 'Back student musicians and put your brand in front of UBC’s music scene.',
-    href: '/sponsors',
+    href: '/sponsors/',
     label: 'Partner',
     icon: 'handshake' as const,
     image: sponsors.data.heroPhoto.src,
@@ -88,7 +89,7 @@ const tracks = [
   {
     title: 'Workshops',
     text: 'Production, songwriting and alumni nights for leveling up between shows.',
-    href: '/events?type=workshop',
+    href: '/events/?type=workshop',
     label: 'Create',
     icon: 'music-notes' as const,
     image: about.data.heroPhoto.src,

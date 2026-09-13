@@ -1,5 +1,6 @@
 ---
 import { inline } from '../../lib/content';
+import { pageHref } from '../../lib/site';
 import Icon from './Icon.astro';
 
 interface Props {
@@ -20,7 +21,7 @@ const { steps, class: className } = Astro.props;
         <h3 class="steps__title">{step.title}</h3>
         <p class="steps__text" set:html={inline(step.text)} />
         {step.href && (
-          <a class="link-arrow steps__link" href={step.href} target={step.href.startsWith('http') ? '_blank' : undefined} rel={step.href.startsWith('http') ? 'noopener noreferrer' : undefined}>
+          <a class="link-arrow steps__link" href={pageHref(step.href)} target={step.href.startsWith('http') ? '_blank' : undefined} rel={step.href.startsWith('http') ? 'noopener noreferrer' : undefined}>
             <span>{step.linkLabel ?? 'Open'}</span>
             <Icon name="arrow-up-right" />
           </a>

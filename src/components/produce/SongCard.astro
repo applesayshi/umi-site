@@ -38,7 +38,7 @@ const snippet = songSnippet(song);
   <div class="song__text">
     <div class="song__info">
       <span class="song__meta">{schoolYearLabel(data.schoolYear)}{data.genre && ` · ${data.genre}`}</span>
-      <a class="song__link" href={`/produceumi/${song.id}`}>
+      <a class="song__link" href={`/produceumi/${song.id}/`}>
         <span class="song__title display" style={fitStyle(data.title)}>{data.title}</span>
       </a>
       <span class="song__artist">

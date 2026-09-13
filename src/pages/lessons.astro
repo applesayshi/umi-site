@@ -10,6 +10,7 @@ import TornEdge from '../components/ui/TornEdge.astro';
 import UiWindow from '../components/ui/UiWindow.astro';
 import Scribble from '../components/ui/Scribble.astro';
 import { getPage, getSettings } from '../lib/content';
+import { pageHref } from '../lib/site';
 import { fitStyle } from '../lib/fit';
 import type { IconName } from '../lib/icons';
 
@@ -34,7 +35,7 @@ const iconFor = (instrument: string): IconName => {
   return 'music-notes';
 };
 
-const contactFallback = (topic: string) => `/contact?topic=${encodeURIComponent(topic)}`;
+const contactFallback = (topic: string) => `/contact/?topic=${encodeURIComponent(topic)}`;
 ---
 
 <BaseLayout title="Lessons" description={data.intro} image={data.heroPhoto.src} imageAlt={data.heroPhoto.alt}>
@@ -81,8 +82,8 @@ const contactFallback = (topic: string) => `/contact?topic=${encodeURIComponent(
     <div class="container paths__grid">
       {
         [
-          { ...data.learners, href: data.learners.signupUrl ?? contactFallback('Lessons'), cta: 'Sign up to learn', icon: 'graduation-cap' as const },
-          { ...data.instructors, href: data.instructors.signupUrl ?? contactFallback('Lessons'), cta: 'Volunteer to teach', icon: 'hand-heart' as const },
+          { ...data.learners, href: pageHref(data.learners.signupUrl ?? contactFallback('Lessons')), cta: 'Sign up to learn', icon: 'graduation-cap' as const },
+          { ...data.instructors, href: pageHref(data.instructors.signupUrl ?? contactFallback('Lessons')), cta: 'Volunteer to teach', icon: 'hand-heart' as const },
         ].map((path, i) => (
           <article class:list={['path', i === 0 && 'path--ink']} data-reveal style={`--i:${i}`}>
             <Icon name={path.icon} size="2.2rem" class="path__icon" />

@@ -23,7 +23,7 @@ const [settings, album, allEvents] = await Promise.all([getSettings(), getAlbumF
 const end = eventEnd(event);
 const isPast = end <= new Date();
 const site = Astro.site ?? new URL('https://www.ubcmusicinitiative.com');
-const pageUrl = new URL(`/events/${event.id}`, site).href;
+const pageUrl = new URL(`/events/${event.id}/`, site).href;
 const location = [data.venue, data.address].filter(Boolean).join(', ');
 const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location || settings.office.building)}`;
 const icsEvent = { uid: `${event.id}@ubcmusicinitiative.com`, title: data.title, start: data.start, end, description: data.summary, location, url: pageUrl };
@@ -54,7 +54,7 @@ const jsonLd = {
   <article class="event theme-night">
     <div class="container event__inner">
       <div class="event__copy">
-        <a class="link-arrow event__back" href="/events">
+        <a class="link-arrow event__back" href="/events/">
           <Icon name="arrow-left" />
           <span>All events</span>
         </a>
@@ -112,12 +112,12 @@ const jsonLd = {
               <p class="serif">This show has wrapped.</p>
               <div class="btn-row">
                 {album && (
-                  <a class="btn" href={`/gallery/${album.id}`}>
+                  <a class="btn" href={`/gallery/${album.id}/`}>
                     <Icon name="images" />
                     <span class="btn__label">See the photos</span>
                   </a>
                 )}
-                <a class="btn btn--ghost" href="/events">
+                <a class="btn btn--ghost" href="/events/">
                   <span class="btn__label">What's next</span>
                 </a>
               </div>
@@ -138,7 +138,7 @@ const jsonLd = {
                   </a>
                 )}
                 {!data.ticketUrl && settings.links.membership && (
-                  <a class="btn" href="/join">
+                  <a class="btn" href="/join/">
                     <span class="btn__label">Members get in free</span>
                     <Icon name="arrow-right" />
                   </a>
@@ -196,7 +196,7 @@ const jsonLd = {
             <h2 class="display event__album-title" id="album-title">
               From the floor
             </h2>
-            <a class="link-arrow" href={`/gallery/${album.id}`}>
+            <a class="link-arrow" href={`/gallery/${album.id}/`}>
               <span>Full album · {album.data.photos.length} photos</span>
               <Icon name="arrow-up-right" />
             </a>
@@ -204,7 +204,7 @@ const jsonLd = {
           <ul class="event__album-grid" role="list">
             {album.data.photos.slice(0, 4).map((photo, i) => (
               <li data-reveal style={`--i:${i}`}>
-                <a href={`/gallery/${album.id}#photo-${i + 1}`} class="event__album-link">
+                <a href={`/gallery/${album.id}/#photo-${i + 1}`} class="event__album-link">
                   <Photo src={photo.src} alt={photo.alt} sizes="(min-width: 900px) 22vw, 45vw" widths={[320, 480, 640]} aspect="1 / 1" />
                 </a>
               </li>

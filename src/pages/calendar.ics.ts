@@ -14,7 +14,7 @@ export const GET: APIRoute = async ({ site }) => {
       end: eventEnd(e),
       description: e.data.summary,
       location: [e.data.venue, e.data.address].filter(Boolean).join(', '),
-      url: new URL(`/events/${e.id}`, base).href,
+      url: new URL(`/events/${e.id}/`, base).href,
     })),
     { name: 'UBC Music Initiative (UMI)' },
   );

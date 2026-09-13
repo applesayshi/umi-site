@@ -1,5 +1,6 @@
 ---
 import Icon from '../ui/Icon.astro';
+import { pageHref } from '../../lib/site';
 
 interface Props {
   announcement: { enabled: boolean; text?: string; linkLabel?: string; url?: string };
@@ -18,7 +19,7 @@ const show = announcement.enabled && announcement.text;
         <p class="announcement__text">
           {announcement.text}
           {announcement.url && announcement.linkLabel && (
-            <a class="announcement__link" href={announcement.url}>
+            <a class="announcement__link" href={pageHref(announcement.url)}>
               {announcement.linkLabel}
               <Icon name="arrow-right" size="1em" />
             </a>

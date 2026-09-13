@@ -8,6 +8,7 @@ Read `README.md` (editing, launch, structure) and `DESIGN.md` (design system) be
 - Styling is vanilla CSS with tokens in `src/styles/tokens.css`; components use semantic tokens (`--fg`, `--bg`, `--accent`, `--hot`) set by `theme-night` / `theme-navy` / `theme-paper` / `theme-cobalt` / `theme-peri` / `theme-orange`.
 - Display headings that show CMS text use `fitStyle()` from `src/lib/fit.ts` plus a `container-type: inline-size` column, so long words shrink instead of breaking (see DESIGN.md).
 - Single-column grids use `minmax(0, 1fr)`; check new layouts at 320px for sideways overflow.
+- Internal page links end with `/` (`/events/`, `/contact/?topic=…`): pages build as folders, and Netlify redirects the slashless form. Pass links typed into the CMS through `pageHref()` from `src/lib/site.ts`.
 - Don't name a component prop `as`: astro check stops reading that component's `Props` interface.
 - Logos: `src/assets/brand/umi-logo.png` and `produceumi-logo.png` are generated from the club's originals (`UMI.PNG`, `PRODUCEUMI.PNG`) by `npm run brand`. Regenerate rather than hand-editing them.
 - Backdrop art: `src/assets/backdrops/*.png` are stencils generated from the club's art in `src/assets/Art/` by `npm run art`, and `ui/ArtBackdrop.astro` prints them into page backgrounds (see DESIGN.md › Backdrop art). The `Art` folder name is capitalised: keep import paths' case exact, because Netlify builds on a case-sensitive filesystem.

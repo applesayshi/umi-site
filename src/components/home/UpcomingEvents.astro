@@ -38,7 +38,7 @@ const rows = events.slice(0, LIMIT + 3).map((event) => {
         <h2 class="upcoming__title display glow-title" id="upcoming-title" data-text={title} data-reveal="stutter" style={fitStyle(title)}>{title}</h2>
         {intro && <p class="lede">{intro}</p>}
       </div>
-      <a class="btn btn--ghost upcoming__cta" href="/events">
+      <a class="btn btn--ghost upcoming__cta" href="/events/">
         <Icon name="calendar" />
         <span class="btn__label">Full calendar</span>
       </a>
@@ -56,7 +56,7 @@ const rows = events.slice(0, LIMIT + 3).map((event) => {
     <div class="upcoming__empty" data-upcoming-empty hidden={visible > 0}>
       <p class="serif">Nothing in the next three weeks.</p>
       <p class="muted">
-        Later dates are on the <a class="link" href="/events">full calendar</a>. Follow
+        Later dates are on the <a class="link" href="/events/">full calendar</a>. Follow
         {instagram ? <a class="link" href={instagram}>@ubcmusicinitiative</a> : '@ubcmusicinitiative'} to hear about new shows first.
       </p>
     </div>

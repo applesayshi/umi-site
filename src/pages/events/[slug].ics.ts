@@ -19,7 +19,7 @@ export const GET: APIRoute = async ({ props, site }) => {
       end: eventEnd(event),
       description: event.data.summary,
       location: [event.data.venue, event.data.address].filter(Boolean).join(', '),
-      url: new URL(`/events/${event.id}`, base).href,
+      url: new URL(`/events/${event.id}/`, base).href,
     },
   ]);
   return new Response(body, {

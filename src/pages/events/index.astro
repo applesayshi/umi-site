@@ -37,7 +37,7 @@ const calendarEvents: CalendarEvent[] = events.map((e) => ({
   typeLabel: EVENT_TYPE_LABELS[e.data.type],
   day: dayKey(e.data.start),
   time: e.data.hideTime ? '' : time(e.data.start),
-  href: `/events/${e.id}`,
+  href: `/events/${e.id}/`,
 }));
 
 // Filter chips for every kind of event on the calendar and in the archive.
@@ -93,7 +93,7 @@ const googleSubscribe = `https://calendar.google.com/calendar/r?cid=${encodeURIC
         <ol class="events__list" role="list" data-list="upcoming" hidden={soonCount === 0}>
           {
             upcoming.map(({ event, soon }, i) => (
-              <EventRow event={event} index={i} hidden={!soon} albumHref={albumFor(event.id) ? `/gallery/${albumFor(event.id)!.id}` : undefined} />
+              <EventRow event={event} index={i} hidden={!soon} albumHref={albumFor(event.id) ? `/gallery/${albumFor(event.id)!.id}/` : undefined} />
             ))
           }
         </ol>
@@ -133,7 +133,7 @@ const googleSubscribe = `https://calendar.google.com/calendar/r?cid=${encodeURIC
                               {mediumDate(event.data.start)}
                             </time>
                             <span class="past__main">
-                              <a class="past__link" href={`/events/${event.id}`}>
+                              <a class="past__link" href={`/events/${event.id}/`}>
                                 {event.data.title}
                               </a>
                               <span class="past__meta">
@@ -143,7 +143,7 @@ const googleSubscribe = `https://calendar.google.com/calendar/r?cid=${encodeURIC
                               </span>
                             </span>
                             {album && (
-                              <a class="chip past__photos" href={`/gallery/${album.id}`}>
+                              <a class="chip past__photos" href={`/gallery/${album.id}/`}>
                                 <Icon name="images" />
                                 Photos
                               </a>

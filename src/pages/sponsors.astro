@@ -12,7 +12,7 @@ import { fitStyle } from '../lib/fit';
 const [page, sponsors, settings] = await Promise.all([getPage('sponsorsPage', 'sponsors'), getSponsors(), getSettings()]);
 const { data } = page;
 const tierLabels = { headliner: 'Headliner', support: 'Support', opener: 'Opener', 'member-perk': 'Member perk' } as const;
-const contactHref = `/contact?topic=${encodeURIComponent('Sponsorship')}`;
+const contactHref = `/contact/?topic=${encodeURIComponent('Sponsorship')}`;
 ---
 
 <BaseLayout title="Sponsors & partners" description={data.intro} image={data.heroPhoto.src} imageAlt={data.heroPhoto.alt}>

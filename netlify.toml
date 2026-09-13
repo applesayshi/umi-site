@@ -10,53 +10,53 @@
 # ── Redirects from the old Squarespace site, so shared links keep working ────
 [[redirects]]
   from = "/upcoming-events"
-  to = "/events"
+  to = "/events/"
   status = 301
 
 [[redirects]]
   from = "/pastevents"
-  to = "/events#past"
+  to = "/events/#past"
   status = 301
 
 [[redirects]]
   from = "/events-1"
-  to = "/events"
+  to = "/events/"
   status = 301
 
 [[redirects]]
   from = "/events-1/*"
-  to = "/events"
+  to = "/events/"
   status = 301
 
 [[redirects]]
   from = "/joinus"
-  to = "/join"
+  to = "/join/"
   status = 301
 
 [[redirects]]
   from = "/lessons-1"
-  to = "/lessons"
+  to = "/lessons/"
   status = 301
 
 [[redirects]]
   from = "/booking-rentals"
-  to = "/booking"
+  to = "/booking/"
   status = 301
 
 [[redirects]]
   from = "/sponsorships"
-  to = "/sponsors"
+  to = "/sponsors/"
   status = 301
 
 # Featured artists became ProduceUMI.
 [[redirects]]
   from = "/artists"
-  to = "/produceumi"
+  to = "/produceumi/"
   status = 301
 
 [[redirects]]
   from = "/artists/*"
-  to = "/produceumi"
+  to = "/produceumi/"
   status = 301
 
 # ── Headers ─────────────────────────────────────────────────────────────────

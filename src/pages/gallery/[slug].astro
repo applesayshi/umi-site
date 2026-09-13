@@ -37,7 +37,7 @@ const full = await Promise.all(
   <section class="album-page theme-night" aria-labelledby="album-title">
     <div class="container">
       <header class="album-page__head">
-        <a class="link-arrow" href="/gallery">
+        <a class="link-arrow" href="/gallery/">
           <Icon name="arrow-left" />
           <span>All albums</span>
         </a>
@@ -54,7 +54,7 @@ const full = await Promise.all(
           {data.photographer && <span>Photos by {data.photographer}</span>}
           {
             event && (
-              <a class="link-arrow" href={`/events/${event.id}`}>
+              <a class="link-arrow" href={`/events/${event.id}/`}>
                 <span>About the show</span>
                 <Icon name="arrow-up-right" />
               </a>
@@ -100,7 +100,7 @@ const full = await Promise.all(
             <ul role="list">
               {others.map((other) => (
                 <li>
-                  <a href={`/gallery/${other.id}`} class="other">
+                  <a href={`/gallery/${other.id}/`} class="other">
                     <span class="other__img">
                       <Picture src={other.data.cover} alt="" widths={[240, 360]} sizes="12rem" formats={['avif', 'webp']} />
                     </span>
