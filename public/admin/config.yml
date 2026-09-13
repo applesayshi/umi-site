@@ -7,8 +7,8 @@
 
 backend:
   name: github
-  # TODO before launch: replace with the real GitHub repository (owner/name).
-  repo: YOUR-GITHUB-ACCOUNT/umi-site
+  # The site's GitHub repository (owner/name). Update this if the repository moves, e.g. to a UMI organization.
+  repo: applesayshi/umi-site
   branch: main
   # GitHub login is handled by Netlify: Site configuration → Access & security → OAuth → Install provider → GitHub.
   base_url: https://api.netlify.com
