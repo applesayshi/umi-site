@@ -4,15 +4,14 @@ hero:
   timecode: AMS Student Nest — Rm 3308
   subtitle: Every genre. Every level. One stage
   photos:
-    - src: ../../assets/uploads/placeholders/stage-01.jpg
-      alt: A singer at the microphone, backlit by amber stage light
-      date: 2025-02-11
-    - src: ../../assets/uploads/placeholders/stage-02.jpg
-      alt: The crowd holds up phones as two performers play under red light
-      date: 2024-12-04
-    - src: ../../assets/uploads/placeholders/stage-04.jpg
-      alt: Close-up of a keyboard lit in teal
-      date: 2025-01-17
+    - src: ../../assets/uploads/img_1630.jpg
+      alt: Sonic Satellite Guitar
+      date: 2026-02-26
+    - src: ../../assets/uploads/img_1663.jpg
+      alt: DJ at sonic satellite
+      date: 2026-02-26
+    - src: ../../assets/uploads/harry_you_look_really_cool_in_this_picture.jpg
+      alt: Harry Guitar tuffatron
 manifesto:
   eyebrow: About UMI
   statement: An outlet for anyone who wants to *perform*, and doesn't know where to start.
