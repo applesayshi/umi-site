@@ -26,7 +26,7 @@ manifesto:
     - value: $10
       label: UBC membership
   photo:
-    src: ../../assets/uploads/img_1877.jpg
+    src: ../../assets/uploads/img_0989.jpg
     alt: A performer at the mic under green stage light
     date: 2025-03-21
 shows:
