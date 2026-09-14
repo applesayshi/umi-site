@@ -7,11 +7,11 @@ hero:
     - src: ../../assets/uploads/img_1630.jpg
       alt: Sonic Satellite Guitar
       date: 2026-02-26
+    - src: ../../assets/uploads/harry_you_look_really_cool_in_this_picture.jpg
+      alt: Harry Guitar tuffatron
     - src: ../../assets/uploads/img_1663.jpg
       alt: DJ at sonic satellite
       date: 2026-02-26
-    - src: ../../assets/uploads/harry_you_look_really_cool_in_this_picture.jpg
-      alt: Harry Guitar tuffatron
 manifesto:
   eyebrow: About UMI
   statement: An outlet for anyone who wants to *perform*, and doesn't know where to start.
