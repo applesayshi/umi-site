@@ -1,12 +1,12 @@
 ---
-title: September Shift
+title: September Soundcheck
 type: show
-start: 2021-09-17T17:30:00-07:00
-end: 2021-09-17T21:00:00-07:00
+start: 2026-09-25T17:00:00-07:00
+end: ""
 venue: Lev Bukman Theatre, AMS Student Nest
-summary: An icebreaker with live performances welcoming all music genres, and UMI's return to in-person shows. Free admission.
-cover: ../../assets/uploads/placeholders/stage-10.jpg
-coverAlt: Two performers on stage under blue light
+summary: Our first live event of the 2026/2027 school year!
+cover: ../../assets/uploads/copy-of-dscf5453-2.jpg
+coverAlt: UMI performance
 priceMember: Free
 priceGeneral: Free
 sample: false
