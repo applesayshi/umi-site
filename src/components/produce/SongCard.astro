@@ -7,7 +7,9 @@ import { Picture } from 'astro:assets';
 import produceLogo from '../../assets/brand/produceumi-logo.png';
 import Icon from '../ui/Icon.astro';
 import SnippetButton from './SnippetButton.astro';
-import { schoolYearLabel, songSnippet, type SongEntry } from '../../lib/content';
+import EditPin from '../ui/EditPin.astro';
+import { cmsEntry } from '../../lib/cms';
+import { cropStyle, schoolYearLabel, songSnippet, type SongEntry } from '../../lib/content';
 import { fitStyle } from '../../lib/fit';
 
 interface Props {
@@ -26,7 +28,7 @@ const snippet = songSnippet(song);
     <span class:list={['song__sleeve', !data.cover && 'song__sleeve--logo']}>
       {
         data.cover ? (
-          <Picture src={data.cover} alt={data.coverAlt ?? ''} widths={[320, 480, 640]} sizes="(min-width: 1100px) 22vw, (min-width: 640px) 40vw, 80vw" formats={['avif', 'webp']} />
+          <Picture src={data.cover} alt={data.coverAlt ?? ''} widths={[320, 480, 640]} sizes="(min-width: 1100px) 22vw, (min-width: 640px) 40vw, 80vw" formats={['avif', 'webp']} style={cropStyle(data.coverFocus)} />
         ) : (
           <Picture src={produceLogo} alt="" widths={[320, 480]} sizes="(min-width: 1100px) 16vw, 60vw" formats={['webp']} />
         )
@@ -44,6 +46,7 @@ const snippet = songSnippet(song);
       <span class="song__artist">
         {data.artist}
         {data.sample && <span class="sample-tag">Sample</span>}
+        <EditPin inline href={cmsEntry(song)} label="Edit song" />
       </span>
     </div>
     {

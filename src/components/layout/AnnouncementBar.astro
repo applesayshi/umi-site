@@ -1,5 +1,7 @@
 ---
 import Icon from '../ui/Icon.astro';
+import EditPin from '../ui/EditPin.astro';
+import { cmsSettings } from '../../lib/cms';
 import { pageHref } from '../../lib/site';
 
 interface Props {
@@ -25,6 +27,7 @@ const show = announcement.enabled && announcement.text;
             </a>
           )}
         </p>
+        <EditPin inline href={cmsSettings} label="Edit announcement" />
         <button class="announcement__close" type="button" data-announcement-close>
           <span class="visually-hidden">Dismiss announcement</span>
           <Icon name="x" size="1rem" />

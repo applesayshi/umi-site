@@ -1,6 +1,8 @@
 ---
 import Photo from '../ui/Photo.astro';
 import Icon from '../ui/Icon.astro';
+import EditPin from '../ui/EditPin.astro';
+import { cmsEntry } from '../../lib/cms';
 import type { TeamEntry } from '../../lib/content';
 import { seeded, between } from '../../lib/random';
 import { fitStyle } from '../../lib/fit';
@@ -12,7 +14,6 @@ interface Props {
 
 const { member, index = 0 } = Astro.props;
 const { data } = member;
-const inks = ['peri', 'orange', 'mint', 'pink', 'teal'] as const;
 const rand = seeded(member.id);
 const tilt = Number(between(rand, -1.8, 1.8).toFixed(2));
 const initials = data.name
@@ -24,16 +25,17 @@ const initials = data.name
 ---
 
 <article class="exec" data-reveal style={`--i:${index % 4}`}>
+  <EditPin href={cmsEntry(member)} label="Edit exec" style="--pin-top: 0; --pin-right: 0" />
   <div class="exec__photo">
     {
       data.photo ? (
         <Photo
           src={data.photo}
           alt={`Portrait of ${data.name}`}
+          position={data.photoFocus}
           sizes="(min-width: 1200px) 18vw, (min-width: 700px) 30vw, 88vw"
           widths={[320, 480, 640, 800]}
           aspect="4 / 5"
-          duo={inks[index % inks.length]}
           tilt={tilt}
           frame="print"
         />
@@ -85,6 +87,7 @@ const initials = data.name
 
 <style>
   .exec {
+    position: relative;
     display: grid;
     gap: 1rem;
     align-content: start;

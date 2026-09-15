@@ -103,6 +103,9 @@ export async function getPage<C extends 'home' | 'produce' | 'about' | 'join' | 
   return entry as CollectionEntry<C>;
 }
 
+/** Inline style for a cropped photo's "Crop position" from the CMS (a CSS object-position). Unset photos stay centred. */
+export const cropStyle = (focus?: string) => (focus ? `object-position: ${focus}` : undefined);
+
 /** Light inline Markdown for short CMS strings: *emphasis* and **strong**. Escapes HTML first. */
 export function inline(text: string) {
   return text

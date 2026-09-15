@@ -8,7 +8,9 @@ import EmbedFacade from '../../components/ui/EmbedFacade.astro';
 import SongCard from '../../components/produce/SongCard.astro';
 import SnippetButton from '../../components/produce/SnippetButton.astro';
 import Icon from '../../components/ui/Icon.astro';
+import EditPin from '../../components/ui/EditPin.astro';
 import produceLogo from '../../assets/brand/produceumi-logo.png';
+import { cmsEntry } from '../../lib/cms';
 import { getSongs, schoolYearLabel, songSnippet } from '../../lib/content';
 import { fitStyle } from '../../lib/fit';
 
@@ -35,6 +37,7 @@ const snippet = songSnippet(song);
   image={data.cover}
   ogImagePath="/og-produceumi.jpg"
   imageAlt={data.coverAlt}
+  edit={cmsEntry(song)}
 >
   <article class="track theme-night">
     <div class="container track__inner">
@@ -45,6 +48,7 @@ const snippet = songSnippet(song);
               src={data.cover}
               alt={data.coverAlt ?? ''}
               label={data.title}
+              position={data.coverFocus}
               sizes="(min-width: 960px) 34vw, 70vw"
               snippet={snippet ? { src: snippet, title: data.title, artist: data.artist } : undefined}
             />
@@ -66,6 +70,7 @@ const snippet = songSnippet(song);
           <span class="eyebrow__index">ProduceUMI</span>
           <span>{year}</span>
           {data.sample && <span class="sample-tag">Sample</span>}
+          <EditPin inline href={cmsEntry(song)} label="Edit song" />
         </p>
         <h1 class="track__title display" style={fitStyle(data.title)}>
           <span class="track__title-inner">{data.title}</span>

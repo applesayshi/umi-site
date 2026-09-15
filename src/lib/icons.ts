@@ -14,6 +14,8 @@ import check from '@phosphor-icons/core/regular/check.svg?raw';
 import clock from '@phosphor-icons/core/regular/clock.svg?raw';
 import copy from '@phosphor-icons/core/regular/copy.svg?raw';
 import envelope from '@phosphor-icons/core/regular/envelope-simple.svg?raw';
+import eye from '@phosphor-icons/core/regular/eye.svg?raw';
+import eyeSlash from '@phosphor-icons/core/regular/eye-slash.svg?raw';
 import facebook from '@phosphor-icons/core/regular/facebook-logo.svg?raw';
 import filmStrip from '@phosphor-icons/core/regular/film-strip.svg?raw';
 import graduationCap from '@phosphor-icons/core/regular/graduation-cap.svg?raw';
@@ -31,9 +33,11 @@ import microphone from '@phosphor-icons/core/regular/microphone-stage.svg?raw';
 import musicNotes from '@phosphor-icons/core/regular/music-notes.svg?raw';
 import pause from '@phosphor-icons/core/regular/pause.svg?raw';
 import pauseFill from '@phosphor-icons/core/fill/pause-fill.svg?raw';
+import pencil from '@phosphor-icons/core/fill/pencil-simple-fill.svg?raw';
 import pianoKeys from '@phosphor-icons/core/regular/piano-keys.svg?raw';
 import play from '@phosphor-icons/core/regular/play.svg?raw';
 import playFill from '@phosphor-icons/core/fill/play-fill.svg?raw';
+import plus from '@phosphor-icons/core/regular/plus.svg?raw';
 import shareNetwork from '@phosphor-icons/core/regular/share-network.svg?raw';
 import soundcloud from '@phosphor-icons/core/regular/soundcloud-logo.svg?raw';
 import speaker from '@phosphor-icons/core/regular/speaker-hifi.svg?raw';
@@ -61,6 +65,8 @@ export const icons = {
   clock,
   copy,
   envelope,
+  eye,
+  'eye-slash': eyeSlash,
   facebook,
   'film-strip': filmStrip,
   'graduation-cap': graduationCap,
@@ -78,9 +84,11 @@ export const icons = {
   'music-notes': musicNotes,
   pause,
   'pause-fill': pauseFill,
+  pencil,
   'piano-keys': pianoKeys,
   play,
   'play-fill': playFill,
+  plus,
   share: shareNetwork,
   soundcloud,
   speaker,

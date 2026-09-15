@@ -418,70 +418,80 @@
     margin-top: 0.8em;
   }
 
-  /* ---- Riso duotone ----------------------------------------------------- */
-  /*
-   * Wrap an image in .riso and add the three layers:
-   *   <span class="riso__ink riso__ink--dark"></span>
-   *   <span class="riso__ink riso__ink--light"></span>
-   *   <span class="riso__screen"></span>
-   * Lighten lifts shadows to the dark ink, multiply tints highlights with the light ink,
-   * and a halftone screen sits on top. Hovering develops the photo into full colour.
-   */
-  .riso {
-    position: relative;
-    isolation: isolate;
+  /* ---- Edit pencils ------------------------------------------------------- */
+  /* Only for people logged in to the CMS in this browser (BaseLayout adds .is-cms-editor), and
+     never while they've hidden them. Everyone else gets display: none, so pencils cost no layout. */
+  .edit-pin {
+    display: none;
   }
 
-  .riso img {
-    filter: grayscale(1) contrast(1.18) brightness(1.04);
-    transition: filter var(--dur-slow) var(--ease-out), transform var(--dur-cinematic) var(--ease-out);
-  }
-
-  .riso__ink,
-  .riso__screen {
+  .is-cms-editor:not(.edit-pins-off) .edit-pin {
     position: absolute;
-    inset: 0;
-    z-index: 1;
-    pointer-events: none;
-    transition: opacity var(--dur-slow) var(--ease-out);
+    top: var(--pin-top, 0.75rem);
+    right: var(--pin-right, 0.75rem);
+    z-index: var(--z-sticky);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+    padding: 0 0.78rem;
+    border-radius: 999px;
+    background: var(--sun);
+    color: var(--night-950);
+    box-shadow: 0 0 0 2px var(--night-950), 0 8px 18px -6px rgb(3 5 18 / 0.6);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: transform var(--dur-fast) var(--ease-out);
   }
 
-  .riso__ink--dark {
-    background: var(--ink-a, var(--duo-dark, var(--night-950)));
-    mix-blend-mode: lighten;
+  .is-cms-editor:not(.edit-pins-off) .edit-pin--inline {
+    position: relative;
+    top: auto;
+    right: auto;
+    vertical-align: middle;
   }
 
-  .riso__ink--light {
-    background: var(--ink-b, var(--duo-light, var(--peri)));
-    mix-blend-mode: multiply;
+  /* A row of pencils in the flow of a section, e.g. "Edit section" and "Add event" under a heading. */
+  .edit-pins {
+    display: none;
   }
 
-  .riso__screen {
-    background-image: radial-gradient(circle, rgb(7 11 31 / 0.55) 0.8px, transparent 1.25px);
-    background-size: 4px 4px;
-    mix-blend-mode: multiply;
-    opacity: 0.35;
+  .is-cms-editor:not(.edit-pins-off) .edit-pins {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
   }
 
-  .duo-peri { --ink-a: #0b1650; --ink-b: #a9b7f2; }
-  .duo-orange { --ink-a: #1a0f2e; --ink-b: #ff6a3d; }
-  .duo-mint { --ink-a: #0f1a1c; --ink-b: #aff5d2; }
-  .duo-pink { --ink-a: #1f2270; --ink-b: #ff94cc; }
-  .duo-teal { --ink-a: #03161c; --ink-b: #7fe0e8; }
-  .duo-sun { --ink-a: #3a0d12; --ink-b: #ffe45e; }
+  .edit-pin--add {
+    background: var(--mint);
+  }
 
-  @media (hover: hover) {
-    .riso-hover:hover .riso img,
-    .riso:hover img {
-      filter: none;
-    }
+  /* The label slides out on hover or keyboard focus; it stays readable to screen readers while tucked away. */
+  .edit-pin__label {
+    max-width: 0;
+    overflow: hidden;
+    transition: max-width var(--dur-base) var(--ease-out);
+  }
 
-    .riso-hover:hover .riso__ink,
-    .riso-hover:hover .riso__screen,
-    .riso:hover .riso__ink,
-    .riso:hover .riso__screen {
-      opacity: 0;
-    }
+  .edit-pin:hover .edit-pin__label,
+  .edit-pin:focus-visible .edit-pin__label {
+    max-width: 16rem;
+  }
+
+  .edit-pin:hover {
+    transform: translateY(-1px);
+  }
+
+  .edit-pin:focus-visible {
+    outline: 3px solid var(--peri);
+    outline-offset: 3px;
   }
 
   /* ---- Textures ----------------------------------------------------------- */

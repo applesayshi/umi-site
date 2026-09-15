@@ -1,0 +1,212 @@
+/* Styles for UMI's custom CMS widgets (widgets.js), matched to Decap's own fields. */
+
+/* ─── Crop position ─────────────────────────────────────────────────────── */
+.umi-focus__crops {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.umi-crop-wrap {
+  display: grid;
+  gap: 6px;
+  max-width: 100%;
+}
+
+/* The whole photo, with the part that gets cropped off dimmed around a bright box. */
+.umi-crop {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #1e2532;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.umi-crop.is-dragging {
+  cursor: grabbing;
+}
+
+.umi-crop.is-whole {
+  cursor: default;
+}
+
+.umi-crop:focus-visible {
+  outline: 3px solid #3a69c7;
+  outline-offset: 3px;
+}
+
+.umi-crop img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.umi-crop__box {
+  position: absolute;
+  box-shadow: 0 0 0 100vmax rgb(10 14 24 / 0.62);
+  outline: 2px solid #fff;
+  outline-offset: -1px;
+  pointer-events: none;
+}
+
+/* Rule-of-thirds guides while pointing at or dragging the box. */
+.umi-crop__box::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.15s;
+  background:
+    linear-gradient(90deg, transparent calc(100% / 3 - 0.5px), rgb(255 255 255 / 0.55) 0 calc(100% / 3 + 0.5px), transparent 0 calc(200% / 3 - 0.5px), rgb(255 255 255 / 0.55) 0 calc(200% / 3 + 0.5px), transparent 0),
+    linear-gradient(180deg, transparent calc(100% / 3 - 0.5px), rgb(255 255 255 / 0.55) 0 calc(100% / 3 + 0.5px), transparent 0 calc(200% / 3 - 0.5px), rgb(255 255 255 / 0.55) 0 calc(200% / 3 + 0.5px), transparent 0);
+}
+
+.umi-crop:hover .umi-crop__box::after,
+.umi-crop.is-dragging .umi-crop__box::after {
+  opacity: 1;
+}
+
+.umi-crop.is-whole .umi-crop__box::after {
+  display: none;
+}
+
+.umi-crop__label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #313d3e;
+}
+
+.umi-focus__status {
+  display: grid;
+  place-items: center;
+  width: 320px;
+  max-width: 100%;
+  min-height: 120px;
+  margin: 0;
+  padding: 16px;
+  border-radius: 4px;
+  background: #eff1f5;
+  color: #5d626f;
+  font-size: 13px;
+  text-align: center;
+}
+
+.umi-focus__status--loading {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Loads the photo out of sight to measure it before drawing the crops. */
+.umi-focus__probe {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.umi-focus__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-top: 12px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #5d626f;
+}
+
+.umi-focus__reset {
+  min-height: 32px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 5px;
+  background: #e8eaef;
+  color: #313d3e;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.umi-focus__reset:hover {
+  background: #dfe3ea;
+}
+
+.umi-focus--empty {
+  color: #5d626f;
+  font-size: 14px;
+}
+
+/* ─── Photo list with bulk upload ───────────────────────────────────────── */
+.umi-photos__drop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  margin-bottom: 12px;
+  padding: 14px 16px;
+  border: 2px dashed #c9ced9;
+  border-radius: 5px;
+  background: #fff;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.umi-photos__drop.is-over {
+  border-color: #3a69c7;
+  background: #eaf0fb;
+}
+
+.umi-photos__button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 18px;
+  border-radius: 5px;
+  background: #3a69c7;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.umi-photos__button:hover {
+  background: #2f5bb3;
+}
+
+.umi-photos__button:focus-within {
+  outline: 3px solid #9ab3e8;
+  outline-offset: 2px;
+}
+
+/* The real file input covers the button, so clicks, taps and keyboard all reach it. */
+.umi-photos__button input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.umi-photos__button.is-busy {
+  background: #798291;
+  cursor: progress;
+}
+
+.umi-photos__button.is-busy input {
+  cursor: progress;
+}
+
+.umi-photos__hint {
+  flex: 1 1 16rem;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #5d626f;
+}

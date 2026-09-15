@@ -20,6 +20,12 @@ const optionalUrl = z.preprocess(blank, z.url().optional());
 const optionalLink = z.preprocess(blank, z.string().optional()); // accepts URLs or site paths like /join
 const optionalEmail = z.preprocess(blank, z.email().optional());
 /*
+ * "Crop position" from the CMS: the part of a photo to keep in view when it's cropped, saved as a
+ * CSS object-position like "50% 30%". Anything else counts as unset (centred) rather than failing the build.
+ */
+const FOCUS = /^\d{1,3}(\.\d+)?% \d{1,3}(\.\d+)?%$/;
+const optionalFocus = z.preprocess((value) => (typeof value === 'string' && FOCUS.test(value.trim()) ? value.trim() : undefined), z.string().optional());
+/*
  * Date-only fields (photo dates, album dates, feature weeks) are calendar days, not instants.
  * YAML parses "2025-02-11" as UTC midnight, which is the previous evening in Vancouver, so
  * pin those to 12:00 UTC: the same calendar day everywhere from Honolulu to Tokyo.
@@ -47,6 +53,7 @@ const events = defineCollection({
       address: optionalText,
       summary: z.string().max(240),
       cover: z.preprocess(blank, image().optional()),
+      coverFocus: optionalFocus,
       coverAlt: optionalText,
       priceMember: optionalText,
       priceGeneral: optionalText,
@@ -65,6 +72,7 @@ const gallery = defineCollection({
       date: calendarDay,
       event: z.preprocess(blank, reference('events').optional()),
       cover: image(),
+      coverFocus: optionalFocus,
       coverAlt: z.string(),
       photographer: optionalText,
       showOnHome: z.boolean().default(true),
@@ -72,6 +80,7 @@ const gallery = defineCollection({
         .array(
           z.object({
             src: image(),
+            focus: optionalFocus,
             alt: optionalText,
             caption: optionalText,
           }),
@@ -97,6 +106,7 @@ const songs = defineCollection({
       schoolYear: z.number().int().min(2000).max(2100),
       genre: optionalText,
       cover: z.preprocess(blank, image().optional()),
+      coverFocus: optionalFocus,
       coverAlt: optionalText,
       summary: z.preprocess(blank, z.string().max(200).optional()),
       producers: optionalText,
@@ -128,6 +138,7 @@ const team = defineCollection({
       lead: z.boolean().default(false),
       order: z.number().default(100),
       photo: z.preprocess(blank, image().optional()),
+      photoFocus: optionalFocus,
       pronouns: optionalText,
       program: optionalText,
       plays: optionalText,
@@ -155,7 +166,7 @@ const sponsors = defineCollection({
 });
 
 /* ------------------------------------------------------------ singletons */
-const photoField = (image: ImageFunction) => z.object({ src: image(), alt: z.string(), date: optionalDate });
+const photoField = (image: ImageFunction) => z.object({ src: image(), focus: optionalFocus, alt: z.string(), date: optionalDate });
 
 const faq = z.array(z.object({ question: z.string(), answer: z.string() })).default([]);
 const steps = z.array(z.object({ title: z.string(), text: z.string() })).default([]);
@@ -172,7 +183,6 @@ const settings = defineCollection({
       logoAlt: optionalText,
       email: z.email(),
       office: z.object({
-        room: z.string(),
         building: z.string(),
         address: z.string(),
         mapUrl: optionalUrl,
@@ -211,6 +221,8 @@ const home = defineCollection({
         subtitle: z.string(),
         photos: z.array(photoField(image)).min(1).max(3),
       }),
+      /** The strip of prints drifting under the hero. Empty: gallery photos and covers are picked automatically. */
+      ribbon: z.array(z.object({ src: image(), focus: optionalFocus })).default([]),
       manifesto: z.object({
         eyebrow: z.string(),
         statement: z.string(),
@@ -265,7 +277,7 @@ const join = defineCollection({
       intro: z.string(),
       heroPhoto: photoField(image),
       term: z.string(),
-      prices: z.array(z.object({ audience: z.string(), newPrice: z.string(), returningPrice: z.string() })),
+      prices: z.array(z.object({ audience: z.string(), price: z.string() })),
       benefits: z.array(z.object({ title: z.string(), text: z.string() })),
       steps,
       faq,

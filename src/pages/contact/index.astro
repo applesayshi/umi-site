@@ -2,6 +2,8 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/layout/PageHero.astro';
 import Icon from '../../components/ui/Icon.astro';
+import EditPin from '../../components/ui/EditPin.astro';
+import { cmsPage, cmsSettings } from '../../lib/cms';
 import { getPage, getSettings } from '../../lib/content';
 
 const [page, settings] = await Promise.all([getPage('contact', 'contact'), getSettings()]);
@@ -14,8 +16,8 @@ const socials = [
 ] as const;
 ---
 
-<BaseLayout title="Contact" description={data.intro}>
-  <PageHero eyebrow="Get in touch" index="B6" title={data.title} intro={data.intro} />
+<BaseLayout title="Contact" description={data.intro} edit={cmsPage('contact')}>
+  <PageHero eyebrow="Get in touch" index="B6" title={data.title} intro={data.intro} edit={cmsPage('contact')} />
 
   <section class="contact theme-night" aria-label="Contact UMI">
     <div class="container contact__grid">
@@ -79,6 +81,9 @@ const socials = [
       </form>
 
       <aside class="contact__aside">
+        <div class="edit-pins">
+          <EditPin inline href={cmsSettings} label="Edit email, office & socials" />
+        </div>
         <div class="contact__card">
           <p class="contact__label">Email</p>
           <a class="contact__big link" href={`mailto:${settings.email}`}>{settings.email}</a>
@@ -86,7 +91,6 @@ const socials = [
         <div class="contact__card">
           <p class="contact__label">Office</p>
           <address class="contact__address">
-            {settings.office.room}<br />
             {settings.office.building}<br />
             {settings.office.address}
           </address>

@@ -4,6 +4,8 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Photo from '../../components/ui/Photo.astro';
 import Icon from '../../components/ui/Icon.astro';
 import TicketStub from '../../components/events/TicketStub.astro';
+import EditPin from '../../components/ui/EditPin.astro';
+import { cmsEntry } from '../../lib/cms';
 import { EVENT_TYPE_LABELS, eventEnd, getAlbumForEvent, getEvents, getSettings } from '../../lib/content';
 import { longDate, timeRange } from '../../lib/dates';
 import { googleCalendarUrl } from '../../lib/ics';
@@ -50,7 +52,7 @@ const jsonLd = {
 };
 ---
 
-<BaseLayout title={data.title} description={data.summary} image={data.cover} imageAlt={data.coverAlt} jsonLd={[jsonLd]}>
+<BaseLayout title={data.title} description={data.summary} image={data.cover} imageAlt={data.coverAlt} jsonLd={[jsonLd]} edit={cmsEntry(event)}>
   <article class="event theme-night">
     <div class="container event__inner">
       <div class="event__copy">
@@ -62,6 +64,7 @@ const jsonLd = {
           <span class="eyebrow__index">{EVENT_TYPE_LABELS[data.type]}</span>
           <span>{isPast ? 'Past show' : 'Upcoming'}</span>
           {data.sample && <span class="sample-tag">Sample</span>}
+          <EditPin inline href={cmsEntry(event)} label="Edit event" />
         </p>
         <h1 class="event__title display" style={fitStyle(data.title)}>
           <span class="event__title-inner">{data.title}</span>
@@ -170,6 +173,7 @@ const jsonLd = {
               src={data.cover}
               alt={data.coverAlt ?? ''}
               date={data.start}
+              position={data.coverFocus}
               sizes="(min-width: 960px) 40vw, 90vw"
               widths={[480, 720, 960, 1280]}
               aspect="4 / 5"
@@ -205,7 +209,7 @@ const jsonLd = {
             {album.data.photos.slice(0, 4).map((photo, i) => (
               <li data-reveal style={`--i:${i}`}>
                 <a href={`/gallery/${album.id}/#photo-${i + 1}`} class="event__album-link">
-                  <Photo src={photo.src} alt={photo.alt} sizes="(min-width: 900px) 22vw, 45vw" widths={[320, 480, 640]} aspect="1 / 1" />
+                  <Photo src={photo.src} alt={photo.alt} position={photo.focus} sizes="(min-width: 900px) 22vw, 45vw" widths={[320, 480, 640]} aspect="1 / 1" />
                 </a>
               </li>
             ))}

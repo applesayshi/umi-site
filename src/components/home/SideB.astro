@@ -4,6 +4,8 @@ import type { ImageMetadata } from 'astro';
 import { getImage } from 'astro:assets';
 import Icon from '../ui/Icon.astro';
 import TornEdge from '../ui/TornEdge.astro';
+import EditPin from '../ui/EditPin.astro';
+import { cmsPage } from '../../lib/cms';
 import { fitStyle } from '../../lib/fit';
 import type { IconName } from '../../lib/icons';
 
@@ -14,6 +16,8 @@ interface Track {
   label: string;
   icon: IconName;
   image: ImageMetadata;
+  /** The photo's "Crop position" from the CMS. */
+  focus?: string;
 }
 
 interface Props {
@@ -28,6 +32,7 @@ const previews = await Promise.all(tracks.map((t) => getImage({ src: t.image, wi
 
 <section class="side-b theme-paper texture-paper" aria-labelledby="side-b-title">
   <TornEdge position="top" seed="side-b-top" />
+  <EditPin href={cmsPage('home')} label="Edit section" style="--pin-top: 2.5rem" />
   <div class="container side-b__inner">
     <header class="side-b__head">
       <p class="eyebrow" data-reveal="fade"><span class="eyebrow__index">B</span><span>Programs</span></p>
@@ -39,7 +44,7 @@ const previews = await Promise.all(tracks.map((t) => getImage({ src: t.image, wi
       {
         tracks.map((track, i) => (
           <li class="side-b__item" data-reveal style={`--i:${i}`}>
-            <a class="side-b__link" href={track.href} data-preview={previews[i].src}>
+            <a class="side-b__link" href={track.href} data-preview={previews[i].src} data-preview-position={track.focus}>
               <span class="side-b__num">B{i + 1}</span>
               <span class="side-b__name display">{track.title}</span>
               <span class="side-b__text">{track.text}</span>
@@ -284,6 +289,7 @@ const previews = await Promise.all(tracks.map((t) => getImage({ src: t.image, wi
     list.querySelectorAll<HTMLAnchorElement>('[data-preview]').forEach((link) => {
       link.addEventListener('pointerenter', () => {
         img.src = link.dataset.preview ?? '';
+        img.style.objectPosition = link.dataset.previewPosition ?? '';
         preview.classList.add('is-visible');
       });
       link.addEventListener('pointerleave', () => preview.classList.remove('is-visible'));

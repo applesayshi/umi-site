@@ -2,6 +2,8 @@
 import { EVENT_TYPE_LABELS, eventEnd, type EventEntry } from '../../lib/content';
 import { dateParts, dayKey, dayPadded, monthShort, timeRange, weekdayShort, mediumDate } from '../../lib/dates';
 import Icon from '../ui/Icon.astro';
+import EditPin from '../ui/EditPin.astro';
+import { cmsEntry } from '../../lib/cms';
 import { fitStyle } from '../../lib/fit';
 
 interface Props {
@@ -38,6 +40,7 @@ const href = `/events/${event.id}/`;
       <span class={`event-row__dot type-${data.type}`} aria-hidden="true"></span>
       {EVENT_TYPE_LABELS[data.type]}
       {data.sample && <span class="sample-tag">Sample</span>}
+      <EditPin inline href={cmsEntry(event)} label="Edit event" />
     </p>
     <h3 class="event-row__title display" style={fitStyle(data.title)}>
       <a class="event-row__link" href={href}>{data.title}</a>

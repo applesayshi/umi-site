@@ -1,16 +1,17 @@
-# Rebuilds the site every morning so finished events move to "Past shows" and the three-week
-# upcoming lists roll forward, even when nobody has edited anything.
+# Rebuilds the site on demand (GitHub → Actions → Rebuild the site → Run workflow).
+#
+# It deliberately has no schedule: every successful Netlify production deploy uses credits (15 of the
+# free plan's 300 a month), so a daily rebuild would use up the month's credits and get the site paused.
+# The upcoming lists and "Past shows" already correct themselves in visitors' browsers between deploys.
 #
 # Setup (one time):
-#   1. Netlify: Site configuration → Build & deploy → Build hooks → Add build hook.
+#   1. Netlify: Project configuration → Build & deploy → Build hooks → Add build hook.
 #   2. GitHub repo: Settings → Secrets and variables → Actions → New secret
 #      named NETLIFY_BUILD_HOOK containing the hook URL.
 
-name: Daily rebuild
+name: Rebuild the site
 
 on:
-  schedule:
-    - cron: '0 10 * * *' # 3am in Vancouver during daylight time, 2am in winter
   workflow_dispatch:
 
 jobs:

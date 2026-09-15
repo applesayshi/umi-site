@@ -3,8 +3,10 @@
 import { Picture } from 'astro:assets';
 import Icon from '../ui/Icon.astro';
 import SnippetButton from '../produce/SnippetButton.astro';
+import EditPin from '../ui/EditPin.astro';
 import produceLogo from '../../assets/brand/produceumi-logo.png';
-import { schoolYearLabel, songSnippet, type SongEntry } from '../../lib/content';
+import { cmsEntry, cmsNew, cmsPage } from '../../lib/cms';
+import { cropStyle, schoolYearLabel, songSnippet, type SongEntry } from '../../lib/content';
 import { fitStyle } from '../../lib/fit';
 
 interface Props {
@@ -29,6 +31,10 @@ const external = signupHref.startsWith('http');
       <p class="eyebrow" data-reveal="fade"><span class="eyebrow__index">A3</span><span>A UMI workshop</span></p>
       <h2 class="produce__title display" id="produce-title" data-reveal="stutter" style={fitStyle(title)}>{title}</h2>
       <p class="produce__text" data-reveal style="--i:1">{text}</p>
+      <div class="edit-pins">
+        <EditPin inline href={cmsPage('home')} label="Edit section" />
+        <EditPin inline add href={cmsNew('songs')} label="Add song" />
+      </div>
 
       {
         songs.length > 0 && (
@@ -39,7 +45,7 @@ const external = signupHref.startsWith('http');
                 <li class="produce__song" data-snippet-root data-reveal style={`--i:${i + 2}`}>
                   <span class="produce__cover" aria-hidden="true">
                     {song.data.cover ? (
-                      <Picture src={song.data.cover} alt="" widths={[96, 160]} sizes="4.5rem" formats={['avif', 'webp']} />
+                      <Picture src={song.data.cover} alt="" widths={[96, 160]} sizes="4.5rem" formats={['avif', 'webp']} style={cropStyle(song.data.coverFocus)} />
                     ) : (
                       <Icon name="waveform" size="1.6rem" />
                     )}
@@ -52,6 +58,7 @@ const external = signupHref.startsWith('http');
                       {song.data.artist}
                       <span class="produce__song-year">{schoolYearLabel(song.data.schoolYear)}</span>
                       {song.data.sample && <span class="sample-tag">Sample</span>}
+                      <EditPin inline href={cmsEntry(song)} label="Edit song" />
                     </span>
                   </span>
                   <span class="produce__song-actions">

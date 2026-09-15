@@ -10,6 +10,7 @@ import ContactSheet from '../components/home/ContactSheet.astro';
 import SideB from '../components/home/SideB.astro';
 import Membership from '../components/home/Membership.astro';
 import { getAlbums, getPage, getSettings, getSongs, getUpcomingEvents } from '../lib/content';
+import { cmsEntry, cmsPage } from '../lib/cms';
 import { pageHref } from '../lib/site';
 
 const [home, join, produce, lessons, booking, sponsors, about, settings, upcoming, songs, albums] = await Promise.all([
@@ -36,30 +37,33 @@ for (let i = 0; i < 4 && frames.length < 10; i++) {
   for (const album of homeAlbums) {
     const photo = album.data.photos[i];
     if (photo && frames.length < 10) {
-      frames.push({ src: photo.src, alt: photo.alt, href: `/gallery/${album.id}/`, album: album.data.title, date: album.data.date });
+      frames.push({ src: photo.src, alt: photo.alt, href: `/gallery/${album.id}/`, album: album.data.title, date: album.data.date, focus: photo.focus, edit: cmsEntry(album) });
     }
   }
 }
 
-// The photo ribbon under the hero: gallery photos (taking turns between albums) with a song or
-// event cover after every second photo. Duplicates are dropped.
-const photos: ImageMetadata[] = [];
+// The photo ribbon under the hero: the photos chosen in the CMS, in order. Without any, it picks
+// gallery photos (taking turns between albums) with a song or event cover after every second photo.
+type Print = { src: ImageMetadata; focus?: string };
+const photos: Print[] = [];
 const longestAlbum = Math.max(0, ...albums.map((album) => album.data.photos.length));
 for (let i = 0; i < longestAlbum; i++) {
   for (const album of albums) {
     const photo = album.data.photos[i];
-    if (photo) photos.push(photo.src);
+    if (photo) photos.push({ src: photo.src, focus: photo.focus });
   }
 }
-const art = [...songs.map((song) => song.data.cover), ...upcoming.map((event) => event.data.cover)].filter((src): src is ImageMetadata => Boolean(src));
-const pool: ImageMetadata[] = [];
+const art = [...songs, ...upcoming].flatMap((entry): Print[] => (entry.data.cover ? [{ src: entry.data.cover, focus: entry.data.coverFocus }] : []));
+const pool: Print[] = [];
 let artIndex = 0;
-photos.forEach((src, i) => {
-  pool.push(src);
+photos.forEach((print, i) => {
+  pool.push(print);
   if (i % 2 === 1 && artIndex < art.length) pool.push(art[artIndex++]);
 });
 pool.push(...art.slice(artIndex));
-const ribbon = [...new Map(pool.map((src) => [src.src, src])).values()].slice(0, 16);
+const picked = h.ribbon.length > 0 ? h.ribbon : [...new Map(pool.map((print) => [print.src.src, print])).values()].slice(0, 16);
+// A short list repeats so the tape still reaches across wide screens.
+const ribbon = picked.length > 0 ? Array.from({ length: Math.max(picked.length, 10) }, (_, i) => picked[i % picked.length]) : [];
 
 const tracks = [
   {
@@ -69,6 +73,7 @@ const tracks = [
     label: 'Learn',
     icon: 'graduation-cap' as const,
     image: lessons.data.heroPhoto.src,
+    focus: lessons.data.heroPhoto.focus,
   },
   {
     title: 'Booking & rentals',
@@ -77,6 +82,7 @@ const tracks = [
     label: 'Hire & borrow',
     icon: 'speaker' as const,
     image: booking.data.heroPhoto.src,
+    focus: booking.data.heroPhoto.focus,
   },
   {
     title: 'Sponsors & partners',
@@ -85,6 +91,7 @@ const tracks = [
     label: 'Partner',
     icon: 'handshake' as const,
     image: sponsors.data.heroPhoto.src,
+    focus: sponsors.data.heroPhoto.focus,
   },
   {
     title: 'Workshops',
@@ -93,11 +100,12 @@ const tracks = [
     label: 'Create',
     icon: 'music-notes' as const,
     image: about.data.heroPhoto.src,
+    focus: about.data.heroPhoto.focus,
   },
 ];
 ---
 
-<BaseLayout title={h.seoTitle}>
+<BaseLayout title={h.seoTitle} edit={cmsPage('home')}>
   <Hero timecode={h.hero.timecode} subtitle={h.hero.subtitle} photos={h.hero.photos} upcoming={upcoming} />
   {ribbon.length > 0 && <PhotoRibbon images={ribbon} />}
   <Manifesto

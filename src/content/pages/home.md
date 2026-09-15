@@ -1,7 +1,7 @@
 ---
 seoTitle: ""
 hero:
-  timecode: AMS Student Nest — Rm 3308
+  timecode: AMS Student Nest
   subtitle: Every genre. Every level. One stage
   photos:
     - src: ../../assets/uploads/img_1630.jpg

@@ -1,10 +1,10 @@
 ---
 import type { ImageMetadata } from 'astro';
 import Photo from '../ui/Photo.astro';
-import type { Duo } from '../../lib/riso';
 import Scribble from '../ui/Scribble.astro';
 import GlitchStrip from '../ui/GlitchStrip.astro';
 import DataRail from '../ui/DataRail.astro';
+import EditPin from '../ui/EditPin.astro';
 import { fitStyle } from '../../lib/fit';
 
 interface Props {
@@ -12,19 +12,21 @@ interface Props {
   index?: string;
   title: string;
   intro?: string;
-  photo?: { src: ImageMetadata; alt: string; date?: Date };
-  duo?: Duo;
+  photo?: { src: ImageMetadata; alt: string; date?: Date; focus?: string };
   /** Show the glowing colour fields. Pages with their own art behind the whole page turn them off. */
   glow?: boolean;
+  /** The CMS entry holding this page's words, for the editors' pencil (see lib/cms.ts). */
+  edit?: string;
 }
 
-const { eyebrow, index, title, intro, photo, duo = 'peri', glow = true } = Astro.props;
+const { eyebrow, index, title, intro, photo, glow = true, edit } = Astro.props;
 ---
 
 <section class="page-hero theme-night" aria-labelledby="page-title">
   {/* Pages can swap the glowing colour fields for their own backdrop, e.g. <ArtBackdrop slot="backdrop" … /> */}
   {Astro.slots.has('backdrop') ? <slot name="backdrop" /> : glow && <div class="page-hero__fields" aria-hidden="true"><i></i><i></i></div>}
-  <DataRail class="page-hero__rail" text={`UMI — ${eyebrow.toUpperCase()} — ${title.toUpperCase()} — AMS NEST RM 3308`} />
+  <DataRail class="page-hero__rail" text={`UMI — ${eyebrow.toUpperCase()} — ${title.toUpperCase()} — AMS STUDENT NEST`} />
+  {edit && <EditPin href={edit} label="Edit page" style="--pin-top: calc(var(--header-h) + 0.75rem)" />}
 
   <div class:list={['container', 'page-hero__inner', photo && 'page-hero__inner--photo']}>
     <div class="page-hero__copy">
@@ -45,13 +47,13 @@ const { eyebrow, index, title, intro, photo, duo = 'peri', glow = true } = Astro
             src={photo.src}
             alt={photo.alt}
             date={photo.date}
+            position={photo.focus}
             sizes="(min-width: 960px) 32vw, 80vw"
             widths={[400, 640, 900, 1200]}
             aspect="4 / 3"
             frame="print"
             tape="top"
             tilt={2.5}
-            duo={duo}
             misregister
             priority
           />

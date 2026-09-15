@@ -6,6 +6,8 @@ import Calendar from '../../components/events/Calendar.astro';
 import EventRow from '../../components/events/EventRow.astro';
 import SectionHeading from '../../components/ui/SectionHeading.astro';
 import Icon from '../../components/ui/Icon.astro';
+import EditPin from '../../components/ui/EditPin.astro';
+import { cmsCollection, cmsEntry, cmsNew } from '../../lib/cms';
 import { EVENT_TYPE_LABELS, getAlbums, getEvents, eventEnd, isInUpcomingWindow, type EventEntry } from '../../lib/content';
 import { dateParts, dayKey, mediumDate, time } from '../../lib/dates';
 import type { CalendarEvent } from '../../lib/calendar';
@@ -48,7 +50,7 @@ const webcal = `webcal://${feedPath.host}${feedPath.pathname}`;
 const googleSubscribe = `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(webcal)}`;
 ---
 
-<BaseLayout title="Events" description="UMI's calendar of showcases, open mics, workshops and socials at UBC, plus our archive of past shows.">
+<BaseLayout title="Events" description="UMI's calendar of showcases, open mics, workshops and socials at UBC, plus our archive of past shows." edit={cmsCollection('events')}>
   <PageHero
     eyebrow="Calendar"
     index="A2"
@@ -90,6 +92,10 @@ const googleSubscribe = `https://calendar.google.com/calendar/r?cid=${encodeURIC
 
       <section class="events__block" aria-labelledby="upcoming-title">
         <SectionHeading eyebrow="Next 3 weeks" title="Upcoming events" id="upcoming-title" size="m" />
+        <div class="edit-pins events__edit">
+          <EditPin inline add href={cmsNew('events')} label="Add event" />
+          <EditPin inline href={cmsCollection('events')} label="All events in the CMS" />
+        </div>
         <ol class="events__list" role="list" data-list="upcoming" hidden={soonCount === 0}>
           {
             upcoming.map(({ event, soon }, i) => (
@@ -140,6 +146,7 @@ const googleSubscribe = `https://calendar.google.com/calendar/r?cid=${encodeURIC
                                 <span class="past__dot" aria-hidden="true" />
                                 {EVENT_TYPE_LABELS[event.data.type]} · {event.data.venue}
                                 {event.data.sample && <span class="sample-tag">Sample</span>}
+                                <EditPin inline href={cmsEntry(event)} label="Edit event" />
                               </span>
                             </span>
                             {album && (
@@ -216,6 +223,10 @@ const googleSubscribe = `https://calendar.google.com/calendar/r?cid=${encodeURIC
 
   .events__block + .events__block {
     margin-top: var(--space-3xl);
+  }
+
+  .events__edit {
+    margin-bottom: var(--space-m);
   }
 
   .events__list {

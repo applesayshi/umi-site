@@ -8,7 +8,9 @@ import Faq from '../../components/ui/Faq.astro';
 import CtaBand from '../../components/ui/CtaBand.astro';
 import Icon from '../../components/ui/Icon.astro';
 import GlitchStrip from '../../components/ui/GlitchStrip.astro';
+import EditPin from '../../components/ui/EditPin.astro';
 import produceLogo from '../../assets/brand/produceumi-logo.png';
+import { cmsNew, cmsPage } from '../../lib/cms';
 import { getPage, getSongsByYear } from '../../lib/content';
 import { pageHref } from '../../lib/site';
 import { dateParts } from '../../lib/dates';
@@ -32,9 +34,10 @@ const thisYear = today.month >= 9 ? today.year : today.year - 1;
 const yearNote = (year: number) => (year === thisYear ? 'This year' : year === thisYear - 1 ? 'Last year' : '');
 ---
 
-<BaseLayout title="ProduceUMI" description={data.intro} ogImagePath="/og-produceumi.jpg" imageAlt="The ProduceUMI logo">
+<BaseLayout title="ProduceUMI" description={data.intro} ogImagePath="/og-produceumi.jpg" imageAlt="The ProduceUMI logo" edit={cmsPage('produce')}>
   <section class="produce-hero theme-navy" aria-labelledby="page-title">
     <div class="produce-hero__fields" aria-hidden="true"><i></i><i></i></div>
+    <EditPin href={cmsPage('produce')} label="Edit page" style="--pin-top: calc(var(--header-h) + 0.75rem)" />
     <div class="container produce-hero__inner">
       <div class="produce-hero__logo">
         <Picture src={produceLogo} alt="" widths={[420, 640, 900, 1280]} sizes="(min-width: 960px) 38vw, 86vw" formats={['avif', 'webp']} priority />
@@ -81,6 +84,9 @@ const yearNote = (year: number) => (year === thisYear ? 'This year' : year === t
       <header class="songs__head">
         <p class="eyebrow"><span class="eyebrow__index">02</span><span>Made in the workshop</span></p>
         <h2 class="songs__title display" id="songs-title" data-reveal="stutter">The songs</h2>
+        <div class="edit-pins">
+          <EditPin inline add href={cmsNew('songs')} label="Add song" />
+        </div>
       </header>
       {
         years.length === 0 ? (

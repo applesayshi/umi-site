@@ -1,13 +1,15 @@
 ---
 /** Membership on the home page: what it costs, what you get, and how to join. */
 import Icon from '../ui/Icon.astro';
+import EditPin from '../ui/EditPin.astro';
+import { cmsPage } from '../../lib/cms';
 import { fitStyle } from '../../lib/fit';
 
 interface Props {
   title: string;
   text: string;
   term: string;
-  prices: { audience: string; newPrice: string; returningPrice: string }[];
+  prices: { audience: string; price: string }[];
   benefits: { title: string; text: string }[];
   membershipUrl?: string;
 }
@@ -17,6 +19,7 @@ const { title, text, term, prices, benefits, membershipUrl } = Astro.props;
 
 <section class="member theme-cobalt" aria-labelledby="member-title">
   <div class="member__screen" aria-hidden="true"></div>
+  <EditPin href={cmsPage('home')} label="Edit section" />
   <div class="container member__inner">
     <div class="member__copy">
       <p class="eyebrow" data-reveal="fade"><span class="eyebrow__index">B2</span><span>Membership</span></p>
@@ -55,19 +58,14 @@ const { title, text, term, prices, benefits, membershipUrl } = Astro.props;
     </div>
 
     <div class="member__prices" data-reveal>
+      <EditPin href={cmsPage('join')} label="Edit prices & perks" style="--pin-top: -0.6rem; --pin-right: 0" />
       <h3 class="member__prices-title">Prices</h3>
       <ul class="member__cards" role="list">
         {
           prices.map((price) => (
             <li class="price">
               <p class="price__who">{price.audience}</p>
-              <p class="price__new">
-                <span class="price__amount display">{price.newPrice}</span>
-                <span class="price__label">new member</span>
-              </p>
-              <p class="price__returning">
-                <span class="price__returning-amount">{price.returningPrice}</span> if you're returning
-              </p>
+              <p class="price__amount display">{price.price}</p>
             </li>
           ))
         }
@@ -152,6 +150,7 @@ const { title, text, term, prices, benefits, membershipUrl } = Astro.props;
   }
 
   .member__prices {
+    position: relative;
     display: grid;
     gap: var(--space-s);
     width: min(100%, 32rem);
@@ -167,8 +166,10 @@ const { title, text, term, prices, benefits, membershipUrl } = Astro.props;
     color: var(--fg-muted);
   }
 
+  /* Two short tickets sit side by side when there's room. */
   .member__cards {
     display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
     gap: var(--space-m);
   }
 
@@ -190,35 +191,11 @@ const { title, text, term, prices, benefits, membershipUrl } = Astro.props;
     color: var(--ink-soft);
   }
 
-  .price__new {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0.25rem 0.75rem;
-  }
-
   .price__amount {
     font-size: clamp(2.4rem, 1.9rem + 1.8vw, 3.4rem);
     font-weight: 900;
     line-height: 1;
     color: var(--cobalt-deep);
-  }
-
-  .price__label {
-    font-size: var(--step--1);
-    font-weight: 600;
-  }
-
-  .price__returning {
-    padding-top: 0.5rem;
-    border-top: 1px dashed rgb(10 15 38 / 0.3);
-    font-size: var(--step--1);
-    color: var(--ink-soft);
-  }
-
-  .price__returning-amount {
-    font-weight: 600;
-    color: var(--ink);
   }
 
   .member__term {

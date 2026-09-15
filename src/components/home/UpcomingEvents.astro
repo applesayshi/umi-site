@@ -5,6 +5,8 @@
  */
 import EventRow from '../events/EventRow.astro';
 import Icon from '../ui/Icon.astro';
+import EditPin from '../ui/EditPin.astro';
+import { cmsNew, cmsPage } from '../../lib/cms';
 import { isInUpcomingWindow, type EventEntry } from '../../lib/content';
 import { fitStyle } from '../../lib/fit';
 
@@ -37,6 +39,10 @@ const rows = events.slice(0, LIMIT + 3).map((event) => {
         <p class="eyebrow" data-reveal="fade"><span class="eyebrow__index">A2</span><span>Next 3 weeks</span></p>
         <h2 class="upcoming__title display glow-title" id="upcoming-title" data-text={title} data-reveal="stutter" style={fitStyle(title)}>{title}</h2>
         {intro && <p class="lede">{intro}</p>}
+        <div class="edit-pins">
+          <EditPin inline href={cmsPage('home')} label="Edit section" />
+          <EditPin inline add href={cmsNew('events')} label="Add event" />
+        </div>
       </div>
       <a class="btn btn--ghost upcoming__cta" href="/events/">
         <Icon name="calendar" />

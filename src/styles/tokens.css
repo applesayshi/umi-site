@@ -121,8 +121,6 @@
     --hot: var(--orange);
     --go: var(--mint);
     --focus: var(--peri);
-    --duo-dark: var(--night-950);
-    --duo-light: var(--peri);
     color-scheme: dark;
     color: var(--fg);
     background-color: var(--bg);
@@ -141,8 +139,6 @@
     --hot: var(--orange);
     --go: var(--mint);
     --focus: var(--peri);
-    --duo-dark: var(--navy);
-    --duo-light: var(--peri);
     color-scheme: dark;
     color: var(--fg);
     background-color: var(--bg);
@@ -161,8 +157,6 @@
     --hot: var(--orange-ink);
     --go: var(--mint-ink);
     --focus: var(--cobalt-deep);
-    --duo-dark: var(--ink);
-    --duo-light: var(--mint);
     color-scheme: light;
     color: var(--fg);
     background-color: var(--bg);
@@ -182,8 +176,6 @@
     --hot: var(--sun);
     --go: var(--mint);
     --focus: #ffffff;
-    --duo-dark: var(--night-950);
-    --duo-light: var(--orange);
     color-scheme: dark;
     color: var(--fg);
     background-color: var(--bg);
@@ -203,8 +195,6 @@
     --hot: var(--night-950);
     --go: var(--night-950);
     --focus: var(--night-950);
-    --duo-dark: var(--navy);
-    --duo-light: var(--chalk);
     color-scheme: light;
     color: var(--fg);
     background-color: var(--bg);
@@ -224,8 +214,6 @@
     --hot: var(--night-950);
     --go: var(--night-950);
     --focus: var(--night-950);
-    --duo-dark: var(--night-950);
-    --duo-light: var(--sun);
     color-scheme: light;
     color: var(--fg);
     background-color: var(--bg);

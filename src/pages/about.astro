@@ -9,6 +9,8 @@ import Photo from '../components/ui/Photo.astro';
 import Icon from '../components/ui/Icon.astro';
 import TornEdge from '../components/ui/TornEdge.astro';
 import Scribble from '../components/ui/Scribble.astro';
+import EditPin from '../components/ui/EditPin.astro';
+import { cmsNew, cmsPage } from '../lib/cms';
 import { getPage, getSettings, getTeam } from '../lib/content';
 import { DEPARTMENTS } from '../lib/constants';
 import { fitStyle } from '../lib/fit';
@@ -33,8 +35,8 @@ const sections = [
 ];
 ---
 
-<BaseLayout title="About" description={data.intro} image={data.heroPhoto.src} imageAlt={data.heroPhoto.alt}>
-  <PageHero eyebrow="Who we are" index="A1" title={data.title} intro={data.intro} photo={data.heroPhoto} duo="peri">
+<BaseLayout title="About" description={data.intro} image={data.heroPhoto.src} imageAlt={data.heroPhoto.alt} edit={cmsPage('about')}>
+  <PageHero eyebrow="Who we are" index="A1" title={data.title} intro={data.intro} photo={data.heroPhoto} edit={cmsPage('about')}>
     <ArtBackdrop slot="backdrop" pieces={['disc']} strength={0.5} />
   </PageHero>
 
@@ -93,6 +95,10 @@ const sections = [
             <p class="eyebrow"><span class="eyebrow__index">02</span><span>The people behind the shows</span></p>
             <h2 class="about__title display" id="execs-title" data-reveal="stutter">Meet the execs</h2>
             <p class="lede">{data.execsIntro}</p>
+            <div class="edit-pins">
+              <EditPin inline href={cmsPage('about')} label="Edit intro" />
+              <EditPin inline add href={cmsNew('team')} label="Add exec" />
+            </div>
           </header>
           {
             leads.length > 0 && (
@@ -128,6 +134,7 @@ const sections = [
 
   <section class="story theme-paper texture-paper" id="story" aria-labelledby="story-title" data-spy-section>
     <TornEdge position="top" seed="story-top" />
+    <EditPin href={cmsPage('about')} label="Edit story & timeline" style="--pin-top: 2.5rem" />
     <Scribble variant="vine" class="story__vine" color="var(--ink)" width={2.2} />
     <div class="container story__inner">
       <header class="story__head">
@@ -147,13 +154,13 @@ const sections = [
                   src={photo.src}
                   alt={photo.alt}
                   date={photo.date}
+                  position={photo.focus}
                   sizes="(min-width: 960px) 26vw, 70vw"
                   widths={[360, 540, 720, 960]}
                   aspect="4 / 3"
                   frame="print"
                   tape={i === 0 ? 'top' : 'corners'}
                   tilt={i === 0 ? -3 : 4}
-                  duo={i === 0 ? 'mint' : 'pink'}
                   flash
                 />
               </div>

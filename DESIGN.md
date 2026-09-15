@@ -2,16 +2,16 @@
 
 The brief: *elegant*, drawing on indie sleaze graphics, Wong Kar-wai's **Chungking Express** and rock/indie record sleeves. The club's moodboard added risograph gig posters, glitch and pixel-sort collages, halftone zines, glowing tracklist posters and ransom-note lettering. The UMI logo sets the colours: navy, white and a scratchy periwinkle clef.
 
-The resolution: UMI's navy and periwinkle printed like a riso zine at night. Two riso inks, cobalt and fluorescent orange, do most of the work, and photos are printed as duotones that "develop" into colour when you point at them. The collage layer (marker scribbles, glitch strips, tape, UI windows) stays in the margins. Layout, spacing and type stay precise, which is what keeps it elegant.
+The resolution: UMI's navy and periwinkle printed like a riso zine at night. Two riso inks, cobalt and fluorescent orange, do most of the work, while photos stay in their natural colour, pasted up as prints. The collage layer (marker scribbles, glitch strips, tape, UI windows) stays in the margins. Layout, spacing and type stay precise, which is what keeps it elegant.
 
 **Clarity beats flourish** wherever people need information: section titles say what the section is ("Upcoming events", "Become a member"), and events, prices and people use the same plain, legible rows everywhere.
 
-The moodboard artworks are copyrighted, so the site recreates their *techniques* (duotone, halftone, misregistration, glow type, tracklists) and never uses the images themselves.
+The moodboard artworks are copyrighted, so the site recreates their *techniques* (halftone, misregistration, glow type, tracklists) and never uses the images themselves.
 
 ## Principles
 
 1. **Night, paper, ink.** Sections alternate between *night* (the show), *paper* (the liner notes) and solid *cobalt* for calls to action, like the front, back and insert of a sleeve.
-2. **Two inks, spot colours sparingly.** Cobalt and orange carry the page. Pink, mint and sun yellow appear once per view at most, as a scribble, a duotone or a sticker.
+2. **Two inks, spot colours sparingly.** Cobalt and orange carry the page. Pink, mint and sun yellow appear once per view at most, as a scribble or a sticker.
 3. **One idea per detail.** Tape holds a print down, a date stamp says when a photo was taken, a scribble circles the thing that matters. Nothing is decoration for its own sake.
 4. **Motion is smooth and quiet.** Headlines fade and rise or wipe in once, prints drift, lights glide. Nothing steps or stutters: an early version used a low-frame-rate "step-print" effect, and on real page loads it read as lag, not style.
 5. **Show, don't sell.** The home page leads with the club's own art and photos, not slogans or scrolling taglines.
@@ -26,19 +26,19 @@ The moodboard artworks are copyrighted, so the site recreates their *techniques*
 | `--peri` | `#93a3e6` | Logo periwinkle: subtitles, glows, focus rings. 8:1 on night |
 | `--cobalt` / `--cobalt-deep` | `#2c52e0` / `#2446c4` | Riso ink 1: CTA bands, rate sheets, links on paper. White text only (5.5:1 / 6.8:1) |
 | `--orange` / `--orange-ink` | `#ff5a2b` / `#ad2d0b` | Riso ink 2: primary buttons, track numbers, marker scribbles. Night text on orange; `--orange-ink` for text on paper |
-| `--pink` · `--mint` · `--sun` | `#ff7cc2` · `#9ef0c9` · `#ffe45e` | Spot colours for duotones, stickers and scribbles |
+| `--pink` · `--mint` · `--sun` | `#ff7cc2` · `#9ef0c9` · `#ffe45e` | Spot colours for stickers and scribbles |
 | `--chalk` / `--mist` | `#eef1fa` / `#a9b1d6` | Text / muted text on night (17.3:1 / 9.2:1) |
 | `--paper-50` | `#ebe9e1` | Paper sections |
 | `--ink` / `--ink-soft` | `#0a0f26` / `#454b66` | Text / muted text on paper (15.6:1 / 7:1) |
 | `--sodium` | `#ff8a4c` | Camera date stamps (decorative) |
 
-Sections declare a theme class that remaps the semantic tokens `--bg`, `--fg`, `--fg-muted`, `--accent`, `--hot`, `--line`, `--focus` and the default duotone inks `--duo-dark` / `--duo-light`. Components only use semantic tokens.
+Sections declare a theme class that remaps the semantic tokens `--bg`, `--fg`, `--fg-muted`, `--accent`, `--hot`, `--line` and `--focus`. Components only use semantic tokens.
 
 | Theme | Surface | Accent | Notes |
 | --- | --- | --- | --- |
 | `theme-night` | night-950 | orange | Default |
 | `theme-navy` | navy | orange | |
-| `theme-paper` | paper-50 | cobalt-deep, hot `--orange-ink` | Duotones print ink + mint |
+| `theme-paper` | paper-50 | cobalt-deep, hot `--orange-ink` | |
 | `theme-cobalt` | cobalt-deep | night, hot sun | White text only; muted text `#dde3ff` (5.6:1) |
 | `theme-peri` | periwinkle | night | Night text only |
 | `theme-orange` | orange | night | Thin bars and stickers only |
@@ -58,14 +58,14 @@ Fonts are self-hosted by Astro's Fonts API with metric-matched fallbacks. Body t
 
 ## Print effects
 
-- **Riso duotone** (`.riso` in `components.css`, used by `Photo`): a grayscale photo under a *lighten* layer (dark ink) and a *multiply* layer (light ink), plus a halftone screen. Ink pairs: `duo-peri`, `duo-orange`, `duo-mint`, `duo-pink`, `duo-teal`, `duo-sun`, or `theme` to follow the section. On hover the inks lift and the photo develops to full colour.
+- **Natural-colour photos.** An earlier duotone treatment (grayscale photos under two ink layers that developed into colour on hover) was removed at the club's request: don't put colour filters or tints over photos.
 - **Misregistration:** an orange plate offset behind a print (`Photo misregister`) or a wordmark (share image).
 - **Glow type** (`.glow-title` + `data-text`): a blurred periwinkle copy of the headline behind it, like a glowing poster title. The copy is hidden from screen readers.
 - **Grain and paper:** fixed film grain over everything, and toner speckle on paper sections (`/textures/`).
 
 ## Signature components
 
-- **Photo** (`ui/Photo.astro`): responsive AVIF/WebP, riso duotone, print border, tape, tilt, misregistration, orange LCD date stamp, and a flash "develop" reveal.
+- **Photo** (`ui/Photo.astro`): responsive AVIF/WebP, print border, tape, tilt, misregistration, orange LCD date stamp, a flash "develop" reveal and a gentle zoom on hover. `position` takes the photo's "Crop position" from the CMS; other cropped images use `cropStyle()`.
 - **Scribble** (`ui/Scribble.astro`): hand-drawn marker marks (circle, underline, arrow, star, loop, vine, burst and more) that draw themselves in when revealed.
 - **GlitchStrip** (`ui/GlitchStrip.astro`): seeded pixel-sort colour bars that close page heroes and the footer.
 - **UiWindow** (`ui/UiWindow.astro`): a small "program window" frame (title bar + body) for status boxes.
@@ -79,9 +79,10 @@ Fonts are self-hosted by Astro's Fonts API with metric-matched fallbacks. Body t
 - **Vinyl** (`ui/Vinyl.astro`): a sleeve with the record sliding out; spins only while on screen. Used for song pages.
 - **Membership** (`home/Membership.astro`): perks, paper price cards and the join button on cobalt.
 - **ExecDepartments** (`about/ExecDepartments.astro`): one `<details>` dropdown per department listing every exec; presidents and VPs also get full cards.
-- **ContactSheet** (`home/ContactSheet.astro`): a 35mm film strip of duotone frames with sprocket holes.
-- **PhotoRibbon** (`home/PhotoRibbon.astro`): an endless, slowly drifting row of tilted riso prints (gallery photos with song and event covers mixed in) under the home hero. Decorative, pauses on hover or with its button, moves only while on screen, and stays still for reduced motion.
+- **ContactSheet** (`home/ContactSheet.astro`): a 35mm film strip of photo frames with sprocket holes.
+- **PhotoRibbon** (`home/PhotoRibbon.astro`): an endless, slowly drifting row of tilted prints under the home hero. Decorative, pauses on hover or with its button, moves only while on screen, and stays still for reduced motion.
 - **Menu**: a full-screen "tracklist" (Side A / Side B) built on `<dialog>`.
+- **EditPin / EditorBar** (`ui/EditPin.astro`, `layout/EditorBar.astro`): for editors logged in to the CMS in this browser only. Sun-yellow pencils (mint plus for "add") float in a section's top-right corner or sit inline in a row; the label slides out on hover or focus. The Editor button folds away in the bottom-left corner. For visitors both are `display: none`, so they never affect layout. Keep pencils out of links (a pencil inside a card link is invalid HTML): put them beside the link in the card's positioned parent.
 
 ## Motion rules
 

@@ -7,13 +7,15 @@ import Countdown from '../ui/Countdown.astro';
 import Scribble from '../ui/Scribble.astro';
 import GlitchStrip from '../ui/GlitchStrip.astro';
 import DataRail from '../ui/DataRail.astro';
+import EditPin from '../ui/EditPin.astro';
 import umiLogo from '../../assets/brand/umi-logo.png';
+import { cmsPage } from '../../lib/cms';
 import type { EventEntry } from '../../lib/content';
 
 interface Props {
   timecode: string;
   subtitle: string;
-  photos: { src: ImageMetadata; alt: string; date?: Date }[];
+  photos: { src: ImageMetadata; alt: string; date?: Date; focus?: string }[];
   upcoming: EventEntry[];
 }
 
@@ -26,6 +28,7 @@ const [first, second, third] = photos;
   <div class="hero__fields" aria-hidden="true"><i></i><i></i><i></i></div>
   <div class="hero__shade" aria-hidden="true"></div>
   <DataRail class="hero__rail" />
+  <EditPin href={cmsPage('home')} label="Edit hero" style="--pin-top: calc(var(--header-h) + 0.75rem)" />
 
   <div class="hero__inner container">
     <div class="hero__copy">
@@ -68,13 +71,13 @@ const [first, second, third] = photos;
               src={first.src}
               alt={first.alt}
               date={first.date}
+              position={first.focus}
               sizes="(min-width: 1024px) 28vw, 58vw"
               widths={[400, 600, 800, 1000]}
               aspect="4 / 5"
               tape="top"
               tilt={3}
               frame="print"
-              duo="peri"
               misregister
               priority
             />
@@ -88,13 +91,13 @@ const [first, second, third] = photos;
               src={second.src}
               alt={second.alt}
               date={second.date}
+              position={second.focus}
               sizes="(min-width: 1024px) 22vw, 46vw"
               widths={[360, 540, 720, 900]}
               aspect="3 / 2"
               tape="corners"
               tilt={-6}
               frame="print"
-              duo="orange"
             />
             <Scribble variant="scribble" class="hero__scrawl" color="var(--chalk)" width={1.6} />
           </div>
@@ -106,11 +109,11 @@ const [first, second, third] = photos;
             <Photo
               src={third.src}
               alt={third.alt}
+              position={third.focus}
               sizes="(min-width: 1024px) 12vw, 30vw"
               widths={[240, 360, 480]}
               aspect="1 / 1"
               tilt={-9}
-              duo="mint"
             />
           </div>
         )

@@ -8,11 +8,9 @@ heroPhoto:
 term: Membership runs for the academic year
 prices:
   - audience: UBC students
-    newPrice: $10
-    returningPrice: $8
-  - audience: Non-UBC
-    newPrice: $15
-    returningPrice: $12
+    price: $10
+  - audience: Non-UBC students
+    price: $15
 benefits:
   - title: Free entry, always
     text: Free access to every UMI event, including showcases and music workshops, plus one complimentary guest pass.
@@ -26,7 +24,7 @@ steps:
   - title: Register on CampusBase
     text: Sign up for UMI through the AMS CampusBase membership form.
   - title: Pay your membership
-    text: $10 for new UBC students, $8 if you're returning. It's $15 and $12 for everyone else.
+    text: $10 for UBC students, or $15 for non-UBC students.
   - title: Come to a show
     text: Follow @ubcmusicinitiative, join the newsletter, and we'll see you at the next event.
 faq:
@@ -35,7 +33,7 @@ faq:
   - question: I've never performed before. Is that okay?
     answer: That's exactly who UMI is for. Our events welcome every genre and skill level, and open mics are a low-pressure place to try your first set.
   - question: Can students from other schools join?
-    answer: Yes. Non-UBC memberships are $15, or $12 if you're returning.
+    answer: Yes. Memberships for non-UBC students are $15.
   - question: How do I sign up to perform at an event?
     answer: Each event page links to a performer sign-up form when spots are open. Members get free entry when they perform at our events.
 ---

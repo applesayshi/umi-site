@@ -4,7 +4,9 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/layout/PageHero.astro';
 import ArtBackdrop from '../../components/ui/ArtBackdrop.astro';
 import DateStamp from '../../components/ui/DateStamp.astro';
-import { getAlbums } from '../../lib/content';
+import EditPin from '../../components/ui/EditPin.astro';
+import { cmsCollection, cmsEntry, cmsNew } from '../../lib/cms';
+import { cropStyle, getAlbums } from '../../lib/content';
 import { mediumDate } from '../../lib/dates';
 import { fitStyle } from '../../lib/fit';
 
@@ -12,13 +14,16 @@ const albums = await getAlbums();
 const years = [...new Set(albums.map((a) => a.data.date.getUTCFullYear()))];
 ---
 
-<BaseLayout title="Gallery" description="Photos from UMI showcases, open mics and socials at UBC.">
+<BaseLayout title="Gallery" description="Photos from UMI showcases, open mics and socials at UBC." edit={cmsCollection('gallery')}>
   <!-- All four Brechella prints blended behind the whole page (the hero and album sections are see-through). -->
   <ArtBackdrop pieces={['crowd', 'guitar', 'desk', 'disc']} placement="page" strength={0.34} />
   <PageHero eyebrow="Contact sheets" index="A4" title="Gallery" intro="Flash photos from the floor of every UMI night. Find yourself in the crowd." glow={false} />
 
   <section class="gallery theme-night" aria-label="Photo albums">
     <div class="container">
+      <div class="edit-pins gallery__edit">
+        <EditPin inline add href={cmsNew('gallery')} label="Add album" />
+      </div>
       {
         albums.length === 0 ? (
           <p class="gallery__empty serif">The first roll is still developing. Check back after the next show.</p>
@@ -43,6 +48,7 @@ const years = [...new Set(albums.map((a) => a.data.date.getUTCFullYear()))];
                               sizes="(min-width: 900px) 30vw, 90vw"
                               formats={['avif', 'webp']}
                               priority={yearIndex === 0 && i === 0}
+                              style={cropStyle(album.data.coverFocus)}
                             />
                             <DateStamp date={album.data.date} class="album__stamp" />
                           </span>
@@ -55,6 +61,7 @@ const years = [...new Set(albums.map((a) => a.data.date.getUTCFullYear()))];
                           </span>
                         </span>
                       </a>
+                      <EditPin href={cmsEntry(album)} label="Edit album & photos" />
                     </li>
                   ))}
               </ul>
@@ -112,6 +119,14 @@ const years = [...new Set(albums.map((a) => a.data.date.getUTCFullYear()))];
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
     gap: var(--space-2xl) var(--space-xl);
+  }
+
+  .gallery__edit {
+    margin-bottom: var(--space-l);
+  }
+
+  .album {
+    position: relative;
   }
 
   .album__link {

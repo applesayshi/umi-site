@@ -7,6 +7,8 @@ import Icon from '../components/ui/Icon.astro';
 import TornEdge from '../components/ui/TornEdge.astro';
 import Scribble from '../components/ui/Scribble.astro';
 import { getPage, getSettings } from '../lib/content';
+import { cmsPage } from '../lib/cms';
+import EditPin from '../components/ui/EditPin.astro';
 import type { IconName } from '../lib/icons';
 
 const [page, settings] = await Promise.all([getPage('join', 'join'), getSettings()]);
@@ -16,8 +18,8 @@ const membershipUrl = settings.links.membership;
 const steps = data.steps.map((step, i) => (i === 0 && membershipUrl ? { ...step, href: membershipUrl, linkLabel: 'Open CampusBase' } : step));
 ---
 
-<BaseLayout title="Join" description={data.intro} image={data.heroPhoto.src} imageAlt={data.heroPhoto.alt}>
-  <PageHero eyebrow="Membership" index="B5" title={data.title} intro={data.intro} photo={data.heroPhoto} duo="pink">
+<BaseLayout title="Join" description={data.intro} image={data.heroPhoto.src} imageAlt={data.heroPhoto.alt} edit={cmsPage('join')}>
+  <PageHero eyebrow="Membership" index="B5" title={data.title} intro={data.intro} photo={data.heroPhoto} edit={cmsPage('join')}>
     {
       membershipUrl && (
         <div class="btn-row join-hero__actions">
@@ -37,6 +39,7 @@ const steps = data.steps.map((step, i) => (i === 0 && membershipUrl ? { ...step,
     <TornEdge position="top" seed="join-top" />
     <div class="container">
       <header class="booth__head">
+        <EditPin href={cmsPage('join')} label="Edit prices" style="--pin-top: 0; --pin-right: 0" />
         <p class="eyebrow"><span class="eyebrow__index">Box office</span><span>{data.term}</span></p>
         <h2 class="booth__title display" id="prices-title" data-reveal="stutter">Door prices</h2>
         <Scribble variant="arrow" class="booth__arrow" color="var(--orange-ink)" width={3} />
@@ -46,16 +49,7 @@ const steps = data.steps.map((step, i) => (i === 0 && membershipUrl ? { ...step,
           data.prices.map((price, i) => (
             <li class="price" data-reveal style={`--i:${i}`}>
               <p class="price__audience">{price.audience}</p>
-              <div class="price__row">
-                <div>
-                  <p class="price__label">New member</p>
-                  <p class="price__value display">{price.newPrice}</p>
-                </div>
-                <div>
-                  <p class="price__label">Returning</p>
-                  <p class="price__value price__value--muted display">{price.returningPrice}</p>
-                </div>
-              </div>
+              <p class="price__value display">{price.price}</p>
               <span class="price__punch" aria-hidden="true" />
               <span class="price__stamp" aria-hidden="true">Admit one</span>
             </li>
@@ -68,6 +62,7 @@ const steps = data.steps.map((step, i) => (i === 0 && membershipUrl ? { ...step,
   <section class="benefits theme-night section" id="benefits" aria-labelledby="benefits-title">
     <div class="container">
       <header class="benefits__head">
+        <EditPin href={cmsPage('join')} label="Edit perks, steps & FAQ" style="--pin-top: 0; --pin-right: 0" />
         <p class="eyebrow"><span class="eyebrow__index">01</span><span>Membership perks</span></p>
         <h2 class="benefits__title display" id="benefits-title" data-reveal="stutter">What you get</h2>
       </header>
@@ -167,30 +162,13 @@ const steps = data.steps.map((step, i) => (i === 0 && membershipUrl ? { ...step,
     font-size: var(--step-3);
   }
 
-  .price__row {
-    display: flex;
-    gap: var(--space-xl);
+  .price__value {
     margin-top: 1rem;
     padding-top: 1rem;
     border-top: 1px dashed rgb(255 255 255 / 0.4);
-  }
-
-  .price__label {
-    font-family: var(--font-mono);
-    font-size: 0.7rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: #dde3ff;
-  }
-
-  .price__value {
     font-size: clamp(2.8rem, 2rem + 3vw, 4.8rem);
     font-weight: 900;
     line-height: 0.95;
-  }
-
-  .price__value--muted {
-    color: #dde3ff;
   }
 
   .price__punch {
@@ -221,6 +199,7 @@ const steps = data.steps.map((step, i) => (i === 0 && membershipUrl ? { ...step,
   }
 
   .benefits__head {
+    position: relative;
     display: grid;
     gap: var(--space-s);
     margin-bottom: var(--space-2xl);

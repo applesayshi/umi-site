@@ -91,6 +91,7 @@ collections:
         hint: One or two sentences, under 240 characters. Shown on tickets, cards and in Google results.
         pattern: ['^[\s\S]{1,240}$', Keep the summary under 240 characters.]
       - { label: Poster or cover photo, name: cover, widget: image, required: false, hint: At least 1600px wide. JPG or PNG under 3 MB. }
+      - { label: Cover crop position, name: coverFocus, widget: focus, image: cover, crops: [{ aspect: '4 / 5', label: Event page }], required: false }
       - { label: Photo description, name: coverAlt, widget: string, required: false, hint: Describe the photo for people using screen readers. }
       - { label: Member price, name: priceMember, widget: string, required: false, hint: 'e.g. Free or $2' }
       - { label: General price, name: priceGeneral, widget: string, required: false, hint: 'e.g. $5' }
@@ -104,7 +105,7 @@ collections:
   - name: gallery
     label: Gallery albums
     label_singular: Album
-    description: One album per night. The newest albums appear in the film strip on the home page.
+    description: One album per night. The newest albums appear in the film strip on the home page. To add a whole roll at once, use “Upload photos” above the photo list.
     folder: src/content/gallery
     editor: { preview: false }
     create: true
@@ -124,16 +125,19 @@ collections:
         required: false
         hint: Links the album and the event page to each other.
       - { label: Cover photo, name: cover, widget: image }
+      - { label: Cover crop position, name: coverFocus, widget: focus, image: cover, crops: [{ aspect: '3 / 2', label: Album card }], required: false }
       - { label: Cover photo description, name: coverAlt, widget: string }
       - { label: Photographer, name: photographer, widget: string, required: false }
       - { label: Show in the home page film strip, name: showOnHome, widget: boolean, required: false, default: true }
       - label: Photos
         name: photos
-        widget: list
+        widget: photos
         min: 1
-        summary: '{{fields.alt}}'
+        summary: "{{fields.alt | default('Photo (no description yet)')}}"
+        hint: “Upload photos” adds as many as you choose in one go, resized for the web. Drag items to reorder.
         fields:
           - { label: Photo, name: src, widget: image, hint: Export at about 2400px on the long edge, under 3 MB. }
+          - { label: Crop position, name: focus, widget: focus, crops: [{ aspect: '3 / 2', label: Home film strip }, { aspect: '1 / 1', label: Event page }], required: false, hint: The album page shows the whole photo. This picks what stays in view where it's cropped. }
           - { label: Description, name: alt, widget: string, required: false, hint: 'What is happening in the photo? e.g. “Two guitarists harmonising under red lights”.' }
           - { label: Caption, name: caption, widget: string, required: false }
       - { label: Sample entry, name: sample, widget: boolean, required: false, default: false }
@@ -160,6 +164,7 @@ collections:
       - { label: School year (starting year), name: schoolYear, widget: number, value_type: int, hint: 'The year the school year began. Enter 2025 for 2025/26.' }
       - { label: Genre, name: genre, widget: string, required: false }
       - { label: Cover art, name: cover, widget: image, required: false, hint: Square works best, at least 1200 × 1200. Without cover art the ProduceUMI logo is shown. }
+      - { label: Cover crop position, name: coverFocus, widget: focus, image: cover, crops: [{ aspect: '1 / 1', label: Record sleeve }], required: false, hint: Only matters when the art isn't square. }
       - { label: Cover art description, name: coverAlt, widget: string, required: false }
       - { label: One-line summary, name: summary, widget: string, required: false, hint: Under 200 characters. }
       - { label: Credits, name: producers, widget: string, required: false, hint: 'e.g. Produced with Alex Kim and Sam Lee' }
@@ -208,6 +213,7 @@ collections:
       - { label: President or VP (show as a card), name: lead, widget: boolean, required: false, default: false, hint: Leads get a full card under “Meet the execs”. Everyone is listed in their department's dropdown. }
       - { label: Order, name: order, widget: number, value_type: int, default: 100, hint: Lower numbers are listed first. }
       - { label: Portrait, name: photo, widget: image, required: false, hint: Portrait orientation (4:5) works best. }
+      - { label: Portrait crop position, name: photoFocus, widget: focus, image: photo, crops: [{ aspect: '4 / 5', label: Exec card }, { aspect: '1 / 1', label: Department list }], required: false }
       - { label: Pronouns, name: pronouns, widget: string, required: false }
       - { label: Program & year, name: program, widget: string, required: false, hint: 'e.g. 3rd year, Computer Science' }
       - { label: Plays, name: plays, widget: string, required: false }
@@ -254,12 +260,12 @@ collections:
         label: Home page
         file: src/content/pages/home.md
         fields:
-          - { label: Browser tab title (optional), name: seoTitle, widget: string, required: false }
+          - { label: Browser tab title, name: seoTitle, widget: string, required: false }
           - label: Hero
             name: hero
             widget: object
             fields:
-              - { label: Camcorder line, name: timecode, widget: string, hint: 'Small text next to REC, e.g. AMS Student Nest — Rm 3308' }
+              - { label: Camcorder line, name: timecode, widget: string, hint: 'Small text next to REC, e.g. AMS Student Nest' }
               - { label: Subtitle, name: subtitle, widget: string, hint: 'The italic line under the UMI wordmark.' }
               - label: Photos (up to 3)
                 name: photos
@@ -269,8 +275,19 @@ collections:
                 summary: '{{fields.alt}}'
                 fields:
                   - { label: Photo, name: src, widget: image }
+                  - { label: Crop position, name: focus, widget: focus, crops: [{ aspect: '4 / 5', label: Tall print }, { aspect: '3 / 2', label: Wide print }], required: false, hint: 'The first photo is printed tall, the second wide and the third square.' }
                   - { label: Description, name: alt, widget: string }
                   - { label: Date stamp, name: date, widget: datetime, format: 'YYYY-MM-DD', time_format: false, required: false }
+          - label: Ribbon photos (under the hero)
+            label_singular: ribbon photo
+            name: ribbon
+            widget: photos
+            required: false
+            collapsed: true
+            hint: The prints drifting across the page under the hero, in order. “Upload photos” adds several at once. Leave the list empty to use gallery photos and song and event covers automatically.
+            fields:
+              - { label: Photo, name: src, widget: image }
+              - { label: Crop position, name: focus, widget: focus, crops: [{ aspect: '4 / 5', label: Tall print }, { aspect: '4 / 3', label: Wide print }], required: false }
           - label: About section
             name: manifesto
             widget: object
@@ -290,6 +307,7 @@ collections:
                 widget: object
                 fields:
                   - { label: Photo, name: src, widget: image }
+                  - { label: Crop position, name: focus, widget: focus, crops: [{ aspect: '4 / 5', label: About section }], required: false }
                   - { label: Description, name: alt, widget: string }
                   - { label: Date stamp, name: date, widget: datetime, format: 'YYYY-MM-DD', time_format: false, required: false }
           - label: Upcoming events section
@@ -350,7 +368,7 @@ collections:
         fields:
           - { label: Title, name: title, widget: string }
           - { label: Intro, name: intro, widget: text }
-          - { label: Hero photo, name: heroPhoto, widget: object, fields: [{ label: Photo, name: src, widget: image }, { label: Description, name: alt, widget: string }, { label: Date stamp, name: date, widget: datetime, format: 'YYYY-MM-DD', time_format: false, required: false }] }
+          - { label: Hero photo, name: heroPhoto, widget: object, fields: [{ label: Photo, name: src, widget: image }, { label: Crop position, name: focus, widget: focus, crops: [{ aspect: '4 / 3', label: Page header }], required: false }, { label: Description, name: alt, widget: string }, { label: Date stamp, name: date, widget: datetime, format: 'YYYY-MM-DD', time_format: false, required: false }] }
           - { label: Mission statement, name: mission, widget: text }
           - label: Pillars
             name: pillars
@@ -375,6 +393,7 @@ collections:
             max: 3
             fields:
               - { label: Photo, name: src, widget: image }
+              - { label: Crop position, name: focus, widget: focus, crops: [{ aspect: '4 / 3', label: Story print }], required: false }
               - { label: Description, name: alt, widget: string }
               - { label: Date stamp, name: date, widget: datetime, format: 'YYYY-MM-DD', time_format: false, required: false }
           - { label: Our story, name: body, widget: markdown }
@@ -385,15 +404,14 @@ collections:
         fields:
           - { label: Title, name: title, widget: string }
           - { label: Intro, name: intro, widget: text }
-          - { label: Hero photo, name: heroPhoto, widget: object, fields: [{ label: Photo, name: src, widget: image }, { label: Description, name: alt, widget: string }, { label: Date stamp, name: date, widget: datetime, format: 'YYYY-MM-DD', time_format: false, required: false }] }
+          - { label: Hero photo, name: heroPhoto, widget: object, fields: [{ label: Photo, name: src, widget: image }, { label: Crop position, name: focus, widget: focus, crops: [{ aspect: '4 / 3', label: Page header }], required: false }, { label: Description, name: alt, widget: string }, { label: Date stamp, name: date, widget: datetime, format: 'YYYY-MM-DD', time_format: false, required: false }] }
           - { label: Membership term note, name: term, widget: string }
           - label: Prices
             name: prices
             widget: list
             fields:
-              - { label: Who, name: audience, widget: string }
-              - { label: New member price, name: newPrice, widget: string }
-              - { label: Returning member price, name: returningPrice, widget: string }
+              - { label: Who, name: audience, widget: string, hint: 'e.g. UBC students' }
+              - { label: Price, name: price, widget: string, hint: 'e.g. $10' }
           - label: Benefits
             name: benefits
             widget: list
@@ -409,7 +427,7 @@ collections:
         fields:
           - { label: Title, name: title, widget: string }
           - { label: Intro, name: intro, widget: text }
-          - { label: Hero photo, name: heroPhoto, widget: object, fields: [{ label: Photo, name: src, widget: image }, { label: Description, name: alt, widget: string }, { label: Date stamp, name: date, widget: datetime, format: 'YYYY-MM-DD', time_format: false, required: false }] }
+          - { label: Hero photo, name: heroPhoto, widget: object, fields: [{ label: Photo, name: src, widget: image }, { label: Crop position, name: focus, widget: focus, crops: [{ aspect: '4 / 3', label: Page header }], required: false }, { label: Description, name: alt, widget: string }, { label: Date stamp, name: date, widget: datetime, format: 'YYYY-MM-DD', time_format: false, required: false }] }
           - label: Performers
             name: performers
             widget: object
@@ -438,7 +456,7 @@ collections:
         fields:
           - { label: Title, name: title, widget: string }
           - { label: Intro, name: intro, widget: text }
-          - { label: Hero photo, name: heroPhoto, widget: object, fields: [{ label: Photo, name: src, widget: image }, { label: Description, name: alt, widget: string }, { label: Date stamp, name: date, widget: datetime, format: 'YYYY-MM-DD', time_format: false, required: false }] }
+          - { label: Hero photo, name: heroPhoto, widget: object, fields: [{ label: Photo, name: src, widget: image }, { label: Crop position, name: focus, widget: focus, crops: [{ aspect: '4 / 3', label: Page header }], required: false }, { label: Description, name: alt, widget: string }, { label: Date stamp, name: date, widget: datetime, format: 'YYYY-MM-DD', time_format: false, required: false }] }
           - label: Sign-up status
             name: status
             widget: select
@@ -461,7 +479,7 @@ collections:
         fields:
           - { label: Title, name: title, widget: string }
           - { label: Intro, name: intro, widget: text }
-          - { label: Hero photo, name: heroPhoto, widget: object, fields: [{ label: Photo, name: src, widget: image }, { label: Description, name: alt, widget: string }, { label: Date stamp, name: date, widget: datetime, format: 'YYYY-MM-DD', time_format: false, required: false }] }
+          - { label: Hero photo, name: heroPhoto, widget: object, fields: [{ label: Photo, name: src, widget: image }, { label: Crop position, name: focus, widget: focus, crops: [{ aspect: '4 / 3', label: Page header }], required: false }, { label: Description, name: alt, widget: string }, { label: Date stamp, name: date, widget: datetime, format: 'YYYY-MM-DD', time_format: false, required: false }] }
           - { label: Stats, name: stats, widget: list, max: 4, fields: [{ label: Value, name: value, widget: string }, { label: Label, name: label, widget: string }] }
           - { label: Reasons to partner, name: reasons, widget: list, fields: [{ label: Title, name: title, widget: string }, { label: Text, name: text, widget: text }] }
           - label: Sponsorship tiers
@@ -503,7 +521,6 @@ collections:
             name: office
             widget: object
             fields:
-              - { label: Room, name: room, widget: string }
               - { label: Building, name: building, widget: string }
               - { label: Address, name: address, widget: string }
               - { label: Map link, name: mapUrl, widget: string, required: false }

@@ -16,6 +16,9 @@ Read `README.md` (editing, launch, structure) and `DESIGN.md` (design system) be
 - Motion must respect `prefers-reduced-motion`, and photo flashes stay rate-limited (see `src/scripts/reveal.ts`).
 - `compressHTML: true` is deliberate (Astro 7's JSX whitespace rules drop spaces around inline elements).
 - Scoped styles don't reach child components: use `.parent :global(.child-class)`.
+- Photos stay in natural colour: no filters or tints over them (the club had the old duotone removed). Cropped images take their CMS "Crop position" (`focus` / `coverFocus` / `photoFocus`) through `Photo`'s `position` prop or `cropStyle()`.
+- `public/admin/widgets.js` defines the `photos` (bulk upload) and `focus` (crop position) CMS widgets on top of Decap internals; re-test both after changing the pinned Decap version.
+- Anything editable should get an `EditPin` (links from `src/lib/cms.ts`); pins are editor-only and must never sit inside another link.
 
 ## Development
 
