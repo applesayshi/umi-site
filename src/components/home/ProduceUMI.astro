@@ -4,7 +4,7 @@ import { Picture } from 'astro:assets';
 import Icon from '../ui/Icon.astro';
 import SnippetButton from '../produce/SnippetButton.astro';
 import produceLogo from '../../assets/brand/produceumi-logo.png';
-import { cropStyle, schoolYearLabel, songSnippet, type SongEntry } from '../../lib/content';
+import { cropStyle, songSnippet, type SongEntry } from '../../lib/content';
 import { fitStyle } from '../../lib/fit';
 
 interface Props {
@@ -50,7 +50,7 @@ const external = signupHref.startsWith('http');
                     </a>
                     <span class="produce__song-artist">
                       {song.data.artist}
-                      <span class="produce__song-year">{schoolYearLabel(song.data.schoolYear)}</span>
+                      {song.data.genre && <span class="produce__song-genre">{song.data.genre}</span>}
                       {song.data.sample && <span class="sample-tag">Sample</span>}
                     </span>
                   </span>
@@ -256,7 +256,7 @@ const external = signupHref.startsWith('http');
     color: var(--fg-muted);
   }
 
-  .produce__song-year {
+  .produce__song-genre {
     font-family: var(--font-mono);
     font-size: 0.72rem;
     letter-spacing: 0.1em;

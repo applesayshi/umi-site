@@ -49,13 +49,16 @@ export async function getAlbumForEvent(eventId: string) {
   return (await getAlbums()).find((a) => a.data.event?.id === eventId);
 }
 
-/** "2025/26" for a school year that started in 2025. */
-export const schoolYearLabel = (startYear: number) => `${startYear}/${String(startYear + 1).slice(-2)}`;
-
-/** ProduceUMI songs: newest school year first, then by the order set in the CMS. */
+/**
+ * ProduceUMI songs in showcase order: as arranged in the CMS (ProduceUMI page → Song order), then songs that
+ * haven't been placed there yet, in the order they were added.
+ */
 export async function getSongs() {
-  const songs = await getCollection('songs', (s) => !s.data.draft);
-  return songs.sort((a, b) => b.data.schoolYear - a.data.schoolYear || a.data.order - b.data.order || a.data.title.localeCompare(b.data.title));
+  const [songs, page] = await Promise.all([getCollection('songs', (s) => !s.data.draft), getEntry('produce', 'produce')]);
+  const order = page?.data.songOrder ?? [];
+  const place = (song: SongEntry) => (order.includes(song.id) ? order.indexOf(song.id) : order.length);
+  const added = (song: SongEntry) => song.data.added?.valueOf() ?? 0;
+  return songs.sort((a, b) => place(a) - place(b) || added(a) - added(b) || a.data.title.localeCompare(b.data.title));
 }
 
 /**
@@ -68,13 +71,6 @@ export function songSnippet(song: SongEntry) {
   if (existsSync(join(process.cwd(), 'public', decodeURIComponent(url)))) return url;
   console.warn(`[songs] ${song.id}: snippet ${url} isn't in public/, so no play button is shown.`);
   return undefined;
-}
-
-/** Songs grouped by school year, newest year first. */
-export async function getSongsByYear() {
-  const groups = new Map<number, SongEntry[]>();
-  for (const song of await getSongs()) groups.set(song.data.schoolYear, [...(groups.get(song.data.schoolYear) ?? []), song]);
-  return [...groups.entries()].map(([year, songs]) => ({ year, label: schoolYearLabel(year), songs }));
 }
 
 export async function getTeam() {

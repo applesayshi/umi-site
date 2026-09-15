@@ -7,17 +7,21 @@ hero:
     - src: ../../assets/uploads/img_1630.jpg
       alt: Sonic Satellite Guitar
       date: 2026-02-26
-    - src: ../../assets/uploads/harry_you_look_really_cool_in_this_picture.jpg
-      alt: Harry Guitar tuffatron
+      focus: 22% 50%
     - src: ../../assets/uploads/img_1663.jpg
       alt: DJ at sonic satellite
       date: 2026-02-26
+      focus: 50% 48%
+    - src: ../../assets/uploads/harry_you_look_really_cool_in_this_picture.jpg
+      alt: Harry Guitar tuffatron
+      focus: 50% 32%
+ribbon: []
 manifesto:
   eyebrow: About UMI
-  statement: An outlet for anyone who wants to *perform*, and doesn't know where to start.
-  body: UMI is a student-run club at UBC for musicians and music lovers. From
-    beatboxers to full bands, first-timers to regulars, we build the stages, the
-    socials and the community that turn an audience into collaborators.
+  statement: An outlet for anyone who loves *music*, and wants to *perform*
+  body: UMI is a student-run club at UBC for musicians and music lovers. From full
+    bands, first-timers, to regulars, we build the stages, the socials and the
+    community that turn an audience into collaborators.
   stats:
     - value: Monthly
       label: Themed showcases

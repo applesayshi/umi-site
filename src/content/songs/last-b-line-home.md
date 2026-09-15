@@ -1,7 +1,6 @@
 ---
 title: Last B-Line Home
 artist: Night Bus Choir
-schoolYear: 2025
 genre: Synth-pop
 cover: ../../assets/uploads/placeholders/cover-06.jpg
 coverAlt: A three-by-three grid of coloured squares
@@ -10,7 +9,6 @@ producers: Produced with the ProduceUMI team
 listenUrl: ''
 spotifyUrl: https://open.spotify.com/search/Last%20B-Line%20Home%20Night%20Bus%20Choir
 snippet: /audio/snippets/last-b-line-home.mp3
-order: 1
 sample: true
 draft: false
 ---

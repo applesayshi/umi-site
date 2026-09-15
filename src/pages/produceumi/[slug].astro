@@ -9,15 +9,14 @@ import SongCard from '../../components/produce/SongCard.astro';
 import SnippetButton from '../../components/produce/SnippetButton.astro';
 import Icon from '../../components/ui/Icon.astro';
 import produceLogo from '../../assets/brand/produceumi-logo.png';
-import { getSongs, schoolYearLabel, songSnippet } from '../../lib/content';
+import { getSongs, songSnippet } from '../../lib/content';
 import { fitStyle } from '../../lib/fit';
 
 export const getStaticPaths = (async () => {
   const songs = await getSongs();
-  return songs.map((song) => {
-    // Other songs from the same year first, then the rest.
-    const others = songs.filter((s) => s.id !== song.id);
-    const more = [...others.filter((s) => s.data.schoolYear === song.data.schoolYear), ...others.filter((s) => s.data.schoolYear !== song.data.schoolYear)].slice(0, 3);
+  return songs.map((song, index) => {
+    // The next songs in the showcase, wrapping around to the start.
+    const more = [...songs.slice(index + 1), ...songs.slice(0, index)].slice(0, 3);
     return { params: { slug: song.id }, props: { song, more } };
   });
 }) satisfies GetStaticPaths;
@@ -25,13 +24,12 @@ export const getStaticPaths = (async () => {
 const { song, more } = Astro.props;
 const { data } = song;
 const { Content } = await render(song);
-const year = schoolYearLabel(data.schoolYear);
 const snippet = songSnippet(song);
 ---
 
 <BaseLayout
   title={`${data.title} by ${data.artist}`}
-  description={data.summary ?? `${data.title} by ${data.artist}, made in UMI's ProduceUMI workshop (${year}).`}
+  description={data.summary ?? `${data.title} by ${data.artist}, made in UMI's ProduceUMI workshop.`}
   image={data.cover}
   ogImagePath="/og-produceumi.jpg"
   imageAlt={data.coverAlt}
@@ -65,7 +63,7 @@ const snippet = songSnippet(song);
         </a>
         <p class="eyebrow">
           <span class="eyebrow__index">ProduceUMI</span>
-          <span>{year}</span>
+          <span>Artist showcase</span>
           {data.sample && <span class="sample-tag">Sample</span>}
         </p>
         <h1 class="track__title display" style={fitStyle(data.title)}>

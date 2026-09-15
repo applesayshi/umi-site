@@ -51,13 +51,15 @@ const googleSubscribe = `https://calendar.google.com/calendar/r?cid=${encodeURIC
 ---
 
 <BaseLayout title="Events" description="UMI's calendar of showcases, open mics, workshops and socials at UBC, plus our archive of past shows.">
+  <!-- The club's event collage and two event photos blended behind the whole page (the hero and the events section are see-through). -->
+  <ArtBackdrop pieces={['events', 'jam', 'studio']} placement="page" strength={0.34} class="events-art" />
   <PageHero
     eyebrow="Calendar"
     index="A2"
     title="Shows & events"
     intro="Showcases, open mics, workshops and members-only nights. Add them to your own calendar and never miss a set."
+    glow={false}
   >
-    <ArtBackdrop slot="backdrop" pieces={['crowd']} strength={0.42} />
     <div class="btn-row events-subscribe">
       <a class="btn" href={webcal}>
         <Icon name="calendar-plus" />
@@ -175,6 +177,42 @@ const googleSubscribe = `https://calendar.google.com/calendar/r?cid=${encodeURIC
 </BaseLayout>
 
 <style>
+  /* Let the event art behind the page show through the hero and the events section. */
+  :global(main:has(> .art--in-page)) :global(.page-hero),
+  .events {
+    background-color: transparent;
+  }
+
+  /* Where the three pieces sit (in the order of `pieces`): the collage down the right, the jam session
+     top left, the studio lower left. Tall screens stack them down the page. */
+  :global(.art.events-art .art__blend) {
+    -webkit-mask-size: 62vmax, 56vmax, 58vmax;
+    mask-size: 62vmax, 56vmax, 58vmax;
+    -webkit-mask-position:
+      right -10vmax top -6vmax,
+      left -8vmax top 4vmax,
+      left 10vmax bottom -14vmax;
+    mask-position:
+      right -10vmax top -6vmax,
+      left -8vmax top 4vmax,
+      left 10vmax bottom -14vmax;
+  }
+
+  @media (max-aspect-ratio: 4 / 5) {
+    :global(.art.events-art .art__blend) {
+      -webkit-mask-size: 130vw, 120vw, 120vw;
+      mask-size: 130vw, 120vw, 120vw;
+      -webkit-mask-position:
+        right -45vw top -8vw,
+        left -30vw top 42%,
+        right -40vw bottom -10vw;
+      mask-position:
+        right -45vw top -8vw,
+        left -30vw top 42%,
+        right -40vw bottom -10vw;
+    }
+  }
+
   .events-subscribe {
     margin-top: var(--space-s);
   }

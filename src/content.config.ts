@@ -95,15 +95,15 @@ const gallery = defineCollection({
     })),
 });
 
-/* Songs made through ProduceUMI, UMI's songwriting and production workshop. */
+/* Songs made through ProduceUMI, UMI's songwriting and production workshop, shown as an artist showcase. */
 const songs = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/songs' }),
   schema: ({ image }) =>
     z.object({
       title: z.string(),
       artist: z.string(),
-      /** The year the school year started: 2025 means the 2025/26 cohort. */
-      schoolYear: z.number().int().min(2000).max(2100),
+      /** When the song was added in the CMS. Songs not yet placed in the ProduceUMI page's song order follow, oldest first. */
+      added: z.preprocess(blank, z.coerce.date().optional()),
       genre: optionalText,
       cover: z.preprocess(blank, image().optional()),
       coverFocus: optionalFocus,
@@ -121,7 +121,6 @@ const songs = defineCollection({
           .regex(/^\/audio\/snippets\/[^/]+\.(mp3|m4a|aac|ogg|oga|opus|wav|flac|webm)$/i, 'Upload the snippet as an audio file (MP3 works in every browser).')
           .optional(),
       ),
-      order: z.number().default(100),
       sample: z.boolean().default(false),
       draft: z.boolean().default(false),
     }),
@@ -247,6 +246,8 @@ const produce = defineCollection({
       status: z.enum(['open', 'waitlist', 'closed']),
       statusNote: optionalText,
       signupUrl: optionalUrl,
+      /** Song file names (ids) in the order the showcase lists them, arranged by dragging in the CMS. */
+      songOrder: z.preprocess((ids) => (Array.isArray(ids) ? ids.filter((id) => typeof id === 'string' && id.trim() !== '') : []), z.array(z.string())),
       steps,
       faq,
       sample: z.boolean().default(false),

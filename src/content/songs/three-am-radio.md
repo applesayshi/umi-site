@@ -1,7 +1,6 @@
 ---
 title: Three A.M. Radio
 artist: saltwater static
-schoolYear: 2026
 genre: Bedroom pop
 cover: ../../assets/uploads/placeholders/cover-01.jpg
 coverAlt: A glowing yellow sun cut by dark horizontal lines
@@ -10,7 +9,6 @@ producers: Produced with the ProduceUMI team
 listenUrl: ''
 spotifyUrl: https://open.spotify.com/search/Three%20A.M.%20Radio%20saltwater%20static
 snippet: /audio/snippets/three-am-radio.mp3
-order: 1
 sample: true
 draft: false
 ---

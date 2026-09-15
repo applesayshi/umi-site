@@ -1,16 +1,18 @@
 ---
 /**
- * The club's "Brechella" xerox art, printed into the background like a riso layer and faded into the page.
- * Decorative only. The stencils come from `npm run art` (src/assets/Art → src/assets/backdrops) and are
- * tinted with CSS masks: a fine halftone screen in the main ink plus a faint orange misprint.
+ * The club's art (the "Brechella" xerox pieces and the event photos), printed into the background like
+ * a riso layer and faded into the page. Decorative only. The stencils come from `npm run art`
+ * (src/assets/Art → src/assets/backdrops) and are tinted with CSS masks: a fine halftone screen in the main
+ * ink plus a faint orange misprint.
  *
  *   One piece: a large print on one side of a hero or section.
  *     <ArtBackdrop slot="backdrop" pieces={['disc']} />                    (in a PageHero, replacing its glow)
  *     <ArtBackdrop pieces={['guitar']} placement="section" strength={0.26} />
- *   Several pieces: one big borderless blend of all of them, fixed behind the whole page.
+ *   Fixed behind the whole page: several pieces make one big borderless blend; a single piece covers the screen.
  *     <ArtBackdrop pieces={['crowd', 'guitar', 'desk', 'disc']} placement="page" />
+ *     <ArtBackdrop pieces={['events', 'jam', 'studio']} placement="page" />
  *
- * In a section, the content after it needs `position: relative` so it paints on top. The page blend sits
+ * In a section, the content after it needs `position: relative` so it paints on top. The page art sits
  * behind everything, so the sections above it need transparent backgrounds.
  */
 import { getImage } from 'astro:assets';
@@ -18,14 +20,20 @@ import desk from '../../assets/backdrops/brechella-desk.png';
 import crowd from '../../assets/backdrops/brechella-crowd.png';
 import guitar from '../../assets/backdrops/brechella-guitar.png';
 import disc from '../../assets/backdrops/brechella-disc.png';
+import events from '../../assets/backdrops/umi-event-art.png';
+import jam from '../../assets/backdrops/umi-jam-session.png';
+import studio from '../../assets/backdrops/umi-studio.png';
 import deskSoft from '../../assets/backdrops/brechella-desk-soft.png';
 import crowdSoft from '../../assets/backdrops/brechella-crowd-soft.png';
 import guitarSoft from '../../assets/backdrops/brechella-guitar-soft.png';
 import discSoft from '../../assets/backdrops/brechella-disc-soft.png';
+import eventsSoft from '../../assets/backdrops/umi-event-art-soft.png';
+import jamSoft from '../../assets/backdrops/umi-jam-session-soft.png';
+import studioSoft from '../../assets/backdrops/umi-studio-soft.png';
 
-const ART = { desk, crowd, guitar, disc } as const;
-/** Copies with their edges faded away, so blended pieces melt into each other. */
-const SOFT = { desk: deskSoft, crowd: crowdSoft, guitar: guitarSoft, disc: discSoft } as const;
+const ART = { desk, crowd, guitar, disc, events, jam, studio } as const;
+/** Copies with their edges faded away, so blended pieces melt into each other (and into the page). */
+const SOFT = { desk: deskSoft, crowd: crowdSoft, guitar: guitarSoft, disc: discSoft, events: eventsSoft, jam: jamSoft, studio: studioSoft } as const;
 export type ArtPiece = keyof typeof ART;
 
 interface Props {
@@ -42,7 +50,9 @@ interface Props {
 }
 
 const { pieces, side = 'right', ink = 'var(--peri)', strength = 0.5, placement = 'hero', class: className } = Astro.props;
-const layout = pieces.length > 1 ? 'blend' : 'single';
+const layout = pieces.length > 1 || placement === 'page' ? 'blend' : 'single';
+/** One piece behind the whole page fills the screen instead of taking a spot in the four-piece arrangement. */
+const fill = placement === 'page' && pieces.length === 1;
 
 // Single prints use the stencil at its own size: resampling adds soft grey edges to a crisp mask,
 // which makes the file bigger rather than smaller. Soft copies are already small.
@@ -56,7 +66,7 @@ const urls = await Promise.all(
 ---
 
 <div
-  class:list={['art', `art--${layout}`, `art--${side}`, `art--in-${placement}`, className]}
+  class:list={['art', `art--${layout}`, `art--${side}`, `art--in-${placement}`, fill && 'art--fill', className]}
   aria-hidden="true"
   style={`--art-ink:${ink};--art-strength:${strength}`}
   data-art-masks={urls.join(', ')}
@@ -210,6 +220,14 @@ const urls = await Promise.all(
         right -45vw top 62%,
         left -20vw bottom -25vw;
     }
+  }
+
+  /* A single page piece covers the screen, biased towards the top of the art. Its soft copy fades at the edges. */
+  .art--fill .art__blend {
+    -webkit-mask-size: cover;
+    mask-size: cover;
+    -webkit-mask-position: center 30%;
+    mask-position: center 30%;
   }
 
   @media (prefers-reduced-motion: reduce) {

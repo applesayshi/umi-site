@@ -9,11 +9,10 @@ import CtaBand from '../../components/ui/CtaBand.astro';
 import Icon from '../../components/ui/Icon.astro';
 import GlitchStrip from '../../components/ui/GlitchStrip.astro';
 import produceLogo from '../../assets/brand/produceumi-logo.png';
-import { getPage, getSongsByYear } from '../../lib/content';
+import { getPage, getSongs } from '../../lib/content';
 import { pageHref } from '../../lib/site';
-import { dateParts } from '../../lib/dates';
 
-const [page, years] = await Promise.all([getPage('produce', 'produce'), getSongsByYear()]);
+const [page, songs] = await Promise.all([getPage('produce', 'produce'), getSongs()]);
 const { data } = page;
 const { Content } = await render(page);
 
@@ -25,11 +24,6 @@ const statusCopy = {
 const status = statusCopy[data.status];
 const signupHref = pageHref(data.signupUrl ?? `/contact/?topic=${encodeURIComponent('ProduceUMI')}`);
 const signupExternal = signupHref.startsWith('http');
-
-// UBC's school year starts in September.
-const today = dateParts(new Date());
-const thisYear = today.month >= 9 ? today.year : today.year - 1;
-const yearNote = (year: number) => (year === thisYear ? 'This year' : year === thisYear - 1 ? 'Last year' : '');
 ---
 
 <BaseLayout title="ProduceUMI" description={data.intro} ogImagePath="/og-produceumi.jpg" imageAlt="The ProduceUMI logo">
@@ -83,22 +77,14 @@ const yearNote = (year: number) => (year === thisYear ? 'This year' : year === t
         <h2 class="songs__title display" id="songs-title" data-reveal="stutter">The songs</h2>
       </header>
       {
-        years.length === 0 ? (
+        songs.length === 0 ? (
           <p class="songs__empty serif">The first songs are still in the studio. Check back soon.</p>
         ) : (
-          years.map(({ year, label, songs }) => (
-            <div class="songs__year">
-              <h3 class="songs__year-label">
-                <span class="display">{label}</span>
-                {yearNote(year) && <span class="songs__year-note">{yearNote(year)}</span>}
-              </h3>
-              <div class="songs__grid">
-                {songs.map((song, i) => (
-                  <SongCard song={song} index={i} />
-                ))}
-              </div>
-            </div>
-          ))
+          <div class="songs__grid">
+            {songs.map((song, i) => (
+              <SongCard song={song} index={i} />
+            ))}
+          </div>
         )
       }
     </div>
@@ -263,33 +249,6 @@ const yearNote = (year: number) => (year === thisYear ? 'This year' : year === t
     display: grid;
     gap: var(--space-s);
     margin-bottom: var(--space-2xl);
-  }
-
-  .songs__year + .songs__year {
-    margin-top: var(--space-3xl);
-  }
-
-  .songs__year-label {
-    display: flex;
-    align-items: baseline;
-    gap: 1rem;
-    margin-bottom: var(--space-xl);
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid var(--line-strong);
-  }
-
-  .songs__year-label .display {
-    font-size: var(--display-m);
-    font-weight: 900;
-    color: var(--peri);
-  }
-
-  .songs__year-note {
-    font-family: var(--font-mono);
-    font-size: var(--step--2);
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--fg-muted);
   }
 
   .songs__grid {

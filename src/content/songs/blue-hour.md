@@ -1,7 +1,6 @@
 ---
 title: Blue Hour
 artist: Static Bloom
-schoolYear: 2025
 genre: Indie rock
 cover: ../../assets/uploads/placeholders/cover-02.jpg
 coverAlt: Streaks of neon light smeared across a dark frame
@@ -10,7 +9,6 @@ producers: Produced with the ProduceUMI team
 listenUrl: ''
 spotifyUrl: https://open.spotify.com/search/Blue%20Hour%20Static%20Bloom
 snippet: /audio/snippets/blue-hour.mp3
-order: 3
 sample: true
 draft: false
 ---

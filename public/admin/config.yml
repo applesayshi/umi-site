@@ -146,22 +146,19 @@ collections:
   - name: songs
     label: ProduceUMI songs
     label_singular: Song
-    description: Songs made in the ProduceUMI workshop. The ProduceUMI page groups them by school year, newest first. Add a Spotify link for a Spotify button, and a short audio snippet that plays when someone clicks the record.
+    description: The ProduceUMI artist showcase. Songs appear in the order you arrange them under Pages → ProduceUMI page → Song order (drag to reorder); new songs show at the end until you place them. Add a Spotify link for a Spotify button, and a short audio snippet that plays when someone clicks the record.
     folder: src/content/songs
     editor: { preview: false }
     create: true
     identifier_field: title
     slug: '{{slug}}'
-    summary: '{{schoolYear}} · {{title}} — {{artist}}'
-    sortable_fields: [schoolYear, title, order]
-    view_groups:
-      - { label: School year, field: schoolYear }
+    summary: '{{title}} — {{artist}}'
+    sortable_fields: [added, title, artist]
     view_filters:
       - { label: Sample entries to replace, field: sample, pattern: true }
     fields:
       - { label: Song title, name: title, widget: string }
       - { label: Artist, name: artist, widget: string, hint: The student, band or group who made the song. }
-      - { label: School year (starting year), name: schoolYear, widget: number, value_type: int, hint: 'The year the school year began. Enter 2025 for 2025/26.' }
       - { label: Genre, name: genre, widget: string, required: false }
       - { label: Cover art, name: cover, widget: image, required: false, hint: Square works best, at least 1200 × 1200. Without cover art the ProduceUMI logo is shown. }
       - { label: Cover crop position, name: coverFocus, widget: focus, image: cover, crops: [{ aspect: '1 / 1', label: Record sleeve }], required: false, hint: Only matters when the art isn't square. }
@@ -183,10 +180,19 @@ collections:
         public_folder: /audio/snippets
         hint: A short clip (15–30 seconds, MP3, under 1 MB) that plays when someone clicks the record. Without one, the record just links to the song's page.
       - { label: Listen link (plays on the page), name: listenUrl, widget: string, required: false, hint: 'Optional: a SoundCloud or YouTube link for the full player on the song page. Leave blank to use the Spotify link.' }
-      - { label: Order within the year, name: order, widget: number, value_type: int, default: 100, hint: Lower numbers are listed first. }
       - { label: Sample entry, name: sample, widget: boolean, required: false, default: false }
       - { label: Hide from the site (draft), name: draft, widget: boolean, required: false, default: false }
       - { label: The story behind the song, name: body, widget: markdown, required: false }
+      - label: Added
+        name: added
+        widget: datetime
+        default: '{{now}}'
+        required: false
+        format: 'YYYY-MM-DDTHH:mm:ssZ'
+        date_format: 'MMM D, YYYY'
+        time_format: 'h:mm A'
+        picker_utc: false
+        hint: Filled in when you create the song. Songs you haven't placed in the ProduceUMI page's Song order show after the placed ones, in the order they were added.
 
   # ─── Exec team ─────────────────────────────────────────────────────────────
   - name: team
@@ -322,7 +328,7 @@ collections:
             widget: object
             fields:
               - { label: Title, name: title, widget: string }
-              - { label: Text, name: text, widget: text, hint: The three newest songs are listed underneath automatically. }
+              - { label: Text, name: text, widget: text, hint: The first three songs in the ProduceUMI page's Song order are listed underneath automatically. }
           - label: Gallery section
             name: gallery
             widget: object
@@ -357,6 +363,15 @@ collections:
               - { label: Closed, value: closed }
           - { label: Status note, name: statusNote, widget: string, required: false }
           - { label: Sign-up link, name: signupUrl, widget: string, required: false, hint: Leave empty to use the contact form. }
+          - label: Song order
+            label_singular: song
+            name: songOrder
+            widget: list
+            required: false
+            collapsed: true
+            summary: '{{fields.song}}'
+            hint: The artist showcase order. Drag songs up or down with the handle on each row; the home page shows the first three. Songs not in this list appear after these, in the order they were added. To place a new song, click Add, pick it, and drag it into position.
+            field: { label: Song, name: song, widget: relation, collection: songs, value_field: '{{slug}}', search_fields: [title, artist], display_fields: [title, artist] }
           - { label: How it works, name: steps, widget: list, fields: [{ label: Title, name: title, widget: string }, { label: Text, name: text, widget: text }] }
           - { label: FAQ, name: faq, widget: list, summary: '{{fields.question}}', fields: [{ label: Question, name: question, widget: string }, { label: Answer, name: answer, widget: text }] }
           - { label: Sample content, name: sample, widget: boolean, required: false, default: false }

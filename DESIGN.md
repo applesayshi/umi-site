@@ -74,7 +74,7 @@ Fonts are self-hosted by Astro's Fonts API with metric-matched fallbacks. Body t
 - **EventRow** (`events/EventRow.astro`): the one way upcoming events are listed, on the Events page and the home page: date block, type, title, time, venue, prices. Both "Upcoming events" lists only show the next three weeks (`lib/upcoming.ts`); later dates live on the calendar.
 - **Past shows** (`pages/events/index.astro`): one closed `<details>` dropdown under the upcoming list, styled like ExecDepartments, holding a compact one-line-per-show archive grouped by season.
 - **TicketStub** (`events/TicketStub.astro`): an event as an admission ticket with a perforated stub and barcode.
-- **ProduceUMI** (`home/ProduceUMI.astro`, `produce/SongCard.astro`, `pages/produceumi/`): the workshop's logo on navy, with its songs as record sleeves grouped by school year. Each song can have a Spotify icon and an audio snippet.
+- **ProduceUMI** (`home/ProduceUMI.astro`, `produce/SongCard.astro`, `pages/produceumi/`): the workshop's logo on navy, with its songs as record sleeves in one artist showcase, ordered by the ProduceUMI page's `songOrder` (then by when songs were added). Each song can have a Spotify icon and an audio snippet.
 - **SnippetButton** (`produce/SnippetButton.astro`, `scripts/snippets.ts`): plays a song's snippet. Over a record sleeve (`cover`) the whole record is the button and an orange badge sits in the corner; in lists it's a small round button. One shared `<audio>` means only one snippet plays at a time. While playing, the nearest `[data-snippet-root]` gets `.is-playing`: the disc slides out and spins, and a ring around the badge shows progress. Records without a snippet keep linking to the song page.
 - **Vinyl** (`ui/Vinyl.astro`): a sleeve with the record sliding out; spins only while on screen. Used for song pages.
 - **Membership** (`home/Membership.astro`): perks, paper price cards and the join button on cobalt.
@@ -108,13 +108,13 @@ The same script builds the home-screen icons and share images (`og-default.jpg`,
 
 ### Backdrop art
 
-The club's "Brechella" xerox graphics live in `src/assets/Art/` (a mixing desk, a crowd, a guitar and a scratched disc with dancers). They're small halftones, so `npm run art` (`scripts/generate-art.mjs`) upscales and re-thresholds each into a crisp white-on-transparent stencil in `src/assets/backdrops/` (the disc is cut round), plus a `-soft` copy with its edges faded out for blending. **ArtBackdrop** (`ui/ArtBackdrop.astro`) prints stencils through CSS masks as a fine halftone screen in one ink (peri on night, cobalt on paper) with a faint orange misprint, and fades them into the page. It's decorative and hidden from assistive tech, and it loads after the page (then fades in) so it never slows the real content.
+The club's "Brechella" xerox graphics live in `src/assets/Art/` (a mixing desk, a crowd, a guitar and a scratched disc with dancers). They're small halftones, so `npm run art` (`scripts/generate-art.mjs`) upscales and re-thresholds each into a crisp white-on-transparent stencil in `src/assets/backdrops/` (the disc is cut round), plus a `-soft` copy with its edges faded out for blending. The club's event photos go through the same script: the collage (`UMI event art.png`, a purple montage on a grey canvas) and two duotone photos (`IMG_9487.png`, a jam session, and `IMG_9487 2.png`, a studio control room, with their white bars trimmed off), where everything brighter than the background becomes ink. **ArtBackdrop** (`ui/ArtBackdrop.astro`) prints stencils through CSS masks as a fine halftone screen in one ink (peri on night, cobalt on paper) with a faint orange misprint, and fades them into the page. It's decorative and hidden from assistive tech, and it loads after the page (then fades in) so it never slows the real content.
 
 Where it's used:
 
 - **Gallery:** all four soft copies blended into one borderless print, fixed behind the whole page (`placement="page"`). The hero drops its glow (`glow={false}`) and the hero and album sections are see-through.
 - **About hero:** the disc, behind the photo print (replacing the glow).
-- **Events hero:** the crowd.
+- **Events:** the collage, the jam session and the studio blended behind the whole page like the Gallery, arranged by the page itself (`events-art`: collage down the right, jam session top left, studio lower left). The hero drops its glow and the hero and events sections are see-through. (A single `placement="page"` piece would cover the screen instead, via `art--fill`.)
 - **Lessons "What you can learn":** the guitar.
 - **Booking "Rent equipment":** the mixing desk, cobalt on paper.
 

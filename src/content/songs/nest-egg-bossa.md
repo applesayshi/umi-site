@@ -1,7 +1,6 @@
 ---
 title: Nest Egg Bossa
 artist: The Nest Egg Trio
-schoolYear: 2025
 genre: Jazz
 cover: ../../assets/uploads/placeholders/cover-03.jpg
 coverAlt: A halftone pattern of golden dots radiating from the centre
@@ -10,7 +9,6 @@ producers: Produced with the ProduceUMI team
 listenUrl: ''
 spotifyUrl: https://open.spotify.com/search/Nest%20Egg%20Bossa%20The%20Nest%20Egg%20Trio
 snippet: /audio/snippets/nest-egg-bossa.mp3
-order: 2
 sample: true
 draft: false
 ---
