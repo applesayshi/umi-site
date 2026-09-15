@@ -8,7 +8,6 @@ import Icon from '../components/ui/Icon.astro';
 import TornEdge from '../components/ui/TornEdge.astro';
 import Scribble from '../components/ui/Scribble.astro';
 import { getPage, getSettings } from '../lib/content';
-import { cmsPage } from '../lib/cms';
 import { pageHref } from '../lib/site';
 import { fitStyle } from '../lib/fit';
 
@@ -28,8 +27,8 @@ const rentalSteps = data.steps.map((step, i) => {
 const performerHref = pageHref(performers.requestUrl ?? `/contact/?topic=${encodeURIComponent('Booking a performer')}`);
 ---
 
-<BaseLayout title="Booking & rentals" description={data.intro} image={data.heroPhoto.src} imageAlt={data.heroPhoto.alt} edit={cmsPage('booking')}>
-  <PageHero eyebrow="Hire & borrow" index="B2" title={data.title} intro={data.intro} photo={data.heroPhoto} edit={cmsPage('booking')}>
+<BaseLayout title="Booking & rentals" description={data.intro} image={data.heroPhoto.src} imageAlt={data.heroPhoto.alt}>
+  <PageHero eyebrow="Hire & borrow" index="B2" title={data.title} intro={data.intro} photo={data.heroPhoto}>
     <div class="btn-row booking-hero__actions">
       <a class="btn" href="#performers">
         <Icon name="microphone" />

@@ -4,7 +4,6 @@ import Photo from '../ui/Photo.astro';
 import Scribble from '../ui/Scribble.astro';
 import GlitchStrip from '../ui/GlitchStrip.astro';
 import DataRail from '../ui/DataRail.astro';
-import EditPin from '../ui/EditPin.astro';
 import { fitStyle } from '../../lib/fit';
 
 interface Props {
@@ -15,18 +14,15 @@ interface Props {
   photo?: { src: ImageMetadata; alt: string; date?: Date; focus?: string };
   /** Show the glowing colour fields. Pages with their own art behind the whole page turn them off. */
   glow?: boolean;
-  /** The CMS entry holding this page's words, for the editors' pencil (see lib/cms.ts). */
-  edit?: string;
 }
 
-const { eyebrow, index, title, intro, photo, glow = true, edit } = Astro.props;
+const { eyebrow, index, title, intro, photo, glow = true } = Astro.props;
 ---
 
 <section class="page-hero theme-night" aria-labelledby="page-title">
   {/* Pages can swap the glowing colour fields for their own backdrop, e.g. <ArtBackdrop slot="backdrop" … /> */}
   {Astro.slots.has('backdrop') ? <slot name="backdrop" /> : glow && <div class="page-hero__fields" aria-hidden="true"><i></i><i></i></div>}
   <DataRail class="page-hero__rail" text={`UMI — ${eyebrow.toUpperCase()} — ${title.toUpperCase()} — AMS STUDENT NEST`} />
-  {edit && <EditPin href={edit} label="Edit page" style="--pin-top: calc(var(--header-h) + 0.75rem)" />}
 
   <div class:list={['container', 'page-hero__inner', photo && 'page-hero__inner--photo']}>
     <div class="page-hero__copy">

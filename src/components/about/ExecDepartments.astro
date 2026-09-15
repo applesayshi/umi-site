@@ -2,8 +2,6 @@
 /** Every exec, in one dropdown per department. Leads (presidents and VPs) are listed first. */
 import { Picture } from 'astro:assets';
 import Icon from '../ui/Icon.astro';
-import EditPin from '../ui/EditPin.astro';
-import { cmsEntry } from '../../lib/cms';
 import { cropStyle, type TeamEntry } from '../../lib/content';
 import { DEPARTMENTS } from '../../lib/constants';
 import { fitStyle } from '../../lib/fit';
@@ -60,7 +58,6 @@ const initials = (name: string) =>
                 <span class="person__role">
                   {person.data.role}
                   {person.data.lead && <span class="person__lead">Lead</span>}
-                  <EditPin inline href={cmsEntry(person)} label="Edit exec" />
                 </span>
                 <span class="person__name">
                   {person.data.name}

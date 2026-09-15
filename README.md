@@ -26,8 +26,6 @@ Press **Publish → Publish now** to save. The live site updates about a minute 
 
 **Every Publish rebuilds the site, and each rebuild uses Netlify credits** (15 of the free plan's 300 a month, so roughly 20 publishes a month; if the credits run out, Netlify pauses the site until the next month). For a big round of edits, batch them: in Netlify, go to *Project configuration → Build & deploy → Continuous deployment → Build settings → Configure* and set **Build status** to **Stopped builds**, then make all your edits in the CMS (they're saved to GitHub, but the live site doesn't change). When you're done, set it back to **Active builds** and press *Deploys → Trigger deploy* once. (While builds are stopped, Trigger deploy is unavailable, so reactivate first.)
 
-**Edit from the site itself:** once you've logged in at `/admin/`, the site shows yellow pencils on everything editable in that browser (visitors never see them). A pencil opens that exact event, album, song, exec or page in the CMS; a plus adds a new one. The **Editor** button in the bottom corner can hide the pencils to preview the page as visitors see it.
-
 ### Tips
 
 - **Photos:** JPG or PNG, about 2400px on the long edge, under 3 MB. The site automatically makes small, fast versions for phones. Always fill in the photo **description** so screen-reader users know what's in it.
@@ -127,9 +125,8 @@ scripts/             Asset generators (placeholders, brand, backdrop art, textur
 ### How a few things work
 
 - **Images:** content references images relative to the content file (`../../assets/uploads/photo.jpg`). Astro turns each into responsive AVIF/WebP at build time. Every content file lives exactly two folders below `src/`, which keeps those paths valid.
-- **Upcoming vs. past:** decided at build time, then corrected in the browser, so a show that ended since the last deploy won't appear as upcoming. The upcoming lists cover the next 21 days by Vancouver date (`UPCOMING_DAYS` in `src/lib/upcoming.ts`); later events are rendered hidden so the browser can roll the list forward between deploys.
+- **Upcoming vs. past:** decided at build time, then corrected in the browser, so the site stays right between deploys without rebuilding. The upcoming lists cover the next 21 days by Vancouver date (`UPCOMING_DAYS` in `src/lib/upcoming.ts`); later events are rendered hidden so the browser can roll the list forward. "Past shows" is built with every event and shows only the ones that have ended, and each event page carries both its upcoming and "This show has wrapped" states.
 - **CMS widgets:** `public/admin/widgets.js` adds two widgets to Decap: `photos` (a list with bulk upload) and `focus` (crop position). Crop positions are CSS `object-position` values stored next to each photo (`focus`, `coverFocus`, `photoFocus`) and applied with `Photo`'s `position` prop or `cropStyle()` from `src/lib/content.ts`. The widgets use Decap internals, so re-test them after upgrading Decap.
-- **Edit pencils:** `ui/EditPin.astro` and `layout/EditorBar.astro`, linking into the CMS through `src/lib/cms.ts`. `BaseLayout` shows them when the browser has a Decap login (`decap-cms-user` in localStorage); for everyone else they're `display: none`.
 - **Calendar:** `/calendar.ics` is a live feed people can subscribe to, and each event has its own `.ics` file plus a Google Calendar link.
 - **Contact form:** Netlify Forms. No server code is needed; locally the form shows its "couldn't send" fallback.
 - **Embeds:** Spotify, SoundCloud and YouTube players don't load until someone presses play, so there are no third-party scripts or cookies on page load.

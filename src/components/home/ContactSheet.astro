@@ -7,8 +7,6 @@ import type { ImageMetadata } from 'astro';
 import SectionHeading from '../ui/SectionHeading.astro';
 import Icon from '../ui/Icon.astro';
 import DateStamp from '../ui/DateStamp.astro';
-import EditPin from '../ui/EditPin.astro';
-import { cmsNew, cmsPage } from '../../lib/cms';
 import { cropStyle } from '../../lib/content';
 
 interface Frame {
@@ -18,8 +16,6 @@ interface Frame {
   album: string;
   date: Date;
   focus?: string;
-  /** The album's page in the CMS. */
-  edit: string;
 }
 
 interface Props {
@@ -39,10 +35,6 @@ const { title, intro, frames } = Astro.props;
         <span class="btn__label">All albums</span>
       </a>
     </SectionHeading>
-    <div class="edit-pins sheet__edit">
-      <EditPin inline href={cmsPage('home')} label="Edit section" />
-      <EditPin inline add href={cmsNew('gallery')} label="Add album" />
-    </div>
   </div>
 
   <div class="sheet__strip" data-reveal="fade">
@@ -76,7 +68,6 @@ const { title, intro, frames } = Astro.props;
                 </svg>
               )}
             </a>
-            <EditPin href={frame.edit} label="Edit album" style="--pin-top: 0.5rem; --pin-right: 0.5rem" />
           </li>
         ))
       }
@@ -181,12 +172,7 @@ const { title, intro, frames } = Astro.props;
     pointer-events: none;
   }
 
-  .sheet__edit {
-    margin-top: var(--space-s);
-  }
-
   .sheet__frame {
-    position: relative;
     flex: none;
     width: clamp(15rem, 26vw, 24rem);
     scroll-snap-align: start;

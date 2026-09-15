@@ -82,7 +82,6 @@ Fonts are self-hosted by Astro's Fonts API with metric-matched fallbacks. Body t
 - **ContactSheet** (`home/ContactSheet.astro`): a 35mm film strip of photo frames with sprocket holes.
 - **PhotoRibbon** (`home/PhotoRibbon.astro`): an endless, slowly drifting row of tilted prints under the home hero. Decorative, pauses on hover or with its button, moves only while on screen, and stays still for reduced motion.
 - **Menu**: a full-screen "tracklist" (Side A / Side B) built on `<dialog>`.
-- **EditPin / EditorBar** (`ui/EditPin.astro`, `layout/EditorBar.astro`): for editors logged in to the CMS in this browser only. Sun-yellow pencils (mint plus for "add") float in a section's top-right corner or sit inline in a row; the label slides out on hover or focus. The Editor button folds away in the bottom-left corner. For visitors both are `display: none`, so they never affect layout. Keep pencils out of links (a pencil inside a card link is invalid HTML): put them beside the link in the card's positioned parent.
 
 ## Motion rules
 

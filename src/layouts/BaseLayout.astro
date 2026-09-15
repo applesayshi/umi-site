@@ -5,7 +5,6 @@ import { Font, getImage } from 'astro:assets';
 import Header from '../components/layout/Header.astro';
 import Footer from '../components/layout/Footer.astro';
 import AnnouncementBar from '../components/layout/AnnouncementBar.astro';
-import EditorBar from '../components/layout/EditorBar.astro';
 import SegmentSprite from '../components/ui/SegmentSprite.astro';
 import { getSettings } from '../lib/content';
 import { hash } from '../lib/random';
@@ -21,8 +20,6 @@ interface Props {
   noindex?: boolean;
   /** Structured data objects rendered as JSON-LD. */
   jsonLd?: Record<string, unknown>[];
-  /** The CMS entry behind this page, for the editing bar (see lib/cms.ts). */
-  edit?: string;
 }
 
 const settings = await getSettings();
@@ -35,7 +32,6 @@ const {
   type = 'website',
   noindex = false,
   jsonLd = [],
-  edit,
 } = Astro.props;
 
 const site = Astro.site ?? new URL('https://www.ubcmusicinitiative.com');
@@ -83,11 +79,6 @@ const organization = {
         if (announceKey && localStorage.getItem('umi-announcement-dismissed') === announceKey) {
           document.documentElement.dataset.announcement = 'dismissed';
         }
-        // Logged in to the CMS (/admin) in this browser: show the edit pencils, unless they've been hidden.
-        if (localStorage.getItem('decap-cms-user')) {
-          document.documentElement.classList.add('is-cms-editor');
-          if (localStorage.getItem('umi-edit-pins') === 'off') document.documentElement.classList.add('edit-pins-off');
-        }
       } catch (e) {}
     </script>
 
@@ -127,7 +118,6 @@ const organization = {
       <slot />
     </main>
     <Footer />
-    <EditorBar edit={edit} />
     <div class="grain" aria-hidden="true"></div>
 
     <script>

@@ -10,7 +10,6 @@ import ContactSheet from '../components/home/ContactSheet.astro';
 import SideB from '../components/home/SideB.astro';
 import Membership from '../components/home/Membership.astro';
 import { getAlbums, getPage, getSettings, getSongs, getUpcomingEvents } from '../lib/content';
-import { cmsEntry, cmsPage } from '../lib/cms';
 import { pageHref } from '../lib/site';
 
 const [home, join, produce, lessons, booking, sponsors, about, settings, upcoming, songs, albums] = await Promise.all([
@@ -37,7 +36,7 @@ for (let i = 0; i < 4 && frames.length < 10; i++) {
   for (const album of homeAlbums) {
     const photo = album.data.photos[i];
     if (photo && frames.length < 10) {
-      frames.push({ src: photo.src, alt: photo.alt, href: `/gallery/${album.id}/`, album: album.data.title, date: album.data.date, focus: photo.focus, edit: cmsEntry(album) });
+      frames.push({ src: photo.src, alt: photo.alt, href: `/gallery/${album.id}/`, album: album.data.title, date: album.data.date, focus: photo.focus });
     }
   }
 }
@@ -105,7 +104,7 @@ const tracks = [
 ];
 ---
 
-<BaseLayout title={h.seoTitle} edit={cmsPage('home')}>
+<BaseLayout title={h.seoTitle}>
   <Hero timecode={h.hero.timecode} subtitle={h.hero.subtitle} photos={h.hero.photos} upcoming={upcoming} />
   {ribbon.length > 0 && <PhotoRibbon images={ribbon} />}
   <Manifesto

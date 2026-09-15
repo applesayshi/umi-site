@@ -1,8 +1,6 @@
 ---
 /** Membership on the home page: what it costs, what you get, and how to join. */
 import Icon from '../ui/Icon.astro';
-import EditPin from '../ui/EditPin.astro';
-import { cmsPage } from '../../lib/cms';
 import { fitStyle } from '../../lib/fit';
 
 interface Props {
@@ -19,7 +17,6 @@ const { title, text, term, prices, benefits, membershipUrl } = Astro.props;
 
 <section class="member theme-cobalt" aria-labelledby="member-title">
   <div class="member__screen" aria-hidden="true"></div>
-  <EditPin href={cmsPage('home')} label="Edit section" />
   <div class="container member__inner">
     <div class="member__copy">
       <p class="eyebrow" data-reveal="fade"><span class="eyebrow__index">B2</span><span>Membership</span></p>
@@ -58,7 +55,6 @@ const { title, text, term, prices, benefits, membershipUrl } = Astro.props;
     </div>
 
     <div class="member__prices" data-reveal>
-      <EditPin href={cmsPage('join')} label="Edit prices & perks" style="--pin-top: -0.6rem; --pin-right: 0" />
       <h3 class="member__prices-title">Prices</h3>
       <ul class="member__cards" role="list">
         {
@@ -150,7 +146,6 @@ const { title, text, term, prices, benefits, membershipUrl } = Astro.props;
   }
 
   .member__prices {
-    position: relative;
     display: grid;
     gap: var(--space-s);
     width: min(100%, 32rem);

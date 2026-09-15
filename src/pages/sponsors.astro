@@ -7,8 +7,6 @@ import Icon from '../components/ui/Icon.astro';
 import TornEdge from '../components/ui/TornEdge.astro';
 import Scribble from '../components/ui/Scribble.astro';
 import { getPage, getSettings, getSponsors } from '../lib/content';
-import { cmsEntry, cmsNew, cmsPage } from '../lib/cms';
-import EditPin from '../components/ui/EditPin.astro';
 import { fitStyle } from '../lib/fit';
 
 const [page, sponsors, settings] = await Promise.all([getPage('sponsorsPage', 'sponsors'), getSponsors(), getSettings()]);
@@ -17,8 +15,8 @@ const tierLabels = { headliner: 'Headliner', support: 'Support', opener: 'Opener
 const contactHref = `/contact/?topic=${encodeURIComponent('Sponsorship')}`;
 ---
 
-<BaseLayout title="Sponsors & partners" description={data.intro} image={data.heroPhoto.src} imageAlt={data.heroPhoto.alt} edit={cmsPage('sponsors')}>
-  <PageHero eyebrow="Partner with UMI" index="B3" title={data.title} intro={data.intro} photo={data.heroPhoto} edit={cmsPage('sponsors')}>
+<BaseLayout title="Sponsors & partners" description={data.intro} image={data.heroPhoto.src} imageAlt={data.heroPhoto.alt}>
+  <PageHero eyebrow="Partner with UMI" index="B3" title={data.title} intro={data.intro} photo={data.heroPhoto}>
     <div class="btn-row sponsors-hero__actions">
       <a class="btn" href={contactHref}>
         <Icon name="handshake" />
@@ -33,9 +31,6 @@ const contactHref = `/contact/?topic=${encodeURIComponent('Sponsorship')}`;
       <header class="partners__head">
         <p class="eyebrow"><span class="eyebrow__index">01</span><span>Thank you</span></p>
         <h2 class="sponsors__title display" id="partners-title" data-reveal="stutter">Our partners</h2>
-        <div class="edit-pins">
-          <EditPin inline add href={cmsNew('sponsors')} label="Add sponsor" />
-        </div>
       </header>
       <ul class="wall" role="list">
         {
@@ -61,7 +56,6 @@ const contactHref = `/contact/?topic=${encodeURIComponent('Sponsorship')}`;
                 ) : (
                   <div class="wall__card">{inner}</div>
                 )}
-                <EditPin href={cmsEntry(sponsor)} label="Edit sponsor" style="--pin-top: 0.5rem; --pin-right: 0.5rem" />
               </li>
             );
           })
@@ -180,7 +174,6 @@ const contactHref = `/contact/?topic=${encodeURIComponent('Sponsorship')}`;
   }
 
   .wall__item {
-    position: relative;
     border-right: 1px solid var(--line-strong);
     border-bottom: 1px solid var(--line-strong);
   }

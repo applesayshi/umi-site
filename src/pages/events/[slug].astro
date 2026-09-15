@@ -4,8 +4,6 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Photo from '../../components/ui/Photo.astro';
 import Icon from '../../components/ui/Icon.astro';
 import TicketStub from '../../components/events/TicketStub.astro';
-import EditPin from '../../components/ui/EditPin.astro';
-import { cmsEntry } from '../../lib/cms';
 import { EVENT_TYPE_LABELS, eventEnd, getAlbumForEvent, getEvents, getSettings } from '../../lib/content';
 import { longDate, timeRange } from '../../lib/dates';
 import { googleCalendarUrl } from '../../lib/ics';
@@ -29,7 +27,9 @@ const pageUrl = new URL(`/events/${event.id}/`, site).href;
 const location = [data.venue, data.address].filter(Boolean).join(', ');
 const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location || settings.office.building)}`;
 const icsEvent = { uid: `${event.id}@ubcmusicinitiative.com`, title: data.title, start: data.start, end, description: data.summary, location, url: pageUrl };
-const more = allEvents.filter((e) => e.id !== event.id && eventEnd(e) > new Date()).slice(0, 3);
+// Three more upcoming events, plus a few spares the page script can bring in as these end.
+const MORE = 3;
+const more = allEvents.filter((e) => e.id !== event.id && eventEnd(e) > new Date()).slice(0, MORE + 3);
 
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -52,8 +52,8 @@ const jsonLd = {
 };
 ---
 
-<BaseLayout title={data.title} description={data.summary} image={data.cover} imageAlt={data.coverAlt} jsonLd={[jsonLd]} edit={cmsEntry(event)}>
-  <article class="event theme-night">
+<BaseLayout title={data.title} description={data.summary} image={data.cover} imageAlt={data.coverAlt} jsonLd={[jsonLd]}>
+  <article class="event theme-night" data-event-ends={end.toISOString()}>
     <div class="container event__inner">
       <div class="event__copy">
         <a class="link-arrow event__back" href="/events/">
@@ -62,9 +62,9 @@ const jsonLd = {
         </a>
         <p class="eyebrow">
           <span class="eyebrow__index">{EVENT_TYPE_LABELS[data.type]}</span>
-          <span>{isPast ? 'Past show' : 'Upcoming'}</span>
+          <span data-show-when="upcoming" hidden={isPast}>Upcoming</span>
+          <span data-show-when="past" hidden={!isPast}>Past show</span>
           {data.sample && <span class="sample-tag">Sample</span>}
-          <EditPin inline href={cmsEntry(event)} label="Edit event" />
         </p>
         <h1 class="event__title display" style={fitStyle(data.title)}>
           <span class="event__title-inner">{data.title}</span>
@@ -109,61 +109,57 @@ const jsonLd = {
           }
         </dl>
 
-        {
-          isPast ? (
-            <div class="event__ended">
-              <p class="serif">This show has wrapped.</p>
-              <div class="btn-row">
-                {album && (
-                  <a class="btn" href={`/gallery/${album.id}/`}>
-                    <Icon name="images" />
-                    <span class="btn__label">See the photos</span>
-                  </a>
-                )}
-                <a class="btn btn--ghost" href="/events/">
-                  <span class="btn__label">What's next</span>
-                </a>
-              </div>
-            </div>
-          ) : (
-            <div class="event__actions">
-              <div class="btn-row">
-                {data.ticketUrl && (
-                  <a class="btn" href={data.ticketUrl} target="_blank" rel="noopener noreferrer">
-                    <Icon name="ticket" />
-                    <span class="btn__label">Get tickets</span>
-                  </a>
-                )}
-                {data.performerUrl && (
-                  <a class="btn btn--hot" href={data.performerUrl} target="_blank" rel="noopener noreferrer">
-                    <Icon name="microphone" />
-                    <span class="btn__label">Sign up to perform</span>
-                  </a>
-                )}
-                {!data.ticketUrl && settings.links.membership && (
-                  <a class="btn" href="/join/">
-                    <span class="btn__label">Members get in free</span>
-                    <Icon name="arrow-right" />
-                  </a>
-                )}
-              </div>
-              <div class="event__secondary">
-                <a class="link-arrow" href={googleCalendarUrl(icsEvent)} target="_blank" rel="noopener noreferrer">
-                  <Icon name="calendar-plus" />
-                  <span>Google Calendar</span>
-                </a>
-                <a class="link-arrow" href={`/events/${event.id}.ics`} download>
-                  <Icon name="calendar-plus" />
-                  <span>Apple / Outlook (.ics)</span>
-                </a>
-                <button class="link-arrow event__share" type="button" data-share data-url={pageUrl} data-title={data.title}>
-                  <Icon name="share" />
-                  <span data-share-label>Share</span>
-                </button>
-              </div>
-            </div>
-          )
-        }
+        {/* Both states are built; the page script shows the right one, so a show that ends between deploys still wraps up. */}
+        <div class="event__ended" data-show-when="past" hidden={!isPast}>
+          <p class="serif">This show has wrapped.</p>
+          <div class="btn-row">
+            {album && (
+              <a class="btn" href={`/gallery/${album.id}/`}>
+                <Icon name="images" />
+                <span class="btn__label">See the photos</span>
+              </a>
+            )}
+            <a class="btn btn--ghost" href="/events/">
+              <span class="btn__label">What's next</span>
+            </a>
+          </div>
+        </div>
+        <div class="event__actions" data-show-when="upcoming" hidden={isPast}>
+          <div class="btn-row">
+            {data.ticketUrl && (
+              <a class="btn" href={data.ticketUrl} target="_blank" rel="noopener noreferrer">
+                <Icon name="ticket" />
+                <span class="btn__label">Get tickets</span>
+              </a>
+            )}
+            {data.performerUrl && (
+              <a class="btn btn--hot" href={data.performerUrl} target="_blank" rel="noopener noreferrer">
+                <Icon name="microphone" />
+                <span class="btn__label">Sign up to perform</span>
+              </a>
+            )}
+            {!data.ticketUrl && settings.links.membership && (
+              <a class="btn" href="/join/">
+                <span class="btn__label">Members get in free</span>
+                <Icon name="arrow-right" />
+              </a>
+            )}
+          </div>
+          <div class="event__secondary">
+            <a class="link-arrow" href={googleCalendarUrl(icsEvent)} target="_blank" rel="noopener noreferrer">
+              <Icon name="calendar-plus" />
+              <span>Google Calendar</span>
+            </a>
+            <a class="link-arrow" href={`/events/${event.id}.ics`} download>
+              <Icon name="calendar-plus" />
+              <span>Apple / Outlook (.ics)</span>
+            </a>
+            <button class="link-arrow event__share" type="button" data-share data-url={pageUrl} data-title={data.title}>
+              <Icon name="share" />
+              <span data-share-label>Share</span>
+            </button>
+          </div>
+        </div>
       </div>
 
       {
@@ -220,14 +216,14 @@ const jsonLd = {
 
     {
       more.length > 0 && (
-        <section class="event__more" aria-labelledby="more-title">
+        <section class="event__more" aria-labelledby="more-title" data-more-events data-limit={MORE}>
           <div class="container">
             <h2 class="display event__more-title" id="more-title">
               More upcoming events
             </h2>
             <ul class="event__more-list" role="list">
               {more.map((e, i) => (
-                <li>
+                <li data-more-end={eventEnd(e).toISOString()} hidden={i >= MORE}>
                   <TicketStub event={e} index={i} />
                 </li>
               ))}
@@ -429,6 +425,27 @@ const jsonLd = {
 </style>
 
 <script>
+  // The page was built at the last deploy. If the show has ended since, swap the ticket and calendar
+  // buttons for "This show has wrapped", and keep "More upcoming events" to shows that haven't ended.
+  const now = new Date();
+  const article = document.querySelector<HTMLElement>('[data-event-ends]');
+  if (article) {
+    const state = new Date(article.dataset.eventEnds ?? '') <= now ? 'past' : 'upcoming';
+    article.querySelectorAll<HTMLElement>('[data-show-when]').forEach((el) => {
+      el.hidden = el.dataset.showWhen !== state;
+    });
+  }
+  document.querySelectorAll<HTMLElement>('[data-more-events]').forEach((section) => {
+    const limit = Number(section.dataset.limit ?? 3);
+    const rows = [...section.querySelectorAll<HTMLElement>('[data-more-end]')].filter((row) => {
+      const ended = new Date(row.dataset.moreEnd ?? '') <= now;
+      if (ended) row.remove();
+      return !ended;
+    });
+    rows.forEach((row, i) => (row.hidden = i >= limit));
+    section.hidden = rows.length === 0;
+  });
+
   document.querySelectorAll<HTMLButtonElement>('[data-share]').forEach((button) => {
     const label = button.querySelector('[data-share-label]');
     button.addEventListener('click', async () => {

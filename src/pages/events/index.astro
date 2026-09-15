@@ -6,8 +6,6 @@ import Calendar from '../../components/events/Calendar.astro';
 import EventRow from '../../components/events/EventRow.astro';
 import SectionHeading from '../../components/ui/SectionHeading.astro';
 import Icon from '../../components/ui/Icon.astro';
-import EditPin from '../../components/ui/EditPin.astro';
-import { cmsCollection, cmsEntry, cmsNew } from '../../lib/cms';
 import { EVENT_TYPE_LABELS, getAlbums, getEvents, eventEnd, isInUpcomingWindow, type EventEntry } from '../../lib/content';
 import { dateParts, dayKey, mediumDate, time } from '../../lib/dates';
 import type { CalendarEvent } from '../../lib/calendar';
@@ -21,13 +19,15 @@ const soonCount = upcoming.filter((u) => u.soon).length;
 const past = events.filter((e) => eventEnd(e) <= now).reverse();
 const albumFor = (id: string) => albums.find((a) => a.data.event?.id === id);
 
-// Group past events by UBC academic year (September to August), newest first.
-const seasons = new Map<string, EventEntry[]>();
-for (const e of past) {
+// "Past shows" holds every event, newest first, grouped by UBC academic year (September to August).
+// Events that haven't ended are hidden; the page script lets each one in once it ends, so shows move
+// into the archive by themselves between deploys.
+const seasons = new Map<string, { event: EventEntry; ended: boolean }[]>();
+for (const e of [...events].reverse()) {
   const { year, month } = dateParts(e.data.start);
   const startYear = month >= 9 ? year : year - 1;
   const label = `${startYear}/${String(startYear + 1).slice(-2)}`;
-  seasons.set(label, [...(seasons.get(label) ?? []), e]);
+  seasons.set(label, [...(seasons.get(label) ?? []), { event: e, ended: eventEnd(e) <= now }]);
 }
 const pastYears = [...new Set([past.at(-1), past[0]].filter((e) => e !== undefined).map((e) => dateParts(e.data.start).year))];
 const pastSummary = `${past.length} ${past.length === 1 ? 'event' : 'events'} · ${pastYears.join('–')}`;
@@ -50,7 +50,7 @@ const webcal = `webcal://${feedPath.host}${feedPath.pathname}`;
 const googleSubscribe = `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(webcal)}`;
 ---
 
-<BaseLayout title="Events" description="UMI's calendar of showcases, open mics, workshops and socials at UBC, plus our archive of past shows." edit={cmsCollection('events')}>
+<BaseLayout title="Events" description="UMI's calendar of showcases, open mics, workshops and socials at UBC, plus our archive of past shows.">
   <PageHero
     eyebrow="Calendar"
     index="A2"
@@ -92,10 +92,6 @@ const googleSubscribe = `https://calendar.google.com/calendar/r?cid=${encodeURIC
 
       <section class="events__block" aria-labelledby="upcoming-title">
         <SectionHeading eyebrow="Next 3 weeks" title="Upcoming events" id="upcoming-title" size="m" />
-        <div class="edit-pins events__edit">
-          <EditPin inline add href={cmsNew('events')} label="Add event" />
-          <EditPin inline href={cmsCollection('events')} label="All events in the CMS" />
-        </div>
         <ol class="events__list" role="list" data-list="upcoming" hidden={soonCount === 0}>
           {
             upcoming.map(({ event, soon }, i) => (
@@ -109,8 +105,8 @@ const googleSubscribe = `https://calendar.google.com/calendar/r?cid=${encodeURIC
       </section>
 
       {
-        past.length > 0 && (
-          <section class="events__block events__block--past" aria-labelledby="past-title">
+        events.length > 0 && (
+          <section class="events__block events__block--past" aria-labelledby="past-title" data-past-block hidden={past.length === 0}>
             <h2 class="visually-hidden" id="past-title">Past shows</h2>
             <details class="past" id="past" data-past data-reveal>
               <summary class="past__summary">
@@ -126,15 +122,21 @@ const googleSubscribe = `https://calendar.google.com/calendar/r?cid=${encodeURIC
               </summary>
               <div class="past__body">
                 {[...seasons.entries()].map(([season, list]) => (
-                  <div class="past__season" data-season>
+                  <div class="past__season" data-season hidden={!list.some((item) => item.ended)}>
                     <h3 class="past__season-label">
                       <span class="serif">{season}</span> season
                     </h3>
                     <ol class="past__list" role="list">
-                      {list.map((event) => {
+                      {list.map(({ event, ended }) => {
                         const album = albumFor(event.id);
                         return (
-                          <li class={`past__item type-${event.data.type}`} data-event-type={event.data.type}>
+                          <li
+                            class={`past__item type-${event.data.type}`}
+                            data-event-type={event.data.type}
+                            data-event-day={dayKey(event.data.start)}
+                            data-event-end={eventEnd(event).toISOString()}
+                            hidden={!ended}
+                          >
                             <time class="past__date" datetime={event.data.start.toISOString()}>
                               {mediumDate(event.data.start)}
                             </time>
@@ -146,7 +148,6 @@ const googleSubscribe = `https://calendar.google.com/calendar/r?cid=${encodeURIC
                                 <span class="past__dot" aria-hidden="true" />
                                 {EVENT_TYPE_LABELS[event.data.type]} · {event.data.venue}
                                 {event.data.sample && <span class="sample-tag">Sample</span>}
-                                <EditPin inline href={cmsEntry(event)} label="Edit event" />
                               </span>
                             </span>
                             {album && (
@@ -223,10 +224,6 @@ const googleSubscribe = `https://calendar.google.com/calendar/r?cid=${encodeURIC
 
   .events__block + .events__block {
     margin-top: var(--space-3xl);
-  }
-
-  .events__edit {
-    margin-bottom: var(--space-m);
   }
 
   .events__list {
@@ -501,6 +498,20 @@ const googleSubscribe = `https://calendar.google.com/calendar/r?cid=${encodeURIC
     upcomingList?.querySelectorAll<HTMLElement>('[data-event-end]').forEach((row) => {
       if (!inUpcomingWindow(row.dataset.eventDay ?? '', row.dataset.eventEnd ?? '', now, until)) row.remove();
     });
+
+    // "Past shows" was built holding every event: keep the ones that have ended by now (including any
+    // that ended since the last deploy) and drop the rest, then recount.
+    past?.querySelectorAll<HTMLElement>('[data-event-end]').forEach((item) => {
+      if (new Date(item.dataset.eventEnd ?? '') > now) item.remove();
+    });
+    const archived = [...(past?.querySelectorAll<HTMLElement>('[data-event-day]') ?? [])];
+    const pastBlock = root.querySelector<HTMLElement>('[data-past-block]');
+    if (pastBlock) pastBlock.hidden = archived.length === 0;
+    if (pastCount && archived.length > 0) {
+      const years = archived.map((item) => Number(item.dataset.eventDay?.slice(0, 4)));
+      const span = [...new Set([Math.min(...years), Math.max(...years)])].join('–');
+      pastCount.dataset.all = `${archived.length} ${archived.length === 1 ? 'event' : 'events'} · ${span}`;
+    }
 
     const apply = (filter: string) => {
       root.dataset.filter = filter;

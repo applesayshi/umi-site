@@ -7,8 +7,6 @@ import { Picture } from 'astro:assets';
 import produceLogo from '../../assets/brand/produceumi-logo.png';
 import Icon from '../ui/Icon.astro';
 import SnippetButton from './SnippetButton.astro';
-import EditPin from '../ui/EditPin.astro';
-import { cmsEntry } from '../../lib/cms';
 import { cropStyle, schoolYearLabel, songSnippet, type SongEntry } from '../../lib/content';
 import { fitStyle } from '../../lib/fit';
 
@@ -46,7 +44,6 @@ const snippet = songSnippet(song);
       <span class="song__artist">
         {data.artist}
         {data.sample && <span class="sample-tag">Sample</span>}
-        <EditPin inline href={cmsEntry(song)} label="Edit song" />
       </span>
     </div>
     {

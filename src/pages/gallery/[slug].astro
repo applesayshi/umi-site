@@ -6,8 +6,6 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Lightbox from '../../components/gallery/Lightbox.astro';
 import DateStamp from '../../components/ui/DateStamp.astro';
 import Icon from '../../components/ui/Icon.astro';
-import EditPin from '../../components/ui/EditPin.astro';
-import { cmsEntry } from '../../lib/cms';
 import { cropStyle, getAlbums } from '../../lib/content';
 import { longDate } from '../../lib/dates';
 import { fitStyle } from '../../lib/fit';
@@ -35,7 +33,7 @@ const full = await Promise.all(
 );
 ---
 
-<BaseLayout title={`${data.title} photos`} description={`${data.photos.length} photos from ${data.title}, ${longDate(data.date)}.`} image={data.cover} imageAlt={data.coverAlt} edit={cmsEntry(album)}>
+<BaseLayout title={`${data.title} photos`} description={`${data.photos.length} photos from ${data.title}, ${longDate(data.date)}.`} image={data.cover} imageAlt={data.coverAlt}>
   <section class="album-page theme-night" aria-labelledby="album-title">
     <div class="container">
       <header class="album-page__head">
@@ -47,7 +45,6 @@ const full = await Promise.all(
           <span class="eyebrow__index">Roll</span>
           <span>{longDate(data.date)}</span>
           {data.sample && <span class="sample-tag">Sample</span>}
-          <EditPin inline href={cmsEntry(album)} label="Edit album & photos" />
         </p>
         <h1 class="album-page__title display" id="album-title" style={fitStyle(data.title)}>
           <span class="album-page__title-inner">{data.title}</span>

@@ -2,9 +2,7 @@
 import { Image } from 'astro:assets';
 import Icon from '../ui/Icon.astro';
 import GlitchStrip from '../ui/GlitchStrip.astro';
-import EditPin from '../ui/EditPin.astro';
 import umiLogo from '../../assets/brand/umi-logo.png';
-import { cmsSettings } from '../../lib/cms';
 import { getSettings } from '../../lib/content';
 import { fullNav } from '../../lib/site';
 
@@ -20,7 +18,6 @@ const socials = [
 ---
 
 <footer class="site-footer theme-night">
-  <EditPin href={cmsSettings} label="Edit contact, socials & links" />
   <div class="container">
     <div class="site-footer__cta">
       <div>

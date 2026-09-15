@@ -10,7 +10,6 @@ import TornEdge from '../components/ui/TornEdge.astro';
 import UiWindow from '../components/ui/UiWindow.astro';
 import Scribble from '../components/ui/Scribble.astro';
 import { getPage, getSettings } from '../lib/content';
-import { cmsPage } from '../lib/cms';
 import { pageHref } from '../lib/site';
 import { fitStyle } from '../lib/fit';
 import type { IconName } from '../lib/icons';
@@ -39,8 +38,8 @@ const iconFor = (instrument: string): IconName => {
 const contactFallback = (topic: string) => `/contact/?topic=${encodeURIComponent(topic)}`;
 ---
 
-<BaseLayout title="Lessons" description={data.intro} image={data.heroPhoto.src} imageAlt={data.heroPhoto.alt} edit={cmsPage('lessons')}>
-  <PageHero eyebrow="Learn" index="B1" title={data.title} intro={data.intro} photo={data.heroPhoto} edit={cmsPage('lessons')}>
+<BaseLayout title="Lessons" description={data.intro} image={data.heroPhoto.src} imageAlt={data.heroPhoto.alt}>
+  <PageHero eyebrow="Learn" index="B1" title={data.title} intro={data.intro} photo={data.heroPhoto}>
     <UiWindow title="lessons_status.txt" class="lessons__status">
       <p class={`status status--${status.tone}`}>
         <span class="status__light" aria-hidden="true"></span>

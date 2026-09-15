@@ -7,9 +7,7 @@ import Countdown from '../ui/Countdown.astro';
 import Scribble from '../ui/Scribble.astro';
 import GlitchStrip from '../ui/GlitchStrip.astro';
 import DataRail from '../ui/DataRail.astro';
-import EditPin from '../ui/EditPin.astro';
 import umiLogo from '../../assets/brand/umi-logo.png';
-import { cmsPage } from '../../lib/cms';
 import type { EventEntry } from '../../lib/content';
 
 interface Props {
@@ -28,7 +26,6 @@ const [first, second, third] = photos;
   <div class="hero__fields" aria-hidden="true"><i></i><i></i><i></i></div>
   <div class="hero__shade" aria-hidden="true"></div>
   <DataRail class="hero__rail" />
-  <EditPin href={cmsPage('home')} label="Edit hero" style="--pin-top: calc(var(--header-h) + 0.75rem)" />
 
   <div class="hero__inner container">
     <div class="hero__copy">
@@ -110,10 +107,12 @@ const [first, second, third] = photos;
               src={third.src}
               alt={third.alt}
               position={third.focus}
-              sizes="(min-width: 1024px) 12vw, 30vw"
+              sizes="(min-width: 1024px) 15vw, 34vw"
               widths={[240, 360, 480]}
               aspect="1 / 1"
-              tilt={-9}
+              tape="top"
+              tilt={-7}
+              frame="print"
             />
           </div>
         )
@@ -341,9 +340,9 @@ const [first, second, third] = photos;
   }
 
   .hero__print--3 {
-    top: 4%;
-    left: 8%;
-    width: 26%;
+    top: 3%;
+    left: 6%;
+    width: 32%;
     z-index: 1;
     animation: print-drop 1.1s var(--ease-out) both 650ms;
   }
@@ -442,8 +441,8 @@ const [first, second, third] = photos;
 
     .hero__print--3 {
       top: 0;
-      left: 6%;
-      width: 28%;
+      left: 4%;
+      width: 34%;
     }
 
     :global(.hero__countdown) {

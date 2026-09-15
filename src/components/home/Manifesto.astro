@@ -4,8 +4,6 @@ import Photo from '../ui/Photo.astro';
 import Icon from '../ui/Icon.astro';
 import TornEdge from '../ui/TornEdge.astro';
 import Scribble from '../ui/Scribble.astro';
-import EditPin from '../ui/EditPin.astro';
-import { cmsPage } from '../../lib/cms';
 import { fitStyle } from '../../lib/fit';
 
 interface Props {
@@ -29,7 +27,6 @@ const plain = statement.replace(/\*/g, '');
 
 <section class="manifesto theme-paper texture-paper" id="about-umi" aria-labelledby="manifesto-title">
   <TornEdge position="top" seed="manifesto-top" />
-  <EditPin href={cmsPage('home')} label="Edit about section" style="--pin-top: 2.5rem" />
   <Scribble variant="vine" class="manifesto__vine" color="var(--ink)" width={2.2} />
   <div class="manifesto__inner container">
     <p class="eyebrow manifesto__eyebrow"><span class="eyebrow__index">A1</span><span>{eyebrow}</span></p>

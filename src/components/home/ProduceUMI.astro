@@ -3,9 +3,7 @@
 import { Picture } from 'astro:assets';
 import Icon from '../ui/Icon.astro';
 import SnippetButton from '../produce/SnippetButton.astro';
-import EditPin from '../ui/EditPin.astro';
 import produceLogo from '../../assets/brand/produceumi-logo.png';
-import { cmsEntry, cmsNew, cmsPage } from '../../lib/cms';
 import { cropStyle, schoolYearLabel, songSnippet, type SongEntry } from '../../lib/content';
 import { fitStyle } from '../../lib/fit';
 
@@ -31,10 +29,6 @@ const external = signupHref.startsWith('http');
       <p class="eyebrow" data-reveal="fade"><span class="eyebrow__index">A3</span><span>A UMI workshop</span></p>
       <h2 class="produce__title display" id="produce-title" data-reveal="stutter" style={fitStyle(title)}>{title}</h2>
       <p class="produce__text" data-reveal style="--i:1">{text}</p>
-      <div class="edit-pins">
-        <EditPin inline href={cmsPage('home')} label="Edit section" />
-        <EditPin inline add href={cmsNew('songs')} label="Add song" />
-      </div>
 
       {
         songs.length > 0 && (
@@ -58,7 +52,6 @@ const external = signupHref.startsWith('http');
                       {song.data.artist}
                       <span class="produce__song-year">{schoolYearLabel(song.data.schoolYear)}</span>
                       {song.data.sample && <span class="sample-tag">Sample</span>}
-                      <EditPin inline href={cmsEntry(song)} label="Edit song" />
                     </span>
                   </span>
                   <span class="produce__song-actions">

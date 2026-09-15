@@ -1,8 +1,6 @@
 ---
 import Photo from '../ui/Photo.astro';
 import Icon from '../ui/Icon.astro';
-import EditPin from '../ui/EditPin.astro';
-import { cmsEntry } from '../../lib/cms';
 import type { TeamEntry } from '../../lib/content';
 import { seeded, between } from '../../lib/random';
 import { fitStyle } from '../../lib/fit';
@@ -25,7 +23,6 @@ const initials = data.name
 ---
 
 <article class="exec" data-reveal style={`--i:${index % 4}`}>
-  <EditPin href={cmsEntry(member)} label="Edit exec" style="--pin-top: 0; --pin-right: 0" />
   <div class="exec__photo">
     {
       data.photo ? (
@@ -87,7 +84,6 @@ const initials = data.name
 
 <style>
   .exec {
-    position: relative;
     display: grid;
     gap: 1rem;
     align-content: start;
