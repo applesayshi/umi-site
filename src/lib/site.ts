@@ -23,6 +23,7 @@ export const primaryNav: NavItem[] = [
   { label: 'Events', href: '/events/' },
   { label: 'ProduceUMI', href: '/produceumi/' },
   { label: 'Gallery', href: '/gallery/' },
+  { label: 'Sponsors', href: '/sponsors/' },
 ];
 
 /** Everything, shown in the full-screen menu and footer. Track numbers mimic a record sleeve. */
