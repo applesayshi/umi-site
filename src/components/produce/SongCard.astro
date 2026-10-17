@@ -7,7 +7,7 @@ import { Picture } from 'astro:assets';
 import produceLogo from '../../assets/brand/produceumi-logo.png';
 import Icon from '../ui/Icon.astro';
 import SnippetButton from './SnippetButton.astro';
-import { cropStyle, songSnippet, type SongEntry } from '../../lib/content';
+import { cropStyle, songCover, songSnippet, type SongEntry } from '../../lib/content';
 import { fitStyle } from '../../lib/fit';
 
 interface Props {
@@ -18,26 +18,22 @@ interface Props {
 const { song, index = 0 } = Astro.props;
 const { data } = song;
 const snippet = songSnippet(song);
+const cover = await songCover(song);
 ---
 
 <article class="song" data-snippet-root data-reveal style={`--i:${index % 4}`}>
   <div class="song__art">
     <span class="song__disc" aria-hidden="true"><span class="song__groove"></span></span>
-    <span class:list={['song__sleeve', !data.cover && 'song__sleeve--logo']}>
-      {
-        data.cover ? (
-          <Picture src={data.cover} alt={data.coverAlt ?? ''} widths={[320, 480, 640]} sizes="(min-width: 1100px) 22vw, (min-width: 640px) 40vw, 80vw" formats={['avif', 'webp']} style={cropStyle(data.coverFocus)} />
-        ) : (
-          <Picture src={produceLogo} alt="" widths={[320, 480]} sizes="(min-width: 1100px) 16vw, 60vw" formats={['webp']} />
-        )
-      }
+    <span class:list={['song__sleeve', !cover && 'song__sleeve--logo']}>
+      {cover?.image && <Picture src={cover.image} alt={data.coverAlt ?? ''} widths={[320, 480, 640]} sizes="(min-width: 1100px) 22vw, (min-width: 640px) 40vw, 80vw" formats={['avif', 'webp']} style={cropStyle(data.coverFocus)} />}
+      {cover?.url && <Picture src={cover.url} width={640} height={640} fallbackFormat="jpeg" alt={data.coverAlt ?? ''} widths={[320, 480, 640]} sizes="(min-width: 1100px) 22vw, (min-width: 640px) 40vw, 80vw" formats={['avif', 'webp']} style={cropStyle(data.coverFocus)} />}
+      {!cover && <Picture src={produceLogo} alt="" widths={[320, 480]} sizes="(min-width: 1100px) 16vw, 60vw" formats={['webp']} />}
     </span>
     {snippet && <SnippetButton variant="cover" src={snippet} title={data.title} artist={data.artist} />}
   </div>
 
   <div class="song__text">
     <div class="song__info">
-      {data.genre && <span class="song__meta">{data.genre}</span>}
       <a class="song__link" href={`/produceumi/${song.id}/`}>
         <span class="song__title display" style={fitStyle(data.title)}>{data.title}</span>
       </a>
@@ -155,14 +151,6 @@ const snippet = songSnippet(song);
     display: grid;
     gap: 0.3rem;
     container-type: inline-size;
-  }
-
-  .song__meta {
-    font-family: var(--font-mono);
-    font-size: 0.68rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--peri);
   }
 
   .song__link {

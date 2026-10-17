@@ -31,6 +31,12 @@ export default defineConfig({
   image: {
     // Keep generated widths modest: most photos render at <= 1400 CSS px.
     breakpoints: [360, 540, 720, 960, 1280, 1600, 2000],
+    // Songs without uploaded cover art borrow the sleeve from their Spotify link (see src/lib/spotify.ts).
+    // Astro downloads and optimises it at build time, so nothing is hotlinked from the live site.
+    remotePatterns: [
+      { protocol: 'https', hostname: 'i.scdn.co' },
+      { protocol: 'https', hostname: '**.spotifycdn.com' },
+    ],
   },
 
   fonts: [

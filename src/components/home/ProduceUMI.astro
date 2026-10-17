@@ -1,10 +1,10 @@
 ---
-/** ProduceUMI on the home page: the workshop's logo, what it is, and its newest songs (with snippets and Spotify links). */
+/** ProduceUMI on the home page: the label's logo, what it is, and its newest songs (with snippets and Spotify links). */
 import { Picture } from 'astro:assets';
 import Icon from '../ui/Icon.astro';
 import SnippetButton from '../produce/SnippetButton.astro';
 import produceLogo from '../../assets/brand/produceumi-logo.png';
-import { cropStyle, songSnippet, type SongEntry } from '../../lib/content';
+import { cropStyle, songCover, songSnippet, type SongEntry } from '../../lib/content';
 import { fitStyle } from '../../lib/fit';
 
 interface Props {
@@ -12,9 +12,12 @@ interface Props {
   text: string;
   songs: SongEntry[];
   signupHref: string;
+  signupLabel?: string;
 }
 
-const { title, text, songs, signupHref } = Astro.props;
+const { title, text, songs, signupHref, signupLabel = 'Send us a demo' } = Astro.props;
+/* Resolved up front: the sleeves can come from Spotify, and the list below isn't an async map. */
+const covers = await Promise.all(songs.map((song) => songCover(song)));
 const external = signupHref.startsWith('http');
 ---
 
@@ -26,7 +29,7 @@ const external = signupHref.startsWith('http');
     </div>
 
     <div class="produce__copy">
-      <p class="eyebrow" data-reveal="fade"><span class="eyebrow__index">A3</span><span>A UMI workshop</span></p>
+      <p class="eyebrow" data-reveal="fade"><span class="eyebrow__index">A3</span><span>UBC's student-run record label</span></p>
       <h2 class="produce__title display" id="produce-title" data-reveal="stutter" style={fitStyle(title)}>{title}</h2>
       <p class="produce__text" data-reveal style="--i:1">{text}</p>
 
@@ -35,14 +38,13 @@ const external = signupHref.startsWith('http');
           <ol class="produce__songs" role="list" aria-label="Latest ProduceUMI songs">
             {songs.map((song, i) => {
               const snippet = songSnippet(song);
+              const cover = covers[i];
               return (
                 <li class="produce__song" data-snippet-root data-reveal style={`--i:${i + 2}`}>
                   <span class="produce__cover" aria-hidden="true">
-                    {song.data.cover ? (
-                      <Picture src={song.data.cover} alt="" widths={[96, 160]} sizes="4.5rem" formats={['avif', 'webp']} style={cropStyle(song.data.coverFocus)} />
-                    ) : (
-                      <Icon name="waveform" size="1.6rem" />
-                    )}
+                    {cover?.image && <Picture src={cover.image} alt="" widths={[96, 160]} sizes="4.5rem" formats={['avif', 'webp']} style={cropStyle(song.data.coverFocus)} />}
+                    {cover?.url && <Picture src={cover.url} width={640} height={640} fallbackFormat="jpeg" alt="" widths={[96, 160]} sizes="4.5rem" formats={['avif', 'webp']} style={cropStyle(song.data.coverFocus)} />}
+                    {!cover && <Icon name="waveform" size="1.6rem" />}
                   </span>
                   <span class="produce__song-text">
                     <a class="produce__song-link" href={`/produceumi/${song.id}/`}>
@@ -50,7 +52,6 @@ const external = signupHref.startsWith('http');
                     </a>
                     <span class="produce__song-artist">
                       {song.data.artist}
-                      {song.data.genre && <span class="produce__song-genre">{song.data.genre}</span>}
                       {song.data.sample && <span class="sample-tag">Sample</span>}
                     </span>
                   </span>
@@ -81,7 +82,7 @@ const external = signupHref.startsWith('http');
           <span class="btn__label">Hear the songs</span>
         </a>
         <a class="btn btn--ghost" href={signupHref} target={external ? '_blank' : undefined} rel={external ? 'noopener noreferrer' : undefined}>
-          <span class="btn__label">Make a song with us</span>
+          <span class="btn__label">{signupLabel}</span>
           <Icon name={external ? 'arrow-up-right' : 'arrow-right'} />
         </a>
       </div>
@@ -254,13 +255,6 @@ const external = signupHref.startsWith('http');
     gap: 0.25rem 0.75rem;
     font-size: var(--step--1);
     color: var(--fg-muted);
-  }
-
-  .produce__song-genre {
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    letter-spacing: 0.1em;
-    color: var(--peri);
   }
 
   .produce__song-arrow {

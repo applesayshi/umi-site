@@ -39,9 +39,10 @@ shows:
     AMS Student Nest.
 produce:
   title: Make a song with us
-  text: ProduceUMI is our songwriting and production workshop. Bring a song idea,
-    and UMI's producers help you record, produce and release it. Here's what
-    students made with us.
+  text: ProduceUMI is UBC's only student-run record label and production company.
+    Send us a demo, and our student producers help you write, record and release
+    the track. Here's what students made with us.
+  buttonLabel: Send us a demo
 gallery:
   title: Seen at UMI
   intro: Flash photos from the floor. Tap any frame to open the full album.

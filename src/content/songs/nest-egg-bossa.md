@@ -1,7 +1,6 @@
 ---
 title: Nest Egg Bossa
 artist: The Nest Egg Trio
-genre: Jazz
 cover: ../../assets/uploads/placeholders/cover-03.jpg
 coverAlt: A halftone pattern of golden dots radiating from the centre
 summary: A bossa nova tune written, arranged and recorded in a single semester.

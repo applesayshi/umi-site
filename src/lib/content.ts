@@ -2,6 +2,7 @@ import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
 import { dayKey } from './dates';
+import { spotifyArtwork } from './spotify';
 import { inUpcomingWindow } from './upcoming';
 
 export type EventEntry = CollectionEntry<'events'>;
@@ -71,6 +72,17 @@ export function songSnippet(song: SongEntry) {
   if (existsSync(join(process.cwd(), 'public', decodeURIComponent(url)))) return url;
   console.warn(`[songs] ${song.id}: snippet ${url} isn't in public/, so no play button is shown.`);
   return undefined;
+}
+
+/**
+ * A song's sleeve: the uploaded cover art, or failing that the artwork from its Spotify link.
+ * `image` is a local upload, `url` is Spotify's (640px, square); null means neither, so callers
+ * fall back to the ProduceUMI logo sleeve.
+ */
+export async function songCover(song: SongEntry): Promise<{ image?: ImageMetadata; url?: string } | null> {
+  if (song.data.cover) return { image: song.data.cover };
+  const url = await spotifyArtwork(song.data.spotifyUrl);
+  return url ? { url } : null;
 }
 
 export async function getTeam() {

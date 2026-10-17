@@ -9,7 +9,7 @@ program: ''
 plays: ''
 onRepeat: ''
 email: ''
-bio: "Runs the ProduceUMI songwriting and production workshop."
+bio: "Runs ProduceUMI, UMI's student-run record label and production company."
 active: true
 sample: true
 ---

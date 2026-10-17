@@ -1,10 +1,12 @@
 ---
 title: ProduceUMI
-intro: A songwriting and production workshop. Bring a song idea, and UMI's
-  producers help you record, produce and release it.
+intro: UBC's only student-run record label and production company.
 status: open
-statusNote: Sign-ups for this term's sessions are open.
+statusNote: We're taking demo submissions to choose this cycle's artists.
 signupUrl: ""
+signupLabel: Send us a demo
+ctaTitle: Got a song idea?
+ctaText: Bring a rough mix, or a finished track. We listen to every submission.
 songOrder:
   - three-am-radio
   - bus-to-campus
@@ -13,26 +15,33 @@ songOrder:
   - nest-egg-bossa
   - blue-hour
 steps:
-  - title: Bring an idea
-    text: A voice memo, some lyrics, a beat or a finished demo. Every genre and
-      every level is welcome.
-  - title: Make it in the workshop
-    text: Weekly sessions pair you with student producers to write, arrange and
-      record in the Nest.
+  - title: Send us a demo
+    text: A voice memo, a rough mix or a finished track. Every genre and every
+      level is welcome.
+  - title: We choose this cycle's artists
+    text: Our team listens to every submission and picks the artists we'll work
+      with this cycle.
+  - title: Make the record
+    text: Student producers write, arrange, record and mix it with you in the Nest.
   - title: Release it
     text: Your finished song goes up here, and you get a slot to play it live at a
       UMI show.
 faq:
-  - question: Do I need production experience?
-    answer: No. Plenty of people join with a song idea and no experience. The
-      workshop covers recording and production as you go.
+  - question: Who can send a demo?
+    answer: Any UBC student. You don't need production experience or a finished
+      song, and our producers cover recording and production as you go.
   - question: Do I need my own gear?
     answer: No. Sessions use UMI's equipment in the Nest. Bring your own instrument
       if you play one.
+  - question: Do you run production workshops?
+    answer: Yes. Music production workshops start in term 2. Watch the events page
+      and our Instagram for dates.
   - question: Who owns the song?
     answer: You do. UMI shares finished songs here and on our socials, with credit,
       only with your permission.
 sample: false
 ---
 
-ProduceUMI is UMI's workshop for students who want to make their own music. Over the term, small groups meet with student producers to take a song from an idea to a finished track, then release it and play it at a UMI show.
+ProduceUMI is UBC's only student-run record label and production company. Each cycle we take on student artists, pair them with student producers to write, record and mix, then release the finished track and put the artist on a UMI stage.
+
+Demo submissions are open now for this cycle, and music production workshops start in term 2.

@@ -9,6 +9,7 @@ topics:
   - Lessons
   - Performing at an event
   - ProduceUMI
+  - ProduceUMI demo
   - Press
 responseNote: We're student volunteers, so replies can take a few days during exams.
 ---

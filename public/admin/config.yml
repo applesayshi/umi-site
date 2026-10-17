@@ -159,8 +159,7 @@ collections:
     fields:
       - { label: Song title, name: title, widget: string }
       - { label: Artist, name: artist, widget: string, hint: The student, band or group who made the song. }
-      - { label: Genre, name: genre, widget: string, required: false }
-      - { label: Cover art, name: cover, widget: image, required: false, hint: Square works best, at least 1200 × 1200. Without cover art the ProduceUMI logo is shown. }
+      - { label: Cover art, name: cover, widget: image, required: false, hint: Square works best, at least 1200 × 1200. Leave it empty to use the artwork from the Spotify link below; without either, the ProduceUMI logo is shown. }
       - { label: Cover crop position, name: coverFocus, widget: focus, image: cover, crops: [{ aspect: '1 / 1', label: Record sleeve }], required: false, hint: Only matters when the art isn't square. }
       - { label: Cover art description, name: coverAlt, widget: string, required: false }
       - { label: One-line summary, name: summary, widget: string, required: false, hint: Under 200 characters. }
@@ -329,6 +328,7 @@ collections:
             fields:
               - { label: Title, name: title, widget: string }
               - { label: Text, name: text, widget: text, hint: The first three songs in the ProduceUMI page's Song order are listed underneath automatically. }
+              - { label: Button text, name: buttonLabel, widget: string, required: false, hint: 'The second button in this section. Leave empty for "Send us a demo".' }
           - label: Gallery section
             name: gallery
             widget: object
@@ -354,15 +354,20 @@ collections:
         fields:
           - { label: Title, name: title, widget: string }
           - { label: Intro, name: intro, widget: text }
-          - label: Sign-up status
+          - label: Demo submissions
             name: status
             widget: select
             options:
-              - { label: Sign-ups open, value: open }
+              - { label: Demo submissions open, value: open }
               - { label: Waitlist, value: waitlist }
               - { label: Closed, value: closed }
-          - { label: Status note, name: statusNote, widget: string, required: false }
-          - { label: Sign-up link, name: signupUrl, widget: string, required: false, hint: Leave empty to use the contact form. }
+            hint: Sets the colour of the light next to the status text, and the wording if you leave Status text empty.
+          - { label: Status text, name: statusLabel, widget: string, required: false, hint: 'The words beside the light, e.g. "Demo submissions open". Leave empty to use the status above.' }
+          - { label: Status note, name: statusNote, widget: string, required: false, hint: The sentence under the status text. }
+          - { label: Demo submission link, name: signupUrl, widget: string, required: false, hint: Leave empty to send people to the Say hello form. }
+          - { label: Button text, name: signupLabel, widget: string, required: false, hint: 'The orange button at the top of this page and in the band at the bottom. Leave empty for "Send us a demo".' }
+          - { label: Bottom banner heading, name: ctaTitle, widget: string, required: false, hint: 'The big line in the band at the foot of the page. Leave empty for "Got a song idea?".' }
+          - { label: Bottom banner text, name: ctaText, widget: text, required: false, hint: The sentence under that heading. }
           - label: Song order
             label_singular: song
             name: songOrder
@@ -375,7 +380,7 @@ collections:
           - { label: How it works, name: steps, widget: list, fields: [{ label: Title, name: title, widget: string }, { label: Text, name: text, widget: text }] }
           - { label: FAQ, name: faq, widget: list, summary: '{{fields.question}}', fields: [{ label: Question, name: question, widget: string }, { label: Answer, name: answer, widget: text }] }
           - { label: Sample content, name: sample, widget: boolean, required: false, default: false }
-          - { label: About the workshop, name: body, widget: markdown, required: false }
+          - { label: About ProduceUMI, name: body, widget: markdown, required: false }
 
       - name: about
         label: About page
@@ -545,6 +550,7 @@ collections:
             widget: object
             fields:
               - { label: Instagram, name: instagram, widget: string, required: false }
+              - { label: ProduceUMI Instagram, name: produceInstagram, widget: string, required: false, hint: The label's own account. Shown in the footer and on the ProduceUMI page. }
               - { label: Facebook, name: facebook, widget: string, required: false }
               - { label: TikTok, name: tiktok, widget: string, required: false }
               - { label: YouTube, name: youtube, widget: string, required: false }

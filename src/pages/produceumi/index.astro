@@ -9,20 +9,23 @@ import CtaBand from '../../components/ui/CtaBand.astro';
 import Icon from '../../components/ui/Icon.astro';
 import GlitchStrip from '../../components/ui/GlitchStrip.astro';
 import produceLogo from '../../assets/brand/produceumi-logo.png';
-import { getPage, getSongs } from '../../lib/content';
+import { getPage, getSettings, getSongs } from '../../lib/content';
 import { pageHref } from '../../lib/site';
 
-const [page, songs] = await Promise.all([getPage('produce', 'produce'), getSongs()]);
+const [page, songs, settings] = await Promise.all([getPage('produce', 'produce'), getSongs(), getSettings()]);
 const { data } = page;
 const { Content } = await render(page);
 
 const statusCopy = {
-  open: { label: 'Sign-ups open', tone: 'go' },
-  waitlist: { label: 'Join the waitlist', tone: 'warn' },
-  closed: { label: 'Sign-ups closed', tone: 'stop' },
+  open: { label: 'Demo submissions open', tone: 'go' },
+  waitlist: { label: 'Demo waitlist', tone: 'warn' },
+  closed: { label: 'Demo submissions closed', tone: 'stop' },
 } as const;
 const status = statusCopy[data.status];
-const signupHref = pageHref(data.signupUrl ?? `/contact/?topic=${encodeURIComponent('ProduceUMI')}`);
+const statusLabel = data.statusLabel ?? status.label;
+const signupLabel = data.signupLabel ?? 'Send us a demo';
+/* No link of their own: demos come in through the Say hello form, tagged so they're easy to spot. */
+const signupHref = pageHref(data.signupUrl ?? `/contact/?topic=${encodeURIComponent('ProduceUMI demo')}`);
 const signupExternal = signupHref.startsWith('http');
 ---
 
@@ -34,24 +37,32 @@ const signupExternal = signupHref.startsWith('http');
         <Picture src={produceLogo} alt="" widths={[420, 640, 900, 1280]} sizes="(min-width: 960px) 38vw, 86vw" formats={['avif', 'webp']} priority />
       </div>
       <div class="produce-hero__copy">
-        <p class="eyebrow"><span class="eyebrow__index">A3</span><span>A UMI workshop</span></p>
+        <p class="eyebrow"><span class="eyebrow__index">A3</span><span>UBC's student-run record label</span></p>
         <h1 class="visually-hidden" id="page-title">{data.title}</h1>
         <p class="produce-hero__intro subtitle">{data.intro}</p>
         <p class={`produce-status produce-status--${status.tone}`}>
           <span class="produce-status__light" aria-hidden="true"></span>
-          <span>{status.label}</span>
+          <span>{statusLabel}</span>
           {data.statusNote && <span class="produce-status__note">{data.statusNote}</span>}
           {data.sample && <span class="sample-tag">Sample</span>}
         </p>
         <div class="btn-row">
           <a class="btn" href={signupHref} target={signupExternal ? '_blank' : undefined} rel={signupExternal ? 'noopener noreferrer' : undefined}>
-            <span class="btn__label">Make a song with us</span>
+            <span class="btn__label">{signupLabel}</span>
             <Icon name={signupExternal ? 'arrow-up-right' : 'arrow-right'} />
           </a>
           <a class="btn btn--ghost" href="#songs">
             <Icon name="headphones" />
             <span class="btn__label">Hear the songs</span>
           </a>
+          {
+            settings.socials.produceInstagram && (
+              <a class="btn btn--ghost" href={settings.socials.produceInstagram} target="_blank" rel="noopener noreferrer">
+                <Icon name="instagram" />
+                <span class="btn__label">@produceumi</span>
+              </a>
+            )
+          }
         </div>
       </div>
     </div>
@@ -73,7 +84,7 @@ const signupExternal = signupHref.startsWith('http');
   <section class="songs theme-night" id="songs" aria-labelledby="songs-title">
     <div class="container">
       <header class="songs__head">
-        <p class="eyebrow"><span class="eyebrow__index">02</span><span>Made in the workshop</span></p>
+        <p class="eyebrow"><span class="eyebrow__index">02</span><span>Released on the label</span></p>
         <h2 class="songs__title display" id="songs-title" data-reveal="stutter">The songs</h2>
       </header>
       {
@@ -101,10 +112,10 @@ const signupExternal = signupHref.startsWith('http');
   }
 
   <CtaBand
-    title="Got a song idea?"
-    text="Bring a voice memo, some lyrics or a finished demo. We'll help you turn it into a track."
+    title={data.ctaTitle ?? 'Got a song idea?'}
+    text={data.ctaText ?? 'Bring a rough mix, or a finished track. We listen to every submission.'}
     href={signupHref}
-    label="Make a song with us"
+    label={signupLabel}
     external={signupExternal}
   />
 </BaseLayout>

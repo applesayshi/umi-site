@@ -1,7 +1,6 @@
 ---
 title: Three A.M. Radio
 artist: saltwater static
-genre: Bedroom pop
 cover: ../../assets/uploads/placeholders/cover-01.jpg
 coverAlt: A glowing yellow sun cut by dark horizontal lines
 summary: A lo-fi love song written between lectures and finished in the Nest at 3 a.m.

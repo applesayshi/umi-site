@@ -9,7 +9,8 @@ import SnippetButton from '../produce/SnippetButton.astro';
 import { cropStyle } from '../../lib/content';
 
 interface Props {
-  src: ImageMetadata;
+  /** An uploaded image, or the URL of a square remote one (a song's Spotify artwork). */
+  src: ImageMetadata | string;
   alt: string;
   label: string;
   sizes: string;
@@ -34,7 +35,11 @@ const { src, alt, label, sizes, position, sticker = 'ProduceUMI', snippet, class
     </div>
   </div>
   <div class="vinyl__sleeve">
-    <Picture src={src} alt={alt} widths={[360, 540, 720, 960]} sizes={sizes} formats={['avif', 'webp']} class="vinyl__img" style={cropStyle(position)} />
+    {typeof src === 'string' ? (
+      <Picture src={src} width={640} height={640} fallbackFormat="jpeg" alt={alt} widths={[360, 540, 640]} sizes={sizes} formats={['avif', 'webp']} class="vinyl__img" style={cropStyle(position)} />
+    ) : (
+      <Picture src={src} alt={alt} widths={[360, 540, 720, 960]} sizes={sizes} formats={['avif', 'webp']} class="vinyl__img" style={cropStyle(position)} />
+    )}
     <span class="vinyl__wear" aria-hidden="true"></span>
     {sticker && <span class="vinyl__sticker" aria-hidden="true">{sticker}</span>}
   </div>

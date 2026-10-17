@@ -1,7 +1,6 @@
 ---
 title: Blue Hour
 artist: Static Bloom
-genre: Indie rock
 cover: ../../assets/uploads/placeholders/cover-02.jpg
 coverAlt: Streaks of neon light smeared across a dark frame
 summary: A garage-rock demo that grew three-part harmonies in the studio.

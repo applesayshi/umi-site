@@ -1,7 +1,6 @@
 ---
 title: One Mouth, Eight Loops
 artist: Box Theory
-genre: Beatbox & looping
 cover: ../../assets/uploads/placeholders/cover-05.jpg
 coverAlt: A silhouette in front of a bright camera flash
 summary: Every sound on the track is a voice, stacked through a loop pedal.

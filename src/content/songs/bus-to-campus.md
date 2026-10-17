@@ -1,7 +1,6 @@
 ---
 title: Bus to Campus
 artist: Harbour Lights
-genre: Folk
 cover: ../../assets/uploads/placeholders/cover-04.jpg
 coverAlt: Diagonal red, black and cream stripes with a yellow label
 summary: Two voices and one guitar on the long ride out to UBC, recorded live in one take.

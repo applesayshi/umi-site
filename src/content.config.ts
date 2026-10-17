@@ -95,7 +95,7 @@ const gallery = defineCollection({
     })),
 });
 
-/* Songs made through ProduceUMI, UMI's songwriting and production workshop, shown as an artist showcase. */
+/* Songs released through ProduceUMI, UMI's student-run record label, shown as an artist showcase. */
 const songs = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/songs' }),
   schema: ({ image }) =>
@@ -104,7 +104,6 @@ const songs = defineCollection({
       artist: z.string(),
       /** When the song was added in the CMS. Songs not yet placed in the ProduceUMI page's song order follow, oldest first. */
       added: z.preprocess(blank, z.coerce.date().optional()),
-      genre: optionalText,
       cover: z.preprocess(blank, image().optional()),
       coverFocus: optionalFocus,
       coverAlt: optionalText,
@@ -189,6 +188,8 @@ const settings = defineCollection({
       }),
       socials: z.object({
         instagram: optionalUrl,
+        /** ProduceUMI runs its own account; shown next to UMI's in the footer and on the ProduceUMI page. */
+        produceInstagram: optionalUrl,
         facebook: optionalUrl,
         tiktok: optionalUrl,
         youtube: optionalUrl,
@@ -230,7 +231,7 @@ const home = defineCollection({
         photo: photoField(image),
       }),
       shows: z.object({ title: z.string(), intro: optionalText }),
-      produce: z.object({ title: z.string(), text: z.string() }),
+      produce: z.object({ title: z.string(), text: z.string(), buttonLabel: optionalText }),
       gallery: z.object({ title: z.string(), intro: optionalText }),
       sideB: z.object({ title: z.string(), intro: optionalText }),
       join: z.object({ title: z.string(), text: z.string() }),
@@ -244,8 +245,15 @@ const produce = defineCollection({
       title: z.string(),
       intro: z.string(),
       status: z.enum(['open', 'waitlist', 'closed']),
+      /** Overrides the words beside the status light; the status above still sets its colour. */
+      statusLabel: optionalText,
       statusNote: optionalText,
       signupUrl: optionalUrl,
+      /** The orange button in the ProduceUMI page's hero and its bottom band. */
+      signupLabel: optionalText,
+      /** The heading and sentence on that bottom band. */
+      ctaTitle: optionalText,
+      ctaText: optionalText,
       /** Song file names (ids) in the order the showcase lists them, arranged by dragging in the CMS. */
       songOrder: z.preprocess((ids) => (Array.isArray(ids) ? ids.filter((id) => typeof id === 'string' && id.trim() !== '') : []), z.array(z.string())),
       steps,

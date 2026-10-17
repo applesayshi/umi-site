@@ -1,7 +1,6 @@
 ---
 title: Last B-Line Home
 artist: Night Bus Choir
-genre: Synth-pop
 cover: ../../assets/uploads/placeholders/cover-06.jpg
 coverAlt: A three-by-three grid of coloured squares
 summary: Glittery synth-pop about the last 99 B-Line home, from last year's cohort.

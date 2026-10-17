@@ -9,7 +9,7 @@ import SongCard from '../../components/produce/SongCard.astro';
 import SnippetButton from '../../components/produce/SnippetButton.astro';
 import Icon from '../../components/ui/Icon.astro';
 import produceLogo from '../../assets/brand/produceumi-logo.png';
-import { getSongs, songSnippet } from '../../lib/content';
+import { getSongs, songCover, songSnippet } from '../../lib/content';
 import { fitStyle } from '../../lib/fit';
 
 export const getStaticPaths = (async () => {
@@ -25,11 +25,12 @@ const { song, more } = Astro.props;
 const { data } = song;
 const { Content } = await render(song);
 const snippet = songSnippet(song);
+const cover = await songCover(song);
 ---
 
 <BaseLayout
   title={`${data.title} by ${data.artist}`}
-  description={data.summary ?? `${data.title} by ${data.artist}, made in UMI's ProduceUMI workshop.`}
+  description={data.summary ?? `${data.title} by ${data.artist}, released through ProduceUMI, UMI's student-run record label.`}
   image={data.cover}
   ogImagePath="/og-produceumi.jpg"
   imageAlt={data.coverAlt}
@@ -38,9 +39,9 @@ const snippet = songSnippet(song);
     <div class="container track__inner">
       <div class="track__media">
         {
-          data.cover ? (
+          cover ? (
             <Vinyl
-              src={data.cover}
+              src={cover.image ?? cover.url!}
               alt={data.coverAlt ?? ''}
               label={data.title}
               position={data.coverFocus}
@@ -71,7 +72,6 @@ const snippet = songSnippet(song);
         </h1>
         <p class="track__artist">by {data.artist}</p>
         <p class="track__meta">
-          {data.genre && <span class="chip chip--solid">{data.genre}</span>}
           {data.producers && <span class="track__producers">{data.producers}</span>}
           {
             data.spotifyUrl && (
