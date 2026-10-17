@@ -4,7 +4,7 @@ date: 2025-02-11
 event: 2025-02-love-notes-live
 cover: ../../assets/uploads/placeholders/stage-12.jpg
 coverAlt: A performer at the microphone under red light
-photographer: ''
+photographer: ""
 showOnHome: true
 photos:
   - src: ../../assets/uploads/placeholders/stage-12.jpg
@@ -24,5 +24,5 @@ photos:
     alt: A keyboard lit in teal
   - src: ../../assets/uploads/placeholders/stage-09.jpg
     alt: A performer at the mic under green light
-sample: true
+sample: false
 ---
