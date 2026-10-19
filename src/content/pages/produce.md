@@ -16,16 +16,17 @@ songOrder:
   - blue-hour
 steps:
   - title: Send us a demo
-    text: A voice memo, a rough mix or a finished track. Every genre and every level
-      is welcome.
+    text: Any thing works! A voice memo, a rough mix, even a finished track. Every
+      genre and every level is welcome.
   - title: We choose this cycle's artists
-    text: Our team listens to every submission and picks the artists we'll work with
-      this cycle.
+    text: Our team listens to every submission and selects the artists we'll work
+      with this cycle.
   - title: Make the record
-    text: Student producers write, arrange, record and mix it with you in the Nest.
+    text: Our Production Team assists with anything you may need whether that be
+      writing, composing, mixing or mastering until we have a completed track.
   - title: Release it
-    text: Your finished song goes up here, and you get a slot to play it live at a
-      UMI show.
+    text: We release your track! Our team assists you with marketing, photoshoots,
+      and scouts live performance opportunities to promote your single.
 faq:
   - question: Who can send a demo?
     answer: Anyone! You don't need production experience or a finished song, and our
