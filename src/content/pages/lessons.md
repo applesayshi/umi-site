@@ -37,7 +37,7 @@ faq:
   - question: Do lessons cost anything?
     answer: Lessons cost $5 per session for UMI members
   - question: Where do lessons happen?
-    answer: Lessons are usually in the AMS Nest clubrooms
+    answer: They are usually in the AMS Nest clubrooms
   - question: Can I request a specific instrument?
     answer: Yes. Tell us on the sign-up form and we'll do our best to find a match.
 sample: false
