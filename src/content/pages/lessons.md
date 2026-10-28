@@ -1,6 +1,7 @@
 ---
 title: Lessons
-intro: Learn from fellow students. UMI's lessons program pairs volunteer instructors with musicians who are ready to start, or start again.
+intro: Learn from fellow students. UMI's lessons program pairs volunteer
+  instructors with musicians who are ready to start, or start again.
 heroPhoto:
   src: ../../assets/uploads/placeholders/stage-07.jpg
   alt: Close-up of a guitar neck and strings in warm red light
@@ -24,12 +25,14 @@ steps:
     text: Meet your instructor and set a rhythm that works for you both.
 learners:
   title: For learners
-  text: Total beginner or returning after years away, lessons are a friendly way to build skills and confidence. Sign-ups open each term.
-  signupUrl: ''
+  text: Total beginner or returning after years away, lessons are a friendly way
+    to build skills and confidence. Sign-ups open each term.
+  signupUrl: ""
 instructors:
   title: For instructors
-  text: Share what you know. Volunteer instructors help grow UBC's music community, and teaching is great experience to put on a resume.
-  signupUrl: ''
+  text: Share what you know. Volunteer instructors help grow UBC's music
+    community, and teaching is great experience to put on a resume.
+  signupUrl: ""
 faq:
   - question: Do lessons cost anything?
     answer: Add the program's pricing or membership requirements here.
@@ -37,5 +40,5 @@ faq:
     answer: Add lesson locations here, for example UMI's space in the AMS Student Nest.
   - question: Can I request a specific instrument?
     answer: Yes. Tell us on the sign-up form and we'll do our best to find a match.
-sample: true
+sample: false
 ---
