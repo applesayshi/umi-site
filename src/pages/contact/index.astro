@@ -57,7 +57,7 @@ const socials = [
         <div class="field">
           <label for="cf-topic">What's it about?</label>
           <select class="select" id="cf-topic" name="topic" data-topic-select>
-            {data.topics.map((topic) => <option value={topic}>{topic}</option>)}
+            {data.topics.map((topic) => <option value={topic.label} data-outreach={topic.outreach ? 'true' : undefined}>{topic.label}</option>)}
           </select>
         </div>
 
@@ -76,6 +76,21 @@ const socials = [
           </button>
         </div>
         <p class="contact-form__status" role="status" aria-live="polite" data-form-status></p>
+      </form>
+
+      {/*
+        A second Netlify form, so topics marked for the other inbox have somewhere of their own to land:
+        the form above switches its `form-name` to this one, and Netlify emails each form separately
+        (Netlify → Forms → notifications). Netlify finds forms by parsing the built HTML, which is why
+        this hidden copy of the fields exists. No address is stored in the site.
+      */}
+      <form name="contact-outreach" method="POST" data-netlify="true" netlify-honeypot="company" hidden aria-hidden="true">
+        <input type="hidden" name="form-name" value="contact-outreach" />
+        <input type="text" name="name" />
+        <input type="email" name="email" />
+        <input type="text" name="topic" />
+        <textarea name="message"></textarea>
+        <input type="text" name="company" />
       </form>
 
       <aside class="contact__aside">
@@ -278,10 +293,19 @@ const socials = [
   const form = document.querySelector<HTMLFormElement>('[data-contact-form]');
 
   if (form) {
-    // Pre-select the topic from links like /contact?topic=Sponsorship
+    // Pre-select the topic from links like /contact?topic=Artist%20bookings
     const topic = new URLSearchParams(location.search).get('topic');
     const select = form.querySelector<HTMLSelectElement>('[data-topic-select]');
     if (topic && select && [...select.options].some((o) => o.value === topic)) select.value = topic;
+
+    /* Topics flagged in the CMS post to the second Netlify form, which notifies its own inbox. */
+    const formName = form.querySelector<HTMLInputElement>('input[name="form-name"]');
+    const route = () => {
+      if (!formName) return;
+      formName.value = select?.selectedOptions[0]?.dataset.outreach === 'true' ? 'contact-outreach' : 'contact';
+    };
+    select?.addEventListener('change', route);
+    route();
 
     const fields = [...form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input[required], textarea[required]')];
     const summary = form.querySelector<HTMLElement>('[data-error-summary]')!;
@@ -345,6 +369,7 @@ const socials = [
       delete status.dataset.tone;
 
       try {
+        route();
         const body = new URLSearchParams(new FormData(form) as unknown as Record<string, string>).toString();
         const response = await fetch('/', {
           method: 'POST',

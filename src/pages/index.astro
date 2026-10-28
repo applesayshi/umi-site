@@ -27,7 +27,7 @@ const [home, join, produce, lessons, booking, sponsors, about, settings, upcomin
 ]);
 
 const h = home.data;
-const produceSignup = pageHref(produce.data.signupUrl ?? `/contact/?topic=${encodeURIComponent('ProduceUMI demo')}`);
+const produceSignup = pageHref(produce.data.signupUrl ?? `/contact/?topic=${encodeURIComponent('General inquiries')}`);
 
 // Interleave album photos so the strip mixes nights rather than showing one album in a row.
 const homeAlbums = albums.filter((a) => a.data.showOnHome);

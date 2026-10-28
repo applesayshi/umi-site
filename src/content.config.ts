@@ -358,7 +358,8 @@ const contact = defineCollection({
     z.object({
       title: z.string(),
       intro: z.string(),
-      topics: z.array(z.string()).min(1),
+      /** The "What's it about?" dropdown. Topics marked `outreach` post to the second Netlify form, which has its own email notification. */
+      topics: z.array(z.object({ label: z.string(), outreach: z.boolean().default(false) })).min(1),
       responseNote: optionalText,
     }),
 });

@@ -24,7 +24,7 @@ const rentalSteps = data.steps.map((step, i) => {
   ];
   return links[i]?.href ? { ...step, href: links[i].href, linkLabel: links[i].label } : step;
 });
-const performerHref = pageHref(performers.requestUrl ?? `/contact/?topic=${encodeURIComponent('Booking a performer')}`);
+const performerHref = pageHref(performers.requestUrl ?? `/contact/?topic=${encodeURIComponent('Artist bookings')}`);
 ---
 
 <BaseLayout title="Booking & rentals" description={data.intro} image={data.heroPhoto.src} imageAlt={data.heroPhoto.alt}>

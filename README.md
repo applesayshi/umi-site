@@ -67,7 +67,11 @@ These are one-time steps, about 30–45 minutes in total.
    2. Set the callback URL to `https://api.netlify.com/auth/done`.
    3. In Netlify, go to *Site configuration → Access & security → OAuth → Install provider → GitHub* and paste the client ID and secret.
 5. **Invite editors.** Add each exec as a collaborator on the GitHub repository. They log in at `/admin/` with their own GitHub account.
-6. **Contact form emails.** In Netlify, go to *Forms*, enable form detection, then add an email notification to `ubcmusicinitiative@gmail.com`. Messages also appear in the Netlify dashboard.
+6. **Contact form emails.** In Netlify, go to *Forms* and enable form detection. After the next deploy two forms appear:
+   - **contact** — add an email notification to `ubcmusicinitiative@gmail.com`.
+   - **contact-outreach** — add a notification to the outreach address. Topics with **Send to the second inbox** switched on (Pages → Contact → Message topics) post here instead; which address that is lives only in Netlify, never in the site.
+
+   Messages also appear in the Netlify dashboard.
 7. **Connect the domain.** The club already owns `ubcmusicinitiative.com` (managed in Squarespace, where the old site lives), so there's nothing to buy.
    1. Netlify → *Domain management → Add a domain* → `www.ubcmusicinitiative.com`, and let it add `ubcmusicinitiative.com` too. Make `www` the primary domain (it matches `site` in `astro.config.mjs`).
    2. In Squarespace → *Domains → ubcmusicinitiative.com → DNS*, delete the Squarespace defaults (the four `A` records for `@` and the `www` `CNAME` to `ext-sq.squarespace.com`), then add the records Netlify shows: an `A` record for `@` pointing to Netlify's load balancer, and a `CNAME` for `www` pointing to `ubcmusicinitiative.netlify.app`.
@@ -128,5 +132,5 @@ scripts/             Asset generators (placeholders, brand, backdrop art, textur
 - **Upcoming vs. past:** decided at build time, then corrected in the browser, so the site stays right between deploys without rebuilding. The upcoming lists cover the next 21 days by Vancouver date (`UPCOMING_DAYS` in `src/lib/upcoming.ts`); later events are rendered hidden so the browser can roll the list forward. "Past shows" is built with every event and shows only the ones that have ended, and each event page carries both its upcoming and "This show has wrapped" states.
 - **CMS widgets:** `public/admin/widgets.js` adds two widgets to Decap: `photos` (a list with bulk upload) and `focus` (crop position). Crop positions are CSS `object-position` values stored next to each photo (`focus`, `coverFocus`, `photoFocus`) and applied with `Photo`'s `position` prop or `cropStyle()` from `src/lib/content.ts`. The widgets use Decap internals, so re-test them after upgrading Decap.
 - **Calendar:** `/calendar.ics` is a live feed people can subscribe to, and each event has its own `.ics` file plus a Google Calendar link.
-- **Contact form:** Netlify Forms. No server code is needed; locally the form shows its "couldn't send" fallback.
+- **Contact form:** Netlify Forms. No server code is needed; locally the form shows its "couldn't send" fallback. The page carries two forms, `contact` and `contact-outreach`: the topic dropdown switches which one a message posts to, and each has its own email notification in Netlify. With JavaScript off, everything posts to `contact`.
 - **Embeds:** Spotify, SoundCloud and YouTube players don't load until someone presses play, so there are no third-party scripts or cookies on page load.

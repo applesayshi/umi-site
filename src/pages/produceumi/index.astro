@@ -25,7 +25,7 @@ const status = statusCopy[data.status];
 const statusLabel = data.statusLabel ?? status.label;
 const signupLabel = data.signupLabel ?? 'Send us a demo';
 /* No link of their own: demos come in through the Say hello form, tagged so they're easy to spot. */
-const signupHref = pageHref(data.signupUrl ?? `/contact/?topic=${encodeURIComponent('ProduceUMI demo')}`);
+const signupHref = pageHref(data.signupUrl ?? `/contact/?topic=${encodeURIComponent('General inquiries')}`);
 const signupExternal = signupHref.startsWith('http');
 ---
 

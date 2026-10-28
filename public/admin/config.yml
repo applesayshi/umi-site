@@ -518,7 +518,14 @@ collections:
         fields:
           - { label: Title, name: title, widget: string }
           - { label: Intro, name: intro, widget: text }
-          - { label: Message topics, name: topics, widget: list, field: { label: Topic, name: topic, widget: string } }
+          - label: Message topics
+            name: topics
+            widget: list
+            summary: '{{fields.label}}'
+            hint: The "What's it about?" dropdown. Drag to reorder; the first one is selected by default.
+            fields:
+              - { label: Topic, name: label, widget: string }
+              - { label: Send to the second inbox, name: outreach, widget: boolean, required: false, default: false, hint: 'Off: messages go to the main inbox. On: they go to the second one instead. Which address each inbox is depends on the notifications set in Netlify → Forms.' }
           - { label: Response time note, name: responseNote, widget: string, required: false }
 
   # ─── Site settings ─────────────────────────────────────────────────────────
