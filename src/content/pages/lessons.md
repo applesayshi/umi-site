@@ -5,7 +5,7 @@ intro: Learn from fellow students. UMI's lessons program pairs volunteer
 heroPhoto:
   src: ../../assets/uploads/placeholders/stage-07.jpg
   alt: Close-up of a guitar neck and strings in warm red light
-  date: 2025-01-17
+  date: ""
 status: open
 statusNote: ""
 instruments:
@@ -35,9 +35,9 @@ instructors:
   signupUrl: ""
 faq:
   - question: Do lessons cost anything?
-    answer: Add the program's pricing or membership requirements here.
+    answer: Lessons cost $5 per session for UMI members
   - question: Where do lessons happen?
-    answer: Add lesson locations here, for example UMI's space in the AMS Student Nest.
+    answer: Lessons are usually in the AMS Nest clubrooms
   - question: Can I request a specific instrument?
     answer: Yes. Tell us on the sign-up form and we'll do our best to find a match.
 sample: false
