@@ -1,7 +1,7 @@
 ---
 title: PRODUCEUMI
 intro: UBC's only student-run record label and production company.
-status: open
+status: closed
 statusNote: We're taking demo submissions to choose this cycle's artists.
 signupUrl: https://forms.gle/CmMjCq7D3bLfnroJ8
 signupLabel: Send us a demo
