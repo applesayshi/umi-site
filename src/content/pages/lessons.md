@@ -6,8 +6,8 @@ heroPhoto:
   src: ../../assets/uploads/placeholders/stage-07.jpg
   alt: Close-up of a guitar neck and strings in warm red light
   date: 2025-01-17
-status: waitlist
-statusNote: Add this term's intake dates here.
+status: open
+statusNote: ""
 instruments:
   - Guitar
   - Piano
