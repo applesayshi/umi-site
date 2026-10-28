@@ -213,8 +213,8 @@ collections:
       - label: Department
         name: department
         widget: select
-        options: [Presidential, Internal, External, Events, Sound, Performance, Marketing, Finance, Education]
-        hint: Presidential is the President and VP Administration.
+        options: [Admin, Finance, Events, Sound, Marketing, Performance, External, Internal, Education, Engagement]
+        hint: The department this exec works in. Admin is the President and VP Admin.
       - { label: President or VP (show as a card), name: lead, widget: boolean, required: false, default: false, hint: Leads get a full card under “Meet the execs”. Everyone is listed in their department's dropdown. }
       - { label: Order, name: order, widget: number, value_type: int, default: 100, hint: Lower numbers are listed first. }
       - { label: Portrait, name: photo, widget: image, required: false, hint: Portrait orientation (4:5) works best. }
